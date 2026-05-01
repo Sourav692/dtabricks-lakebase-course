@@ -372,3 +372,4 @@ else:
 # MAGIC - The decision rule for Autoscaling vs Provisioned
 # MAGIC
 # MAGIC **Next up: Module 2** — the architecture deep dive. Separated compute and storage, copy-on-write branching internals, scale-to-zero mechanics, and the OAuth token TTL trap that ruins Friday afternoons.
+
