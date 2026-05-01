@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 01 — Foundations & the Lakebase Mental Model</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 64px 48px 56px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(255,107,53,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.crumb .tag {
+  color: var(--accent-orange);
+  padding: 4px 12px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.crumb .sep { color: var(--text-muted); }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-orange); }
+
+.lede {
+  font-size: 17px; color: var(--text-dim);
+  max-width: 720px; line-height: 1.75;
+  margin-bottom: 32px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px; font-weight: 500;
+  color: var(--accent-teal);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 48px 100px;
+}
+
+/* ─── TOC ─── */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-orange);
+  border-radius: 6px;
+  padding: 22px 26px;
+  margin-bottom: 56px;
+}
+.toc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  margin-bottom: 14px;
+}
+.toc ol { list-style: none; counter-reset: tc; }
+.toc li {
+  counter-increment: tc;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; align-items: baseline; gap: 16px;
+  font-size: 14px;
+}
+.toc li:last-child { border-bottom: none; }
+.toc li::before {
+  content: counter(tc, decimal-leading-zero);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  min-width: 24px;
+}
+.toc a { color: var(--text); text-decoration: none; transition: color 0.2s; }
+.toc a:hover { color: var(--accent-orange); }
+.toc .dur {
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ─── SECTION ─── */
+section.topic {
+  margin-bottom: 72px;
+  scroll-margin-top: 32px;
+}
+
+.topic-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px;
+}
+.topic-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-orange);
+  padding: 4px 10px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.topic-banner .line { flex: 1; height: 1px; background: var(--border); }
+.topic-banner .type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.5vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+h2 em { font-style: italic; color: var(--accent-orange); }
+
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin: 36px 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 28px 0 10px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 16px 0 20px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 6px 0 6px 24px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  color: var(--accent-orange);
+  font-size: 16px;
+}
+ol { counter-reset: ol; }
+ol li::before {
+  content: counter(ol, decimal-leading-zero);
+  counter-increment: ol;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--accent-orange);
+  top: 9px;
+  left: 0;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+/* ─── TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 24px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.5;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+.yes { color: var(--accent-green); font-weight: 600; }
+.no  { color: var(--accent-red); }
+.warn { color: var(--accent-yellow); }
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 28px 0;
+  padding: 20px 24px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.callout strong { color: var(--text); }
+.callout-checkpoint {
+  background: rgba(0,191,165,0.05);
+  border-left-color: var(--accent-teal);
+}
+.callout-warn {
+  background: rgba(251,191,36,0.05);
+  border-left-color: var(--accent-yellow);
+}
+.callout-note {
+  background: rgba(74,158,255,0.05);
+  border-left-color: var(--accent-blue);
+}
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+.callout-checkpoint .callout-label { color: var(--accent-teal); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-note .callout-label { color: var(--accent-blue); }
+
+/* ─── INTERACTIVE DIAGRAM SHELL ─── */
+.diagram {
+  margin: 32px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.diagram-header {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.diagram-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+}
+.diagram-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+.diagram-hint::before { content: '◉ '; color: var(--accent-teal); }
+
+.diagram-stage {
+  padding: 24px;
+  position: relative;
+  min-height: 360px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.diagram-info {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,191,165,0.03);
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  min-height: 70px;
+}
+.diagram-info-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin-bottom: 6px;
+}
+.diagram-info p { margin: 0; }
+
+/* ─── DIAGRAM 1: SEAM TAX (BEFORE/AFTER) ─── */
+.seam-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--surface3);
+  border-radius: 4px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+.seam-toggle button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.seam-toggle button.active {
+  background: var(--accent-orange);
+  color: #fff;
+}
+.seam-svg { width: 100%; max-width: 900px; height: auto; }
+.seam-node {
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.seam-node:hover { filter: brightness(1.15); }
+.seam-node.dimmed { opacity: 0.25; }
+
+/* ─── DIAGRAM 2: STACK PLANES ─── */
+.stack-svg { width: 100%; max-width: 800px; height: auto; }
+.plane {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.plane rect.bg {
+  transition: fill 0.25s, stroke 0.25s, filter 0.25s;
+}
+.plane:hover rect.bg {
+  filter: brightness(1.2);
+}
+.plane.active rect.bg {
+  stroke-width: 2.5;
+}
+.plane text { transition: fill 0.25s; pointer-events: none; }
+.plane-arrow { opacity: 0.4; }
+
+/* ─── DIAGRAM 3: VOCABULARY CARDS ─── */
+.vocab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 900px;
+}
+.vocab-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.vocab-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 50%, rgba(255,107,53,0.04) 100%);
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.vocab-card:hover {
+  border-color: var(--accent-orange);
+  transform: translateY(-2px);
+}
+.vocab-card:hover::before { opacity: 1; }
+.vocab-card.active {
+  border-color: var(--accent-orange);
+  background: var(--surface3);
+}
+.vocab-card.active::before { opacity: 1; }
+.vocab-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.vocab-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-style: italic;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.vocab-tagline {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ─── DIAGRAM 4: AUTOSCALING vs PROVISIONED ─── */
+.compare-svg { width: 100%; max-width: 900px; height: auto; }
+.cap-row {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.cap-row:hover { opacity: 0.9; }
+.cap-row text { pointer-events: none; }
+.cap-row rect { transition: fill 0.2s; }
+
+/* ─── DECISION DRILL ─── */
+.drill {
+  margin: 32px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+}
+.drill-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-yellow);
+  margin-bottom: 6px;
+}
+.drill-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.drill-question {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: var(--text);
+}
+.drill-options {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-top: 12px;
+}
+.drill-options button {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.drill-options button:hover {
+  border-color: var(--accent-orange);
+  color: var(--text);
+}
+.drill-options button.correct {
+  background: rgba(34,197,94,0.15);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+.drill-options button.wrong {
+  background: rgba(239,68,68,0.12);
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+.drill-feedback {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 13.5px;
+  font-style: italic;
+  display: none;
+}
+.drill-feedback.show { display: block; }
+.drill-feedback.ok {
+  background: rgba(34,197,94,0.08);
+  border-left: 2px solid var(--accent-green);
+  color: var(--accent-green);
+}
+.drill-feedback.bad {
+  background: rgba(239,68,68,0.08);
+  border-left: 2px solid var(--accent-red);
+  color: var(--accent-red);
+}
+
+/* ─── WRAP-UP ─── */
+.wrap-up {
+  margin-top: 80px;
+  padding: 36px 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.wrap-up::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wrap-up h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 26px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.wrap-up h3 em { color: var(--accent-orange); }
+
+/* ─── PROGRESS BAR ─── */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--accent-orange);
+  z-index: 1000;
+  transition: width 0.1s;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 30px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 01</span>
+      <span class="sep">/</span>
+      <span>Lakebase Mastery</span>
+      <span class="sep">/</span>
+      <span>Foundations</span>
+    </div>
+    <h1>Foundations &amp; the<br><em>Lakebase Mental Model</em></h1>
+    <p class="lede">Why operational databases belong in the lakehouse, what Lakebase actually replaces in a customer's stack, and the difference between the Autoscaling default and the legacy Provisioned tier. Three topics. Zero hand-waving.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">3</span><span class="meta-lbl">Theory Topics</span></div>
+      <div class="meta-item"><span class="meta-val">~2h</span><span class="meta-lbl">Duration</span></div>
+      <div class="meta-item"><span class="meta-val">Beginner</span><span class="meta-lbl">Level</span></div>
+      <div class="meta-item"><span class="meta-val">4</span><span class="meta-lbl">Interactive Diagrams</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ───── TABLE OF CONTENTS ───── -->
+  <div class="toc">
+    <div class="toc-label">▸ On this page</div>
+    <ol>
+      <li><a href="#t11">Why Operational Databases Belong in the Lakehouse</a><span class="dur">~25 min</span></li>
+      <li><a href="#t12">The Lakebase Stack — The Full Map</a><span class="dur">~30 min</span></li>
+      <li><a href="#t13">Autoscaling vs Provisioned — What &amp; When</a><span class="dur">~20 min</span></li>
+      <li><a href="#wrap">Module 1 Wrap-Up</a><span class="dur">~5 min</span></li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 1.1 -->
+  <section class="topic" id="t11">
+    <div class="topic-banner">
+      <span class="topic-id">1.1</span>
+      <span class="line"></span>
+      <span class="type">Theory</span>
+    </div>
+    <h2>Why operational databases belong in the <em>lakehouse</em></h2>
+
+    <h3>The historical split</h3>
+    <p>For roughly thirty years, the database world has been divided into two tribes that almost never talk to each other. <strong>OLTP</strong> — Online Transaction Processing — handles the row-level reads and writes that power apps, agents, and user-facing transactions. <strong>OLAP</strong> — Online Analytical Processing — handles the columnar scans that power dashboards, ML training, and reporting.</p>
+
+    <p>The Databricks Lakehouse — Delta + Spark + Photon + Unity Catalog — is exceptional at OLAP. It is, by design, not an OLTP engine. So every customer building a real product on Databricks ended up with the same story: <em>"We do all our analytics here, but our app actually lives over there in Aurora."</em></p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>OLTP</th><th>OLAP</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Workload shape</strong></td><td>Many small reads/writes per second</td><td>Few large scans per minute</td></tr>
+          <tr><td><strong>Latency target</strong></td><td>Single-digit milliseconds</td><td>Seconds to minutes</td></tr>
+          <tr><td><strong>Concurrency</strong></td><td>Thousands of users hitting one row each</td><td>Tens of analysts scanning whole tables</td></tr>
+          <tr><td><strong>Data layout</strong></td><td>Row-oriented</td><td>Columnar</td></tr>
+          <tr><td><strong>Typical engines</strong></td><td>Postgres, MySQL, Aurora, RDS</td><td>Snowflake, BigQuery, <strong>Delta Lake</strong></td></tr>
+          <tr><td><strong>What it powers</strong></td><td>Apps, agents, transactions</td><td>Dashboards, ML, reporting</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The seam tax — visualized</h3>
+    <p>That "over there" is not free. Once you have two databases, you pay what we call the <strong>seam tax</strong>: reverse-ETL pipelines, separate IAM, separate audit, separate billing, separate SLAs, schema drift. In customer reviews this seam was almost always the largest source of operational pain — and the largest hidden cost line on the data platform bill.</p>
+
+    <p>Click the toggle below to compare the two architectures. Hover over any node to highlight its role.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 1: BEFORE/AFTER ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 1.1 · The Seam, Before &amp; After</span>
+        <div class="seam-toggle">
+          <button id="seamBefore" class="active" onclick="toggleSeam('before')">Before Lakebase</button>
+          <button id="seamAfter" onclick="toggleSeam('after')">With Lakebase</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" class="seam-svg" id="seamSvg">
+          <defs>
+            <marker id="arrow1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8899bb"/>
+            </marker>
+            <marker id="arrowOrange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff6b35"/>
+            </marker>
+          </defs>
+
+          <!-- BEFORE STATE -->
+          <g id="seamBeforeGroup">
+            <!-- Lakehouse box -->
+            <g class="seam-node" data-info="The analytical lakehouse — Delta + Spark. Excellent at OLAP. Lives in the Databricks governance plane.">
+              <rect class="bg" x="40" y="60" width="180" height="100" rx="6" fill="#1a2235" stroke="#00bfa5" stroke-width="1.5"/>
+              <text x="130" y="95" text-anchor="middle" font-family="Playfair Display, serif" font-size="15" fill="#e8edf5" font-style="italic">Lakehouse</text>
+              <text x="130" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="1.5">DELTA · UC · SPARK</text>
+              <text x="130" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">OLAP / ANALYTICS</text>
+            </g>
+
+            <!-- Reverse ETL -->
+            <g class="seam-node" data-info="Reverse-ETL: Fivetran, Hightouch, Census, or hand-written Spark jobs. The pipeline that pushes Delta data into Postgres. Costs money. Breaks at midnight.">
+              <rect class="bg" x="280" y="80" width="160" height="60" rx="6" fill="#3a1a14" stroke="#ef4444" stroke-width="1.5"/>
+              <text x="360" y="105" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#fca5a5" font-style="italic">Reverse-ETL</text>
+              <text x="360" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#ef4444" letter-spacing="1">HIGHTOUCH · CENSUS · CUSTOM</text>
+            </g>
+
+            <!-- Sidecar Postgres -->
+            <g class="seam-node" data-info="Sidecar Postgres / Aurora / RDS. Where the app actually reads at app latency. Separate IAM. Separate audit. Separate bill.">
+              <rect class="bg" x="500" y="60" width="180" height="100" rx="6" fill="#1a2235" stroke="#4a9eff" stroke-width="1.5"/>
+              <text x="590" y="95" text-anchor="middle" font-family="Playfair Display, serif" font-size="15" fill="#e8edf5" font-style="italic">Sidecar Postgres</text>
+              <text x="590" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="1.5">AURORA · RDS · CLOUDSQL</text>
+              <text x="590" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">OLTP / APP LATENCY</text>
+            </g>
+
+            <!-- App -->
+            <g class="seam-node" data-info="The customer's application — needs sub-10ms reads, transactional writes, user-facing. Has no idea about the lakehouse drama happening behind it.">
+              <rect class="bg" x="500" y="220" width="180" height="60" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="1.5"/>
+              <text x="590" y="245" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">App / Agent</text>
+              <text x="590" y="264" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#a855f7" letter-spacing="1">USER-FACING</text>
+            </g>
+
+            <!-- Pain icons -->
+            <g class="seam-node" data-info="The seam tax: separate IAM, separate audit logs, separate billing, separate SLAs, schema drift, two on-call rotations. Always growing.">
+              <rect class="bg" x="40" y="220" width="380" height="120" rx="6" fill="#2a1a14" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,4"/>
+              <text x="230" y="248" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="2">▼ THE SEAM TAX ▼</text>
+              <text x="60" y="275" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e8edf5">› Separate IAM &amp; SCIM</text>
+              <text x="60" y="293" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e8edf5">› Separate audit logs</text>
+              <text x="60" y="311" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e8edf5">› Separate billing &amp; SLAs</text>
+              <text x="60" y="329" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e8edf5">› Schema drift over time</text>
+              <text x="240" y="275" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e8edf5">› Pipeline failures at 3am</text>
+              <text x="240" y="293" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e8edf5">› Two on-call rotations</text>
+              <text x="240" y="311" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e8edf5">› Vendor sprawl</text>
+              <text x="240" y="329" font-family="IBM Plex Mono, monospace" font-size="10" fill="#e8edf5">› Compliance friction</text>
+            </g>
+
+            <!-- arrows -->
+            <line x1="220" y1="110" x2="280" y2="110" stroke="#8899bb" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow1)"/>
+            <line x1="440" y1="110" x2="500" y2="110" stroke="#8899bb" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow1)"/>
+            <line x1="590" y1="160" x2="590" y2="220" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrow1)"/>
+          </g>
+
+          <!-- AFTER STATE -->
+          <g id="seamAfterGroup" style="display:none">
+            <!-- Single Databricks platform box -->
+            <g class="seam-node" data-info="One platform. One governance plane. One bill. Lakehouse and Lakebase share storage philosophy, identity, and Unity Catalog. The seam is gone.">
+              <rect class="bg" x="40" y="50" width="720" height="280" rx="8" fill="#0b0f1a" stroke="#ff6b35" stroke-width="1.5" stroke-dasharray="6,4"/>
+              <text x="60" y="78" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ DATABRICKS DATA INTELLIGENCE PLATFORM</text>
+            </g>
+
+            <!-- Lakehouse -->
+            <g class="seam-node" data-info="The same Lakehouse — Delta tables in Unity Catalog. Now governed alongside Lakebase. No more 'over here' vs 'over there'.">
+              <rect class="bg" x="80" y="120" width="200" height="100" rx="6" fill="#1a2235" stroke="#00bfa5" stroke-width="1.5"/>
+              <text x="180" y="155" text-anchor="middle" font-family="Playfair Display, serif" font-size="15" fill="#e8edf5" font-style="italic">Lakehouse</text>
+              <text x="180" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="1.5">DELTA · UC</text>
+              <text x="180" y="198" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">OLAP</text>
+            </g>
+
+            <!-- Lakebase -->
+            <g class="seam-node" data-info="Lakebase — managed Postgres 17, native to the platform. Synced tables replace reverse-ETL. Same UC governance. Same OAuth identity. Same bill.">
+              <rect class="bg" x="520" y="120" width="200" height="100" rx="6" fill="#2a1a14" stroke="#ff6b35" stroke-width="2"/>
+              <text x="620" y="155" text-anchor="middle" font-family="Playfair Display, serif" font-size="15" fill="#e8edf5" font-style="italic">Lakebase</text>
+              <text x="620" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1.5">POSTGRES 17 · UC</text>
+              <text x="620" y="198" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">OLTP</text>
+            </g>
+
+            <!-- Synced tables (replaces reverse ETL) -->
+            <g class="seam-node" data-info="Synced Tables: managed CDC from UC Delta into Lakebase, seconds-to-minutes latency. Replaces Hightouch/Census/Fivetran. No pipeline to operate.">
+              <rect class="bg" x="300" y="135" width="180" height="40" rx="6" fill="#1a2a1f" stroke="#22c55e" stroke-width="1.5"/>
+              <text x="390" y="153" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">Synced Tables</text>
+              <text x="390" y="167" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#22c55e" letter-spacing="1">UC → PG</text>
+            </g>
+
+            <!-- Lakehouse Sync (reverse) -->
+            <g class="seam-node" data-info="Lakehouse Sync: managed CDC the other direction — Lakebase → Delta. Operational data flows back for analytics. Same single platform.">
+              <rect class="bg" x="300" y="180" width="180" height="40" rx="6" fill="#1a2a1f" stroke="#22c55e" stroke-width="1.5"/>
+              <text x="390" y="198" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">Lakehouse Sync</text>
+              <text x="390" y="212" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#22c55e" letter-spacing="1">PG → UC</text>
+            </g>
+
+            <!-- App -->
+            <g class="seam-node" data-info="The same app — but now connecting to Lakebase via Databricks Apps. Identity is the workspace user (OBO). RLS works against workspace identity for free.">
+              <rect class="bg" x="520" y="250" width="200" height="60" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="1.5"/>
+              <text x="620" y="275" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">App / Agent</text>
+              <text x="620" y="294" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#a855f7" letter-spacing="1">DATABRICKS APPS</text>
+            </g>
+
+            <!-- single-bill annotation -->
+            <g class="seam-node" data-info="One governance plane: Unity Catalog. One identity: workspace OAuth. One bill: Databricks DBUs. One audit log. One on-call rotation. The seam is replaced by integration.">
+              <rect class="bg" x="80" y="250" width="200" height="60" rx="6" fill="#1a2a1f" stroke="#22c55e" stroke-width="1.5"/>
+              <text x="180" y="275" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">One Plane</text>
+              <text x="180" y="295" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#22c55e" letter-spacing="1">UC · OAUTH · DBUs · AUDIT</text>
+            </g>
+
+            <!-- arrows: lakehouse <-> sync <-> lakebase -->
+            <line x1="280" y1="155" x2="300" y2="155" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+            <line x1="480" y1="155" x2="520" y2="155" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+            <line x1="520" y1="200" x2="480" y2="200" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+            <line x1="300" y1="200" x2="280" y2="200" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+            <line x1="620" y1="220" x2="620" y2="250" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arrow1)"/>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Hover any element</div>
+        <p id="seamInfo">Click "Before Lakebase" or "With Lakebase" to compare. Hover individual boxes to learn what each component does and why it matters.</p>
+      </div>
+    </div>
+
+    <h3>What Lakebase actually replaces</h3>
+    <p>Lakebase is a <strong>fully managed, cloud-native PostgreSQL 17 database</strong> that lives natively inside the Databricks Data Intelligence Platform. Read the sentence twice. The two important phrases are:</p>
+
+    <ul>
+      <li><strong>"PostgreSQL"</strong> — not a Postgres-flavored API, not a wire-compatible reimplementation. <em>Real Postgres.</em> Existing drivers, ORMs, extensions (from a curated allowlist), and Postgres knowledge transfer 1:1.</li>
+      <li><strong>"natively inside Databricks"</strong> — same governance plane (Unity Catalog), same identity (workspace OAuth), same data plane (synced tables, Lakehouse Sync, federation), same bill.</li>
+    </ul>
+
+    <p>The thing it eliminates is not Postgres itself. It's the seam. When a customer adopts Lakebase, what disappears from their architecture is roughly: the reverse-ETL tool, the sidecar Aurora/RDS for app data (in many cases), the third-party vector database for sub-10M corpora, the bespoke agent state store, and the recurring "let's stand up a small Postgres on EKS" decision.</p>
+
+    <h3>The five killer use cases</h3>
+    <p>These are the conversations we have with customers most often. If you only memorize five things from this module, memorize these:</p>
+
+    <ol>
+      <li><strong>Operational app backends</strong> — internal admin tools, CRUD apps, customer 360 lookups, approval workflows. Backed by Databricks Apps + Lakebase.</li>
+      <li><strong>Real-time feature serving</strong> — sub-10ms feature lookups for online ML inference, replacing Redis or a sidecar Postgres.</li>
+      <li><strong>AI agent state and memory</strong> — durable conversation history, tool-call logs, vector-retrievable episodic memories. Module 6 in depth.</li>
+      <li><strong>Vector search at app latency</strong> — pgvector + HNSW for production RAG, no third-party vector DB. Best fit under ~10M vectors.</li>
+      <li><strong>Reverse-ETL replacement</strong> — synced tables push UC Delta data into Postgres for low-latency reads, eliminating Hightouch/Census/Fivetran style pipelines.</li>
+    </ol>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 1.1</span>
+      <p>Can you state, in one sentence, what Lakebase replaces in a typical customer's stack? A passing answer mentions: <em>a managed Postgres + a reverse-ETL tool, plus often a vector DB and an agent state store</em>. If you can say that without looking, move on.</p>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 1.2 -->
+  <section class="topic" id="t12">
+    <div class="topic-banner">
+      <span class="topic-id">1.2</span>
+      <span class="line"></span>
+      <span class="type">Theory</span>
+    </div>
+    <h2>The Lakebase stack — <em>the full map</em></h2>
+
+    <p>Lakebase is not one thing — it's a small set of objects you'll be referring to constantly. Get the vocabulary right now and every later module reads cleanly.</p>
+
+    <h3>The four planes</h3>
+    <p>Think of Lakebase as four stacked layers, each composed of well-defined objects. Click any plane below to focus it and see what lives there.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 2: STACK PLANES ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 1.2 · The Four Planes of Lakebase</span>
+        <span class="diagram-hint">Click a plane to inspect</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 760 460" xmlns="http://www.w3.org/2000/svg" class="stack-svg" id="stackSvg">
+          <defs>
+            <marker id="planeArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5878"/>
+            </marker>
+          </defs>
+
+          <!-- APPLICATION PLANE -->
+          <g class="plane" data-plane="app" onclick="selectPlane('app')">
+            <rect class="bg" x="40" y="20" width="680" height="80" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="60" y="45" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="2">▸ APPLICATION PLANE</text>
+            <text x="380" y="72" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Databricks Apps · Notebooks · Feature Store · AI Agents</text>
+            <text x="380" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">WHAT GETS BUILT ON TOP</text>
+          </g>
+
+          <!-- arrow -->
+          <line class="plane-arrow" x1="380" y1="105" x2="380" y2="118" stroke="#4a5878" stroke-width="1" marker-end="url(#planeArrow)"/>
+          <line class="plane-arrow" x1="380" y1="195" x2="380" y2="105" stroke="#4a5878" stroke-width="1" marker-end="url(#planeArrow)"/>
+
+          <!-- OPERATIONAL PLANE -->
+          <g class="plane" data-plane="op" onclick="selectPlane('op')">
+            <rect class="bg" x="40" y="125" width="680" height="80" rx="6" fill="#1a2235" stroke="#4a9eff" stroke-width="1.5"/>
+            <text x="60" y="150" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="2">▸ OPERATIONAL PLANE</text>
+            <text x="380" y="177" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">SQL Editor · Tables Editor · psql / JDBC · PostgREST API</text>
+            <text x="380" y="197" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">HOW HUMANS &amp; CODE TOUCH IT</text>
+          </g>
+
+          <line class="plane-arrow" x1="380" y1="210" x2="380" y2="223" stroke="#4a5878" stroke-width="1" marker-end="url(#planeArrow)"/>
+          <line class="plane-arrow" x1="380" y1="300" x2="380" y2="210" stroke="#4a5878" stroke-width="1" marker-end="url(#planeArrow)"/>
+
+          <!-- INTEGRATION PLANE -->
+          <g class="plane" data-plane="int" onclick="selectPlane('int')">
+            <rect class="bg" x="40" y="230" width="680" height="80" rx="6" fill="#1a2235" stroke="#00bfa5" stroke-width="1.5"/>
+            <text x="60" y="255" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="2">▸ INTEGRATION PLANE</text>
+            <text x="380" y="282" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Unity Catalog · Synced Tables · Federation · Lakehouse Sync</text>
+            <text x="380" y="302" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">HOW IT TALKS TO THE LAKEHOUSE</text>
+          </g>
+
+          <line class="plane-arrow" x1="380" y1="315" x2="380" y2="328" stroke="#4a5878" stroke-width="1" marker-end="url(#planeArrow)"/>
+          <line class="plane-arrow" x1="380" y1="420" x2="380" y2="315" stroke="#4a5878" stroke-width="1" marker-end="url(#planeArrow)"/>
+
+          <!-- CORE OBJECTS -->
+          <g class="plane" data-plane="core" onclick="selectPlane('core')">
+            <rect class="bg" x="40" y="335" width="680" height="100" rx="6" fill="#2a1a14" stroke="#ff6b35" stroke-width="2"/>
+            <text x="60" y="360" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="2">▸ CORE OBJECTS · THE FOUNDATION</text>
+            <text x="380" y="390" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">Project · Branch · Compute · Database</text>
+            <text x="380" y="412" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">Synced Table · Read Replica</text>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Selected plane</div>
+        <p id="planeInfo">Click any plane to see what lives there and why it matters. Each plane is a layer of abstraction on top of the one below it — the core objects on the bottom support everything above.</p>
+      </div>
+    </div>
+
+    <h3>Core objects — the vocabulary</h3>
+    <p>These are the nouns you'll use every day. Every later module assumes you know them. Click any card below to reveal the detail.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 3: VOCABULARY CARDS ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 1.3 · Core Object Vocabulary</span>
+        <span class="diagram-hint">Click a card</span>
+      </div>
+      <div class="diagram-stage">
+        <div class="vocab-grid" id="vocabGrid">
+          <div class="vocab-card" data-vocab="project" onclick="selectVocab('project')">
+            <div class="vocab-num">OBJECT 01</div>
+            <div class="vocab-name">Project</div>
+            <div class="vocab-tagline">The top-level container. Owns storage, branches, compute, networking, and billing.</div>
+          </div>
+          <div class="vocab-card" data-vocab="branch" onclick="selectVocab('branch')">
+            <div class="vocab-num">OBJECT 02</div>
+            <div class="vocab-name">Branch</div>
+            <div class="vocab-tagline">A named, isolated compute endpoint pointing at a copy-on-write snapshot of storage.</div>
+          </div>
+          <div class="vocab-card" data-vocab="compute" onclick="selectVocab('compute')">
+            <div class="vocab-num">OBJECT 03</div>
+            <div class="vocab-name">Compute</div>
+            <div class="vocab-tagline">The Postgres process attached to a branch. Elastic. Can scale to zero. Can fail over.</div>
+          </div>
+          <div class="vocab-card" data-vocab="database" onclick="selectVocab('database')">
+            <div class="vocab-num">OBJECT 04</div>
+            <div class="vocab-name">Database</div>
+            <div class="vocab-tagline">A standard PostgreSQL database inside the branch. Schemas, tables, GRANTs as you'd expect.</div>
+          </div>
+          <div class="vocab-card" data-vocab="synced" onclick="selectVocab('synced')">
+            <div class="vocab-num">OBJECT 05</div>
+            <div class="vocab-name">Synced Table</div>
+            <div class="vocab-tagline">A Lakebase table automatically populated from a UC Delta source via managed CDC.</div>
+          </div>
+          <div class="vocab-card" data-vocab="replica" onclick="selectVocab('replica')">
+            <div class="vocab-num">OBJECT 06</div>
+            <div class="vocab-name">Read Replica</div>
+            <div class="vocab-tagline">Additional compute sharing the same storage. Zero replication lag for committed pages.</div>
+          </div>
+        </div>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Object detail</div>
+        <p id="vocabInfo">Click any card above to read the deep explanation. The six core objects build on each other — start with <strong>Project</strong>.</p>
+      </div>
+    </div>
+
+    <h3>Integration plane — the three patterns</h3>
+    <p>This is the layer that makes Lakebase a <em>lakehouse</em> OLTP rather than just another managed Postgres. Three patterns, covered in depth in Module 4. The decision rule for now: if data flows <strong>from</strong> the lakehouse <strong>into</strong> the app, use synced tables. If it flows <strong>from</strong> the app <strong>back to</strong> the lakehouse for analytics, use Lakehouse Sync. For occasional ad-hoc joins, federation is fine.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Pattern</th><th>Direction</th><th>Latency</th><th>Typical Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Synced tables</strong></td><td>UC Delta → Lakebase</td><td>Seconds to minutes</td><td>Serve features, profiles, catalog data to apps</td></tr>
+          <tr><td><strong>Lakehouse Sync</strong></td><td>Lakebase → UC Delta</td><td>Continuous CDC</td><td>Analytics on operational data, history</td></tr>
+          <tr><td><strong>Federation</strong></td><td>Live read from DBSQL</td><td>Per-query</td><td>Ad-hoc joins, low-volume reads, exploration</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 1.2</span>
+      <p>Without looking, list the six core objects: <em>project, branch, compute, database, synced table, read replica</em>. Then explain, for each, what would break if it didn't exist. If "compute" feels redundant with "branch", reread — the separation is what makes scale-to-zero and read replicas possible.</p>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 1.3 -->
+  <section class="topic" id="t13">
+    <div class="topic-banner">
+      <span class="topic-id">1.3</span>
+      <span class="line"></span>
+      <span class="type">Theory</span>
+    </div>
+    <h2>Autoscaling vs Provisioned — <em>what &amp; when</em></h2>
+
+    <h3>The short version</h3>
+    <p>As of <strong>March 12, 2026</strong>, every newly created Lakebase instance is provisioned as a <strong>Lakebase Autoscaling</strong> project. The older <strong>Lakebase Provisioned</strong> offering still exists for backward compatibility, but it is in maintenance mode — no new feature work targets it.</p>
+    <p><strong>For all new customer designs, recommend Autoscaling.</strong> The exceptions are narrow, and we'll cover them at the end of this section.</p>
+
+    <h3>Capability comparison — interactive</h3>
+    <p>Hover over any capability row below to see why it matters and what the architectural difference is. The four rows in orange are the distinguishing features that only exist on Autoscaling.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 4: COMPARISON ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 1.4 · Autoscaling vs Provisioned</span>
+        <span class="diagram-hint">Hover any row</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 800 540" xmlns="http://www.w3.org/2000/svg" class="compare-svg" id="compareSvg">
+          <!-- Headers -->
+          <rect x="20" y="20" width="380" height="40" rx="4" fill="#111827"/>
+          <text x="40" y="46" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb" letter-spacing="2">CAPABILITY</text>
+
+          <rect x="410" y="20" width="180" height="40" rx="4" fill="#2a1a14" stroke="#ff6b35" stroke-width="1.5"/>
+          <text x="500" y="46" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" font-style="italic" fill="#ff6b35">Autoscaling</text>
+
+          <rect x="600" y="20" width="180" height="40" rx="4" fill="#1a2235"/>
+          <text x="690" y="46" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" font-style="italic" fill="#8899bb">Provisioned</text>
+
+          <!-- Row 1: Compute model -->
+          <g class="cap-row" data-cap="compute" onmouseover="highlightCap('compute')">
+            <rect x="20" y="70" width="760" height="36" rx="3" fill="#0b0f1a"/>
+            <text x="40" y="93" font-family="IBM Plex Mono, monospace" font-size="11" fill="#e8edf5">Compute Model</text>
+            <text x="500" y="93" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#22c55e">Auto + scale-to-zero</text>
+            <text x="690" y="93" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#fbbf24">Fixed-size, manual</text>
+          </g>
+
+          <!-- Row 2: Branching -->
+          <g class="cap-row" data-cap="branch" onmouseover="highlightCap('branch')">
+            <rect x="20" y="112" width="760" height="36" rx="3" fill="#1a1209" stroke="#ff6b35" stroke-width="1"/>
+            <text x="40" y="135" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ff6b35">Branching (copy-on-write) ★</text>
+            <text x="500" y="135" text-anchor="middle" font-family="Syne, sans-serif" font-size="14" fill="#22c55e" font-weight="600">✓ Native</text>
+            <text x="690" y="135" text-anchor="middle" font-family="Syne, sans-serif" font-size="14" fill="#ef4444">✗ Not supported</text>
+          </g>
+
+          <!-- Row 3: Instant restore -->
+          <g class="cap-row" data-cap="restore" onmouseover="highlightCap('restore')">
+            <rect x="20" y="154" width="760" height="36" rx="3" fill="#1a1209" stroke="#ff6b35" stroke-width="1"/>
+            <text x="40" y="177" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ff6b35">Instant Restore (PITR) ★</text>
+            <text x="500" y="177" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#22c55e">✓ 0–30 day window</text>
+            <text x="690" y="177" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#fbbf24">⚠ Traditional only</text>
+          </g>
+
+          <!-- Row 4: Read replicas -->
+          <g class="cap-row" data-cap="replica" onmouseover="highlightCap('replica')">
+            <rect x="20" y="196" width="760" height="36" rx="3" fill="#1a1209" stroke="#ff6b35" stroke-width="1"/>
+            <text x="40" y="219" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ff6b35">Read Replicas ★</text>
+            <text x="500" y="219" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#22c55e">✓ True, same storage</text>
+            <text x="690" y="219" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#fbbf24">⚠ Readable secondaries</text>
+          </g>
+
+          <!-- Row 5: Data API -->
+          <g class="cap-row" data-cap="api" onmouseover="highlightCap('api')">
+            <rect x="20" y="238" width="760" height="36" rx="3" fill="#1a1209" stroke="#ff6b35" stroke-width="1"/>
+            <text x="40" y="261" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ff6b35">Data API (PostgREST) ★</text>
+            <text x="500" y="261" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#22c55e">✓ GA</text>
+            <text x="690" y="261" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#fbbf24">⚠ Private Preview</text>
+          </g>
+
+          <!-- Row 6: HA -->
+          <g class="cap-row" data-cap="ha" onmouseover="highlightCap('ha')">
+            <rect x="20" y="280" width="760" height="36" rx="3" fill="#0b0f1a"/>
+            <text x="40" y="303" font-family="IBM Plex Mono, monospace" font-size="11" fill="#e8edf5">HA Across AZs</text>
+            <text x="500" y="303" text-anchor="middle" font-family="Syne, sans-serif" font-size="14" fill="#22c55e" font-weight="600">✓</text>
+            <text x="690" y="303" text-anchor="middle" font-family="Syne, sans-serif" font-size="14" fill="#22c55e" font-weight="600">✓</text>
+          </g>
+
+          <!-- Row 7: UC -->
+          <g class="cap-row" data-cap="uc" onmouseover="highlightCap('uc')">
+            <rect x="20" y="322" width="760" height="36" rx="3" fill="#0b0f1a"/>
+            <text x="40" y="345" font-family="IBM Plex Mono, monospace" font-size="11" fill="#e8edf5">Unity Catalog Registration</text>
+            <text x="500" y="345" text-anchor="middle" font-family="Syne, sans-serif" font-size="14" fill="#22c55e" font-weight="600">✓</text>
+            <text x="690" y="345" text-anchor="middle" font-family="Syne, sans-serif" font-size="14" fill="#22c55e" font-weight="600">✓</text>
+          </g>
+
+          <!-- Row 8: Synced tables -->
+          <g class="cap-row" data-cap="synced" onmouseover="highlightCap('synced')">
+            <rect x="20" y="364" width="760" height="36" rx="3" fill="#0b0f1a"/>
+            <text x="40" y="387" font-family="IBM Plex Mono, monospace" font-size="11" fill="#e8edf5">Synced Tables (UC → PG)</text>
+            <text x="500" y="387" text-anchor="middle" font-family="Syne, sans-serif" font-size="14" fill="#22c55e" font-weight="600">✓</text>
+            <text x="690" y="387" text-anchor="middle" font-family="Syne, sans-serif" font-size="14" fill="#22c55e" font-weight="600">✓</text>
+          </g>
+
+          <!-- Row 9: Lakehouse Sync -->
+          <g class="cap-row" data-cap="lhs" onmouseover="highlightCap('lhs')">
+            <rect x="20" y="406" width="760" height="36" rx="3" fill="#0b0f1a"/>
+            <text x="40" y="429" font-family="IBM Plex Mono, monospace" font-size="11" fill="#e8edf5">Lakehouse Sync (PG → UC)</text>
+            <text x="500" y="429" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#22c55e">✓ Beta on AWS</text>
+            <text x="690" y="429" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#fbbf24">⚠ Limited</text>
+          </g>
+
+          <!-- Row 10: Investment -->
+          <g class="cap-row" data-cap="invest" onmouseover="highlightCap('invest')">
+            <rect x="20" y="448" width="760" height="36" rx="3" fill="#0b0f1a"/>
+            <text x="40" y="471" font-family="IBM Plex Mono, monospace" font-size="11" fill="#e8edf5">New Feature Investment</text>
+            <text x="500" y="471" text-anchor="middle" font-family="Syne, sans-serif" font-size="13" fill="#22c55e" font-weight="600">✓ Active</text>
+            <text x="690" y="471" text-anchor="middle" font-family="Syne, sans-serif" font-size="13" fill="#ef4444">✗ Maintenance mode</text>
+          </g>
+
+          <!-- footnote -->
+          <text x="40" y="510" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="0.5">★ Distinguishing capabilities — only exist on Autoscaling</text>
+          <text x="40" y="525" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="0.5">  Autoscaling is a strict superset of Provisioned</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Capability detail</div>
+        <p id="capInfo">Hover any row to see the architectural reason behind the difference. The four ★ rows are why customers pick Autoscaling — they don't exist on Provisioned at all.</p>
+      </div>
+    </div>
+
+    <h3>Why this matters: the architectural difference</h3>
+    <p>The capability gap isn't an arbitrary feature-flag decision. It reflects a fundamentally different storage architecture:</p>
+    <ul>
+      <li><strong>Provisioned</strong> runs Postgres with locally-attached storage, replicated at the block level. Branching would mean physically copying terabytes; that's why it's not offered.</li>
+      <li><strong>Autoscaling</strong> runs Postgres against a shared, copy-on-write <strong>page server</strong> backed by object storage. Branching is just a new pointer at the same pages — instant and cheap.</li>
+    </ul>
+    <p>When customers ask <em>"can't you just add branching to Provisioned?"</em> — no, not without rebuilding it as Autoscaling.</p>
+
+    <h3>The decision rule</h3>
+    <p><strong>Choose Autoscaling when:</strong> starting a new project (essentially always); you want branching, instant restore, scale-to-zero, the Data API, or active feature development; you're in a region where Autoscaling is GA.</p>
+    <p><strong>Choose Provisioned only when:</strong> you have an existing Provisioned project and aren't ready to migrate; Autoscaling is not yet GA in the customer's required region (verify in docs); a specific compliance certification is on Provisioned but not yet on Autoscaling (rare).</p>
+    <p>There is no <em>"Provisioned for predictable cost"</em> answer — Autoscaling supports a fixed-baseline compute mode if you want predictability, and you get branching and instant restore for free.</p>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">⚠ Region availability — verify, don't assume</span>
+      <p>Autoscaling is rolling out region by region. Before you commit to a customer architecture, run <code>w.database.list_database_projects()</code> in their workspace. <strong>Walking back a recommendation in front of the customer is far worse than discovering the limit privately first.</strong> Module 9 lists this as the #1 thing RSAs forget to verify upfront.</p>
+    </div>
+
+    <h3>Quick decision drill</h3>
+    <p>For each scenario below, pick Autoscaling or Provisioned. Don't think longer than five seconds. Click your answer to check it.</p>
+
+    <!-- ─── DECISION DRILL ─── -->
+    <div class="drill">
+      <div class="drill-label">▸ Interactive · Decision Drill</div>
+      <div class="drill-title">Five scenarios. Five seconds each.</div>
+
+      <div class="drill-question" id="q1">
+        <div style="margin-bottom:10px;"><strong>Scenario 1.</strong> New customer, brand new use case, US-East region.</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(1, 'auto', true)">Autoscaling</button>
+          <button onclick="answerDrill(1, 'prov', false)">Provisioned</button>
+        </div>
+        <div class="drill-feedback" id="f1"></div>
+      </div>
+
+      <div class="drill-question" id="q2">
+        <div style="margin-bottom:10px;"><strong>Scenario 2.</strong> Customer has a 2-year-old Provisioned project running fine; no immediate driver to change.</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(2, 'auto', false)">Force migrate to Autoscaling</button>
+          <button onclick="answerDrill(2, 'prov', true)">Leave on Provisioned, no forced move</button>
+        </div>
+        <div class="drill-feedback" id="f2"></div>
+      </div>
+
+      <div class="drill-question" id="q3">
+        <div style="margin-bottom:10px;"><strong>Scenario 3.</strong> Customer wants branching for PR-based schema migrations.</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(3, 'auto', true)">Autoscaling</button>
+          <button onclick="answerDrill(3, 'prov', false)">Provisioned</button>
+        </div>
+        <div class="drill-feedback" id="f3"></div>
+      </div>
+
+      <div class="drill-question" id="q4">
+        <div style="margin-bottom:10px;"><strong>Scenario 4.</strong> Customer in a region where Autoscaling isn't GA yet, but needs Lakebase now.</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(4, 'auto', false)">Autoscaling anyway</button>
+          <button onclick="answerDrill(4, 'prov', true)">Provisioned (interim) + flag the limitation</button>
+        </div>
+        <div class="drill-feedback" id="f4"></div>
+      </div>
+
+      <div class="drill-question" id="q5">
+        <div style="margin-bottom:10px;"><strong>Scenario 5.</strong> Customer says "I want predictable monthly cost" and asks if they should use Provisioned for that reason.</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(5, 'auto', true)">Autoscaling with fixed-baseline compute</button>
+          <button onclick="answerDrill(5, 'prov', false)">Provisioned for cost predictability</button>
+        </div>
+        <div class="drill-feedback" id="f5"></div>
+      </div>
+    </div>
+
+    <h3>Upgrade path</h3>
+    <p>Existing Provisioned instances continue to be supported. There is <strong>no forced migration</strong> to Autoscaling. Customers can leave existing Provisioned projects in place, provision new projects as Autoscaling, and migrate Provisioned → Autoscaling on their own schedule using the standard Postgres logical-replication / dump-and-load toolkit.</p>
+    <p>In the field, the most common pattern is <em>coexistence</em>: keep the legacy Provisioned project running, build new applications on Autoscaling, migrate the old one only when there's a compelling reason. Don't push migration-for-migration's-sake.</p>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 1.3</span>
+      <p>You should now be able to walk into any customer conversation and recommend Autoscaling vs Provisioned with a clear, honest rationale. The default answer is <strong>Autoscaling</strong> — and you should be able to name the four distinguishing features (branching, instant restore, true read replicas, Data API) without looking. The exceptions to the default are narrow and known.</p>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════ WRAP-UP -->
+  <section id="wrap">
+    <div class="wrap-up">
+      <h3>Module 1 — <em>wrap-up</em></h3>
+      <p style="font-size:15.5px; color:var(--text-dim); line-height:1.75;">You should now be able to handle the first three minutes of any Lakebase customer conversation:</p>
+      <ul>
+        <li>Explain in one sentence what Lakebase is and what it replaces (1.1)</li>
+        <li>Whiteboard the four planes and six core objects without notes (1.2)</li>
+        <li>Recommend Autoscaling vs Provisioned with a clear, honest rationale (1.3)</li>
+      </ul>
+      <p style="margin-top:18px;">The remaining hands-on lab in topic 1.4 (workspace prerequisites and sanity check) is what gets your laptop ready to do every other lab in this roadmap. Run it next, then continue to <strong>Module 2</strong> for the architecture deep dive — separated compute and storage, copy-on-write branching internals, scale-to-zero mechanics, and the OAuth token TTL trap.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ Progress bar ═══════════════
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+// ═══════════════ Diagram 1: Seam Tax Toggle ═══════════════
+function toggleSeam(state) {
+  const before = document.getElementById('seamBeforeGroup');
+  const after = document.getElementById('seamAfterGroup');
+  const btnB = document.getElementById('seamBefore');
+  const btnA = document.getElementById('seamAfter');
+  const info = document.getElementById('seamInfo');
+
+  if (state === 'before') {
+    before.style.display = 'block';
+    after.style.display = 'none';
+    btnB.classList.add('active');
+    btnA.classList.remove('active');
+    info.textContent = 'BEFORE: two databases, one pipeline between them, one giant tax. Hover any element to see what it actually costs.';
+  } else {
+    before.style.display = 'none';
+    after.style.display = 'block';
+    btnA.classList.add('active');
+    btnB.classList.remove('active');
+    info.textContent = 'AFTER: one platform, one identity, one bill. The seam is replaced by managed integration. Hover any element to see how.';
+  }
+}
+
+// Hover handlers for seam diagram
+document.querySelectorAll('#seamSvg .seam-node').forEach(node => {
+  node.addEventListener('mouseenter', () => {
+    const info = node.dataset.info;
+    if (info) document.getElementById('seamInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 2: Stack Planes ═══════════════
+const planeData = {
+  app:  { color: '#a855f7', text: 'APPLICATION PLANE — what gets built on top. Databricks Apps for full-stack data products. AI agents using Lakebase as memory and tool-call store. Feature Store online layer for sub-10ms inference lookups. Notebooks for data scientists who need transactional state. External apps connecting via public TLS or Inbound Private Link.' },
+  op:   { color: '#4a9eff', text: 'OPERATIONAL PLANE — how humans and code touch Lakebase. SQL Editor and Tables Editor in the Databricks UI for ad-hoc work. Standard Postgres clients (psql, DataGrip, JDBC, psycopg, SQLAlchemy) work unchanged. PostgREST Data API auto-generates REST endpoints for tables. Notebook SDK (WorkspaceClient.database) for programmatic provisioning and lifecycle.' },
+  int:  { color: '#00bfa5', text: 'INTEGRATION PLANE — how Lakebase talks to the lakehouse. This is what makes it a LAKEHOUSE OLTP rather than just another managed Postgres. Unity Catalog registration for governance. Synced Tables push UC Delta into Lakebase via managed CDC. Federation lets DBSQL query Lakebase live. Lakehouse Sync (Beta) streams Lakebase changes back to Delta.' },
+  core: { color: '#ff6b35', text: 'CORE OBJECTS — the foundation. Project (top-level container, owns storage + compute + billing). Branch (named, isolated compute pointing at a copy-on-write storage snapshot). Compute (the Postgres process attached to a branch). Database (standard PG database inside the branch). Synced Table (auto-populated from UC Delta). Read Replica (extra compute on the same storage).' }
+};
+
+function selectPlane(plane) {
+  document.querySelectorAll('#stackSvg .plane').forEach(p => p.classList.remove('active'));
+  const node = document.querySelector(`[data-plane="${plane}"]`);
+  if (node) node.classList.add('active');
+  document.getElementById('planeInfo').textContent = planeData[plane].text;
+}
+
+document.querySelectorAll('#stackSvg .plane').forEach(plane => {
+  plane.addEventListener('mouseenter', () => {
+    const p = plane.dataset.plane;
+    if (planeData[p]) document.getElementById('planeInfo').textContent = planeData[p].text;
+  });
+});
+
+// ═══════════════ Diagram 3: Vocabulary Cards ═══════════════
+const vocabData = {
+  project:  '◉ PROJECT — the top-level container. Owns storage, branches, compute, networking, and the billing scope. When a customer says "we have one Lakebase database" they almost certainly mean "we have one Lakebase project." Provisioning a project is the first hands-on step in Module 3. A project consists of two physically separated layers: a multi-tenant page server (storage) and one or more Postgres compute processes that lazily fetch pages from it.',
+  branch:   '◉ BRANCH — a named, isolated compute endpoint pointing at a copy-on-write snapshot of project storage. Every project starts with a `main` branch. Creating a new branch takes seconds — no data is physically copied, only the pointer. Branches enable PR-based schema migrations, ephemeral CI databases, blue-green deploys, point-in-time recovery (branch from a timestamp), and "what-if" analysis on a writable copy. If you know Git, the model transfers almost perfectly.',
+  compute:  '◉ COMPUTE — the Postgres process attached to a branch. Compute is ELASTIC: it autoscales up under load, scales to zero when idle (on dev/preview branches), and survives failover with a synchronous standby in another AZ (on HA-enabled branches). Compute is NOT where your data lives. Your data lives in the storage layer. Compute is just the engine that reads pages, processes queries, and writes WAL.',
+  database: '◉ DATABASE — inside a branch\'s Postgres, you have one or more standard PostgreSQL databases. The default is `databricks_postgres`. This is plain Postgres — schemas, tables, roles, GRANTs all work exactly as you\'d expect. Most customers use one database per project. There\'s no architectural rule against more, but it adds operational complexity for little gain.',
+  synced:   '◉ SYNCED TABLE — a Lakebase table that is automatically populated from a Unity Catalog Delta source. You declare the source (e.g. `main.gold.customers`), the primary key, and a scheduling policy (CONTINUOUS or SNAPSHOT). Databricks runs a managed CDC pipeline that keeps Lakebase in sync within seconds-to-minutes. Synced tables are how you replace reverse-ETL. They appear as ordinary Postgres tables to your app — query and index them normally.',
+  replica:  '◉ READ REPLICA — an additional compute node sharing the SAME storage as the primary. Because storage is already replicated at the page-server level, read replicas have zero replication lag for committed pages. Pattern: send writes and hot reads to the primary, route analyst/dashboard load to a replica. Provisioned offering uses "readable secondaries"; Autoscaling has true read replicas.'
+};
+
+function selectVocab(key) {
+  document.querySelectorAll('.vocab-card').forEach(c => c.classList.remove('active'));
+  const card = document.querySelector(`[data-vocab="${key}"]`);
+  if (card) card.classList.add('active');
+  document.getElementById('vocabInfo').innerHTML = vocabData[key];
+}
+
+document.querySelectorAll('.vocab-card').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    const k = card.dataset.vocab;
+    if (vocabData[k]) document.getElementById('vocabInfo').innerHTML = vocabData[k];
+  });
+});
+
+// ═══════════════ Diagram 4: Capability Comparison ═══════════════
+const capData = {
+  compute: 'COMPUTE MODEL — Autoscaling automatically adjusts compute up under load and (optionally) suspends to zero when idle, billing storage-only during idle. Provisioned uses fixed-size instances; you scale them manually. Autoscaling supports a fixed-baseline mode if you want predictability + branching together.',
+  branch:  'BRANCHING ★ — Autoscaling exclusive. A branch is a new compute pointing at a copy-on-write snapshot of shared storage. Created in seconds. No data copied. Provisioned cannot offer this because its storage is locally attached and replicated at the block level — branching would mean physically copying terabytes.',
+  restore: 'INSTANT RESTORE ★ — Autoscaling exclusive. Every page version is retained for the configured window (up to 30 days). Restoring is just creating a branch at timestamp T — instant. Provisioned uses traditional point-in-time recovery (replay WAL from a backup), which is much slower for the same outcome.',
+  replica: 'READ REPLICAS ★ — Autoscaling true replicas share the same page-server storage, so they see committed pages with zero replication lag. Provisioned "readable secondaries" use streaming replication and have small but nonzero lag, like classic Postgres async replicas.',
+  api:     'DATA API (PostgREST) ★ — Autoscaling exposes a managed PostgREST endpoint that auto-generates REST routes for your tables. Useful for lightweight integrations, JAMstack-style apps, or low-code tools. Provisioned has it in Private Preview only.',
+  ha:      'HA ACROSS AZs — both offerings support a synchronous standby in a second availability zone. Failover is typically <30s and connection strings are stable through it. Storage is already replicated at the page-server level on Autoscaling, so HA only protects the compute tier.',
+  uc:      'UNITY CATALOG REGISTRATION — both offerings register as first-class catalogs in UC. Same RBAC, same tags, same audit, same federation surface. This is what makes Lakebase a LAKEHOUSE OLTP rather than just a managed Postgres.',
+  synced:  'SYNCED TABLES — both offerings support synced tables (UC Delta → Lakebase). Same scheduling policies (CONTINUOUS / SNAPSHOT). This is the integration that replaces reverse-ETL pipelines.',
+  lhs:     'LAKEHOUSE SYNC (PG → UC) — Autoscaling supports the reverse direction, currently Beta on AWS, streaming Lakebase changes back to Delta via managed CDC. Verify region GA status before designing for prod. Provisioned support is limited.',
+  invest:  'NEW FEATURE INVESTMENT — Autoscaling is the active platform; this is where new features land. Provisioned is in maintenance mode — it remains supported with no forced migration, but new capability work targets Autoscaling.'
+};
+
+function highlightCap(cap) {
+  if (capData[cap]) document.getElementById('capInfo').textContent = capData[cap];
+}
+
+// ═══════════════ Decision Drill ═══════════════
+const drillExplain = {
+  1: { ok: '✓ Correct. Default is always Autoscaling for new projects in supported regions. You get branching, instant restore, and active feature investment for free.', bad: '✗ Provisioned is maintenance-only. New projects should start on Autoscaling unless there\'s a specific blocker.' },
+  2: { ok: '✓ Correct. There is no forced migration. The most common pattern is COEXISTENCE — leave legacy Provisioned alone, start new apps on Autoscaling, migrate the old one only when there\'s a compelling driver.', bad: '✗ There is no forced migration. Pushing migration-for-migration\'s-sake erodes customer trust. Coexistence is the right pattern.' },
+  3: { ok: '✓ Correct. Branching is the #1 distinguishing feature. It only exists on Autoscaling — Provisioned\'s storage architecture cannot support it.', bad: '✗ Provisioned does not support branching at all. This requirement forces Autoscaling.' },
+  4: { ok: '✓ Correct. Verify region availability BEFORE the design call. If Autoscaling isn\'t GA, recommend Provisioned as an interim solution and clearly flag the missing capabilities (branching, instant restore, Data API) as known limitations.', bad: '✗ Don\'t recommend a service in a region where it isn\'t GA — you\'ll have to walk back the recommendation in front of the customer. Use Provisioned interim, flag the limitations.' },
+  5: { ok: '✓ Correct. Autoscaling supports a fixed-baseline compute mode for predictable cost — and you still get branching, instant restore, and active feature investment. There is no "Provisioned for cost predictability" answer.', bad: '✗ Autoscaling has a fixed-baseline mode that gives you predictable cost AND branching/restore. Choosing Provisioned for predictability alone leaves capabilities on the table.' }
+};
+
+function answerDrill(q, choice, correct) {
+  const fb = document.getElementById('f' + q);
+  const buttons = document.querySelectorAll('#q' + q + ' button');
+
+  buttons.forEach(b => {
+    b.classList.remove('correct', 'wrong');
+    b.disabled = true;
+  });
+
+  // Mark the correct one regardless of what user clicked
+  buttons.forEach(b => {
+    if (b.getAttribute('onclick').includes('true')) {
+      b.classList.add('correct');
+    }
+  });
+
+  // If user picked wrong, mark their click as wrong too
+  if (!correct) {
+    buttons.forEach(b => {
+      if (b.getAttribute('onclick').includes(`'${choice}'`) && b.getAttribute('onclick').includes('false')) {
+        b.classList.add('wrong');
+      }
+    });
+  }
+
+  fb.classList.add('show');
+  if (correct) {
+    fb.classList.remove('bad');
+    fb.classList.add('ok');
+    fb.textContent = drillExplain[q].ok;
+  } else {
+    fb.classList.remove('ok');
+    fb.classList.add('bad');
+    fb.textContent = drillExplain[q].bad;
+  }
+}
+</script>
+
+</body>
+</html>

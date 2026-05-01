@@ -1,0 +1,2532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lakebase Mastery Roadmap · From Zero to RSA-Ready</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #0d0f12;
+    --ink-soft:   #1a1d23;
+    --paper:      #f4efe6;
+    --paper-2:    #ebe4d4;
+    --rust:       #c2410c;
+    --rust-deep:  #7c2d12;
+    --moss:       #2d4a1f;
+    --moss-soft:  #4a6a3a;
+    --gold:       #b8860b;
+    --sky:        #1e3a5f;
+    --line:       #2a2d33;
+    --muted:      #6b6258;
+    --code-bg:    #14171c;
+    --code-text:  #e8dcc4;
+    --grid:       rgba(13,15,18,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-position: -1px -1px;
+    overflow-x: hidden;
+  }
+
+  /* ============== HERO ============== */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 2px solid var(--ink);
+    position: relative;
+  }
+
+  .hero-left {
+    padding: 60px 60px 40px;
+    border-right: 2px solid var(--ink);
+    position: relative;
+    background:
+      radial-gradient(circle at 90% 10%, rgba(194,65,12,0.08), transparent 50%);
+  }
+
+  .hero-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 80px;
+  }
+
+  .hero-meta span:after { content: " ·"; }
+  .hero-meta span:last-child:after { content: ""; }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(56px, 7vw, 112px);
+    font-weight: 300;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--rust);
+  }
+
+  .hero h1 .strike {
+    position: relative;
+    display: inline-block;
+  }
+
+  .hero h1 .strike:after {
+    content: "";
+    position: absolute;
+    left: -4%;
+    right: -4%;
+    top: 52%;
+    height: 3px;
+    background: var(--rust);
+    transform: rotate(-2deg);
+  }
+
+  .hero-sub {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-style: italic;
+    color: var(--ink-soft);
+    max-width: 520px;
+    margin-bottom: 56px;
+    line-height: 1.4;
+  }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 48px;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid var(--ink);
+    border-radius: 100px;
+  }
+
+  .tag.filled {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .hero-right {
+    padding: 60px;
+    background: var(--ink);
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-right:before {
+    content: "";
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    border: 1px solid rgba(244,239,230,0.12);
+    border-radius: 50%;
+  }
+
+  .hero-right:after {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 300px;
+    height: 300px;
+    border: 1px solid rgba(244,239,230,0.08);
+    border-radius: 50%;
+  }
+
+  .index-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+
+  .index-title {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 300;
+    margin-bottom: 32px;
+    color: var(--paper-2);
+  }
+
+  .index-list {
+    list-style: none;
+    counter-reset: idx;
+  }
+
+  .index-list li {
+    counter-increment: idx;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(244,239,230,0.12);
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: baseline;
+    gap: 16px;
+    font-size: 15px;
+    transition: padding 0.3s;
+  }
+
+  .index-list li:hover { padding-left: 12px; }
+
+  .index-list li:before {
+    content: counter(idx, decimal-leading-zero);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+  }
+
+  .index-list a {
+    color: var(--paper);
+    text-decoration: none;
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 400;
+  }
+
+  .index-list a:hover { color: var(--gold); }
+
+  .index-list .pages {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* ============== SECTION CHROME ============== */
+  .module {
+    padding: 100px 60px;
+    border-bottom: 1px solid var(--ink);
+    position: relative;
+  }
+
+  .module-header {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 60px;
+    margin-bottom: 64px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .module-num {
+    font-family: 'Fraunces', serif;
+    font-size: 96px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--rust);
+    font-style: italic;
+  }
+
+  .module-info {
+    align-self: end;
+  }
+
+  .module-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .module h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .module h2 em { color: var(--rust); font-style: italic; font-weight: 300;}
+
+  .module-desc {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--ink-soft);
+    max-width: 700px;
+  }
+
+  .module-body {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 60px;
+  }
+
+  .module-marginalia {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    line-height: 1.6;
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+
+  .module-marginalia strong {
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 10px;
+    display: block;
+    margin-bottom: 8px;
+    margin-top: 24px;
+  }
+
+  .module-marginalia strong:first-child { margin-top: 0; }
+
+  .module-content { max-width: 760px; }
+
+  .module-content h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+    margin: 56px 0 16px;
+    letter-spacing: -0.01em;
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .module-content h3:before {
+    content: "§";
+    position: absolute;
+    left: 0;
+    color: var(--rust);
+    font-style: italic;
+  }
+
+  .module-content h3:first-child { margin-top: 0; }
+
+  .module-content h4 {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin: 32px 0 12px;
+    color: var(--moss);
+    font-weight: 600;
+  }
+
+  .module-content p {
+    margin-bottom: 18px;
+    color: var(--ink-soft);
+  }
+
+  .module-content p strong { color: var(--ink); }
+
+  .module-content ul, .module-content ol {
+    margin: 0 0 20px 24px;
+    color: var(--ink-soft);
+  }
+
+  .module-content li { margin-bottom: 8px; }
+
+  /* ============== CALLOUTS ============== */
+  .callout {
+    border-left: 3px solid var(--rust);
+    padding: 20px 24px;
+    margin: 32px 0;
+    background: rgba(194,65,12,0.04);
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-style: italic;
+  }
+
+  .callout.note { border-left-color: var(--sky); background: rgba(30,58,95,0.05); }
+  .callout.warn { border-left-color: var(--gold); background: rgba(184,134,11,0.06); }
+  .callout.success { border-left-color: var(--moss); background: rgba(45,74,31,0.05); }
+
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust);
+    font-style: normal;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .callout.note .callout-label { color: var(--sky); }
+  .callout.warn .callout-label { color: var(--gold); }
+  .callout.success .callout-label { color: var(--moss); }
+
+  /* ============== CODE ============== */
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 6px;
+    margin: 24px 0;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(13,15,18,0.12);
+  }
+
+  .code-header {
+    background: rgba(255,255,255,0.04);
+    padding: 10px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--code-text);
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .code-lang {
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 9px;
+  }
+
+  .code-block pre {
+    padding: 20px 22px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--code-text);
+  }
+
+  .code-block .kw { color: #ff8a65; }
+  .code-block .str { color: #a5d6a7; }
+  .code-block .com { color: #6b7280; font-style: italic; }
+  .code-block .fn { color: #ffd54f; }
+  .code-block .num { color: #ce93d8; }
+
+  /* ============== TABLES ============== */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 28px 0;
+    border: 1px solid var(--ink);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  th {
+    background: var(--ink);
+    color: var(--paper);
+    text-align: left;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(13,15,18,0.1);
+    vertical-align: top;
+    color: var(--ink-soft);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: rgba(13,15,18,0.02); }
+
+  .yes { color: var(--moss); font-weight: 600; }
+  .no  { color: var(--rust-deep); }
+  .partial { color: var(--gold); font-weight: 500; }
+
+  /* ============== HANDS-ON BANNER ============== */
+  .handson {
+    margin: 40px 0;
+    padding: 24px 28px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .handson:before {
+    content: "▸ HANDS-ON";
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+  }
+
+  .handson h4 {
+    color: var(--gold) !important;
+    margin: 0 0 8px !important;
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    font-weight: 400;
+  }
+
+  .handson p { color: var(--paper-2); margin: 0; font-size: 14px;}
+
+  /* ============== ARCHITECTURE DIAGRAM ============== */
+  .arch-wrap {
+    margin: 40px 0;
+    padding: 32px;
+    background: var(--paper-2);
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+  }
+
+  .arch-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  /* ============== FINAL FOOTER ============== */
+  footer {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 80px 60px 40px;
+    text-align: center;
+  }
+
+  footer h3 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 36px;
+    font-weight: 300;
+    margin-bottom: 16px;
+  }
+
+  footer p {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: var(--paper-2);
+    max-width: 540px;
+    margin: 0 auto 32px;
+  }
+
+  .footer-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(244,239,230,0.12);
+  }
+
+  /* ============== CAPSTONE MODULE ============== */
+  .capstone-module {
+    background:
+      linear-gradient(180deg, #ebe4d4 0%, #e0d6c0 100%);
+    position: relative;
+  }
+
+  .capstone-module:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        transparent 0,
+        transparent 40px,
+        rgba(194,65,12,0.025) 40px,
+        rgba(194,65,12,0.025) 41px
+      );
+    pointer-events: none;
+  }
+
+  .capstone-module .module-num { color: var(--moss); }
+
+  .capstone-badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 14px;
+    background: var(--moss);
+    color: var(--paper);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    border-radius: 2px;
+  }
+
+  .phase-card {
+    margin: 32px 0;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 6px 6px 0 var(--ink);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .phase-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+
+  .phase-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 16px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .phase-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .phase-title .phase-num {
+    color: var(--gold);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-style: normal;
+    letter-spacing: 0.2em;
+    margin-right: 12px;
+  }
+
+  .phase-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .phase-body { padding: 22px 26px; }
+
+  .phase-body p { font-size: 15px; }
+
+  .phase-tasks {
+    list-style: none;
+    margin: 12px 0 4px;
+    padding: 0;
+  }
+
+  .phase-tasks li {
+    padding: 8px 0 8px 28px;
+    border-bottom: 1px dashed rgba(13,15,18,0.15);
+    position: relative;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .phase-tasks li:last-child { border-bottom: none; }
+
+  .phase-tasks li:before {
+    content: "□";
+    position: absolute;
+    left: 4px;
+    top: 7px;
+    color: var(--rust);
+    font-size: 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .phase-modules {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(13,15,18,0.12);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .phase-modules span {
+    display: inline-block;
+    padding: 3px 8px;
+    background: var(--ink);
+    color: var(--gold);
+    margin: 0 4px 4px 0;
+    border-radius: 2px;
+  }
+
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 28px 0;
+  }
+
+  .stack-item {
+    padding: 14px 16px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+  }
+
+  .stack-item-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .stack-item-name {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  .deliverable-row {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(13,15,18,0.1);
+    font-size: 14px;
+  }
+
+  .deliverable-row:last-child { border-bottom: none; }
+
+  .deliverable-row .check {
+    color: var(--moss);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* ============== RSA SPECIAL MODULE ============== */
+  .rsa-module {
+    background: linear-gradient(135deg, #1a1d23 0%, #2d1b14 100%);
+    color: var(--paper);
+  }
+
+  .rsa-module h2, .rsa-module h3, .rsa-module h4 { color: var(--paper); }
+  .rsa-module .module-num { color: var(--gold); }
+  .rsa-module .module-eyebrow { color: var(--gold); }
+  .rsa-module .module-desc { color: var(--paper-2); }
+  .rsa-module .module-content p { color: var(--paper-2); }
+  .rsa-module .module-content h3:before { color: var(--gold); }
+  .rsa-module .module-content h4 { color: var(--gold); }
+  .rsa-module .module-content p strong { color: var(--paper); }
+  .rsa-module .module-content ul, .rsa-module .module-content ol { color: var(--paper-2); }
+  .rsa-module .module-marginalia { color: var(--paper-2); }
+  .rsa-module .module-marginalia strong { color: var(--gold); }
+  .rsa-module .module-header { border-bottom-color: rgba(244,239,230,0.2); }
+  .rsa-module td { color: var(--paper-2); border-bottom-color: rgba(244,239,230,0.15);}
+  .rsa-module tr:nth-child(even) td { background: rgba(244,239,230,0.04); }
+  .rsa-module .table-wrap { border-color: rgba(244,239,230,0.2);}
+  .rsa-module .callout { background: rgba(244,239,230,0.04); }
+  .rsa-module .callout p, .rsa-module .callout { color: var(--paper-2); }
+
+  .rsa-badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 14px;
+    background: var(--gold);
+    color: var(--ink);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    border-radius: 2px;
+  }
+
+  /* ============== RESPONSIVE ============== */
+  @media (max-width: 980px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; }
+    .hero-left, .hero-right { padding: 40px 28px; border-right: none; }
+    .hero-left { border-bottom: 2px solid var(--ink); }
+    .module { padding: 60px 28px; }
+    .module-header, .module-body { grid-template-columns: 1fr; gap: 24px; }
+    .module-marginalia { position: static; padding: 16px; background: var(--paper-2); border-left: 3px solid var(--rust); }
+    .module-num { font-size: 64px; }
+    footer { padding: 60px 28px 30px; }
+  }
+
+  /* ============== ANIMATIONS ============== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .module-header, .module-content > * {
+    animation: fadeUp 0.6s ease-out backwards;
+  }
+
+  /* progress strip */
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--rust);
+    z-index: 1000;
+    transition: width 0.1s;
+  }
+
+  /* dot decoration */
+  .dot-row {
+    display: flex;
+    gap: 6px;
+    margin: 24px 0;
+  }
+  .dot-row span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ink);
+    opacity: 0.2;
+  }
+  .dot-row span.active { opacity: 1; background: var(--rust);}
+
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<!-- ====================================================== -->
+<!-- HERO                                                   -->
+<!-- ====================================================== -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-meta">
+      <span>Field Manual № 04</span>
+      <span>Rev. 2026.04</span>
+      <span>RSA Edition</span>
+    </div>
+
+    <h1>
+      The <em>Lakebase</em><br>
+      <span class="strike">Postgres</span><br>
+      <em>Roadmap</em>
+    </h1>
+
+    <p class="hero-sub">
+      A practitioner's path from "I've heard of Lakebase" to "I architect production lakehouse-grade OLTP" — built for the Resident Solutions Architect who must answer the hard customer questions.
+    </p>
+
+    <div class="hero-tags">
+      <span class="tag filled">Theory + Hands-On</span>
+      <span class="tag">PostgreSQL 17</span>
+      <span class="tag">Vector / pgvector</span>
+      <span class="tag">Databricks Apps</span>
+      <span class="tag">AI Agents</span>
+      <span class="tag">RSA Toolkit</span>
+    </div>
+
+    <div class="dot-row">
+      <span class="active"></span><span class="active"></span><span class="active"></span>
+      <span class="active"></span><span class="active"></span><span class="active"></span>
+      <span class="active"></span><span class="active"></span><span></span><span></span>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="index-label">▸ Table of Contents</div>
+    <h2 class="index-title">Nine modules.<br>One destination.</h2>
+
+    <ol class="index-list">
+      <li><a href="#m1">Foundations of Lakebase</a><span class="pages">~30 min</span></li>
+      <li><a href="#m2">Architecture Deep Dive</a><span class="pages">~45 min</span></li>
+      <li><a href="#m3">Hands-On: First Database</a><span class="pages">~60 min</span></li>
+      <li><a href="#m4">Sync, Federation &amp; Unity Catalog</a><span class="pages">~50 min</span></li>
+      <li><a href="#m5">Lakebase as Vector Store</a><span class="pages">~75 min</span></li>
+      <li><a href="#m6">Lakebase for AI Agent Memory</a><span class="pages">~60 min</span></li>
+      <li><a href="#m7">Powering Databricks Apps</a><span class="pages">~75 min</span></li>
+      <li><a href="#m8">Capstone · The Full-Stack Build</a><span class="pages">◆ ~4 hrs</span></li>
+      <li><a href="#m9">RSA Toolkit · Comparison &amp; Best Practices</a><span class="pages">★ ~90 min</span></li>
+    </ol>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- MODULE 1                                               -->
+<!-- ====================================================== -->
+<section class="module" id="m1">
+  <div class="module-header">
+    <div class="module-num">01</div>
+    <div class="module-info">
+      <div class="module-eyebrow">▸ Module One · Foundations</div>
+      <h2>What <em>Lakebase</em> actually is</h2>
+      <p class="module-desc">A managed Postgres engine, fused into the Lakehouse. Why Databricks built it, what problem it kills, and how it differs from "yet another database."</p>
+    </div>
+  </div>
+
+  <div class="module-body">
+    <aside class="module-marginalia">
+      <strong>Time</strong>
+      ~30 minutes
+      <strong>Format</strong>
+      Theory primer
+      <strong>You will learn</strong>
+      • Why OLTP matters in the Lakehouse<br>
+      • Autoscaling vs Provisioned<br>
+      • Core terminology: project, branch, compute<br>
+      • The 5 use cases Databricks targets
+    </aside>
+
+    <div class="module-content">
+      <h3>The one-paragraph pitch</h3>
+      <p>Lakebase is a <strong>fully managed, cloud-native PostgreSQL database</strong> that lives natively inside the Databricks Data Intelligence Platform. It brings online transaction processing (OLTP) to the Lakehouse — meaning you can finally run the operational, low-latency, high-concurrency, row-level workloads (apps, agents, feature serving, user-facing dashboards) on the same governance plane as your analytical Delta tables, without standing up a separate RDS / Aurora / Cloud SQL stack and without writing reverse-ETL pipelines to bridge the two worlds.</p>
+
+      <h3>Why Databricks built this</h3>
+      <p>For a decade the Lakehouse has been brilliant at <em>analytical</em> workloads — Delta + Spark + photon. But every real product needs an operational layer too: the user clicks "buy", the agent writes a memory, the app reads the latest profile in 5 ms. Historically customers solved this with a sidecar Postgres, Aurora, or DynamoDB and then stitched the two halves with Fivetran, Debezium, or hand-written CDC. Lakebase removes the seam.</p>
+
+      <ul>
+        <li><strong>Same governance:</strong> Lakebase databases register in Unity Catalog as first-class catalogs.</li>
+        <li><strong>Same identity:</strong> Workspace users, SCIM groups, OAuth — all native.</li>
+        <li><strong>Same data plane:</strong> Synced tables push UC Delta data into Postgres in seconds; Lakehouse Sync (Beta) does the reverse.</li>
+        <li><strong>Same billing:</strong> Lakebase compute and storage are Databricks DBUs.</li>
+      </ul>
+
+      <h3>Two flavors: Autoscaling vs Provisioned</h3>
+      <p>As of <strong>March 12, 2026</strong>, all newly created Lakebase instances are provisioned as <strong>Lakebase Autoscaling</strong> projects. The older <strong>Lakebase Provisioned</strong> tier still exists for backward compatibility but is in maintenance mode — new feature work targets Autoscaling.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Capability</th><th>Autoscaling (Default)</th><th>Provisioned (Legacy)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Compute model</td><td>Auto, scale-to-zero</td><td>Fixed-size, manual</td></tr>
+            <tr><td>Branching (copy-on-write)</td><td class="yes">✓ Native</td><td class="no">—</td></tr>
+            <tr><td>Instant restore (any point in time)</td><td class="yes">✓ 0–30 days</td><td class="partial">PITR only</td></tr>
+            <tr><td>Read replicas</td><td class="yes">✓ Same storage</td><td class="partial">Readable secondaries</td></tr>
+            <tr><td>Data API (PostgREST)</td><td class="yes">✓ GA</td><td class="partial">Private Preview</td></tr>
+            <tr><td>HA across AZs</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Unity Catalog registration</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-label">RSA Note</span>
+        When a customer asks <em>"should I pick Provisioned for predictable cost?"</em> — the honest answer is no. Autoscaling now supports a fixed-size compute mode if you want predictability, and you get branching + instant restore for free. Provisioned exists only because some customers cannot migrate yet.
+      </div>
+
+      <h3>The five killer use cases</h3>
+      <ol>
+        <li><strong>Operational app backends</strong> — internal tools, CRUD apps, admin dashboards backed by Databricks Apps.</li>
+        <li><strong>Real-time feature serving</strong> — sub-10ms feature lookups for ML inference.</li>
+        <li><strong>AI agent state &amp; memory</strong> — durable conversation history, tool-call logs, vector-retrievable memories.</li>
+        <li><strong>Vector search at app latency</strong> — pgvector-backed RAG without a third-party vector DB.</li>
+        <li><strong>Reverse-ETL replacement</strong> — synced tables push UC data into Postgres for low-latency reads, eliminating Hightouch / Census pipelines.</li>
+      </ol>
+
+      <div class="handson">
+        <h4>Checkpoint</h4>
+        <p>Before moving on, you should be able to answer: "What does Lakebase replace in a typical customer's stack?" — Hint: a managed Postgres + a reverse-ETL tool + (often) a vector DB and an agent state store.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- MODULE 2                                               -->
+<!-- ====================================================== -->
+<section class="module" id="m2">
+  <div class="module-header">
+    <div class="module-num">02</div>
+    <div class="module-info">
+      <div class="module-eyebrow">▸ Module Two · Architecture</div>
+      <h2>How it <em>works</em> under the hood</h2>
+      <p class="module-desc">Separated compute and storage, copy-on-write branches, scale-to-zero suspension. The architectural choices that make Lakebase feel different from RDS.</p>
+    </div>
+  </div>
+
+  <div class="module-body">
+    <aside class="module-marginalia">
+      <strong>Time</strong>
+      ~45 minutes
+      <strong>Format</strong>
+      Theory + diagrams
+      <strong>Key concepts</strong>
+      • Compute / storage separation<br>
+      • Branches as Git for data<br>
+      • Cold-start mechanics<br>
+      • HA topology<br>
+      • Networking &amp; Private Link
+    </aside>
+
+    <div class="module-content">
+      <h3>The defining architectural move</h3>
+      <p>Lakebase Autoscaling separates <strong>compute</strong> from <strong>storage</strong>. Storage is a multi-tenant page server backed by object storage; compute is a Postgres instance that lazily fetches pages from the page server and caches them locally. This decoupling is what enables every magical capability:</p>
+
+      <ul>
+        <li><strong>Scale-to-zero</strong> — when no queries run for ~5 minutes, compute suspends. Storage stays. Cost drops to storage-only.</li>
+        <li><strong>Branching</strong> — a new branch is just a new compute pointing at a copy-on-write snapshot of storage. No data is copied. Ready in seconds.</li>
+        <li><strong>Instant restore</strong> — every page version is retained for the restore window (up to 30 days). Restoring is creating a branch at timestamp T.</li>
+        <li><strong>Read replicas</strong> — additional compute nodes share the same storage layer. Zero replication lag for committed pages.</li>
+      </ul>
+
+      <div class="arch-wrap">
+        <div class="arch-title">▸ Lakebase Autoscaling Topology</div>
+        <svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+          <defs>
+            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(13,15,18,0.05)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="720" height="380" fill="url(#grid)"/>
+
+          <!-- Project boundary -->
+          <rect x="20" y="20" width="680" height="340" fill="none" stroke="#0d0f12" stroke-width="1.5" stroke-dasharray="4,4"/>
+          <text x="35" y="40" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b6258" letter-spacing="2">PROJECT</text>
+
+          <!-- Storage layer -->
+          <rect x="60" y="280" width="600" height="60" fill="#1e3a5f" rx="2"/>
+          <text x="360" y="305" font-family="Fraunces, serif" font-size="14" fill="#f4efe6" text-anchor="middle" font-style="italic">Shared Page Server  ·  Object Storage</text>
+          <text x="360" y="325" font-family="JetBrains Mono, monospace" font-size="10" fill="#b8860b" text-anchor="middle" letter-spacing="2">COPY-ON-WRITE · MULTI-VERSION</text>
+
+          <!-- Branches -->
+          <g>
+            <rect x="60" y="80" width="160" height="120" fill="#c2410c" rx="2"/>
+            <text x="140" y="115" font-family="Fraunces, serif" font-size="16" fill="#f4efe6" text-anchor="middle" font-style="italic">main</text>
+            <text x="140" y="140" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">PRIMARY · HA AZ-A</text>
+            <text x="140" y="160" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">AUTOSCALE 1-8 CU</text>
+            <text x="140" y="180" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">READ/WRITE</text>
+          </g>
+
+          <g>
+            <rect x="240" y="80" width="140" height="120" fill="#2d4a1f" rx="2"/>
+            <text x="310" y="115" font-family="Fraunces, serif" font-size="14" fill="#f4efe6" text-anchor="middle" font-style="italic">dev/feature-x</text>
+            <text x="310" y="140" font-family="JetBrains Mono, monospace" font-size="9" fill="#dceacc" text-anchor="middle" letter-spacing="1">BRANCH</text>
+            <text x="310" y="160" font-family="JetBrains Mono, monospace" font-size="9" fill="#dceacc" text-anchor="middle" letter-spacing="1">COW SNAPSHOT</text>
+            <text x="310" y="180" font-family="JetBrains Mono, monospace" font-size="9" fill="#dceacc" text-anchor="middle" letter-spacing="1">SCALE-TO-ZERO</text>
+          </g>
+
+          <g>
+            <rect x="400" y="80" width="120" height="120" fill="#7c2d12" rx="2" opacity="0.85"/>
+            <text x="460" y="115" font-family="Fraunces, serif" font-size="13" fill="#f4efe6" text-anchor="middle" font-style="italic">read-replica</text>
+            <text x="460" y="140" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">READ ONLY</text>
+            <text x="460" y="160" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">SAME STORAGE</text>
+          </g>
+
+          <g>
+            <rect x="540" y="80" width="120" height="120" fill="#b8860b" rx="2" opacity="0.85"/>
+            <text x="600" y="115" font-family="Fraunces, serif" font-size="13" fill="#0d0f12" text-anchor="middle" font-style="italic">restore@T-3d</text>
+            <text x="600" y="140" font-family="JetBrains Mono, monospace" font-size="9" fill="#0d0f12" text-anchor="middle" letter-spacing="1">PIT BRANCH</text>
+            <text x="600" y="160" font-family="JetBrains Mono, monospace" font-size="9" fill="#0d0f12" text-anchor="middle" letter-spacing="1">INSTANT</text>
+          </g>
+
+          <!-- connectors -->
+          <line x1="140" y1="200" x2="140" y2="280" stroke="#0d0f12" stroke-width="1.5"/>
+          <line x1="310" y1="200" x2="310" y2="280" stroke="#0d0f12" stroke-width="1.5"/>
+          <line x1="460" y1="200" x2="460" y2="280" stroke="#0d0f12" stroke-width="1.5"/>
+          <line x1="600" y1="200" x2="600" y2="280" stroke="#0d0f12" stroke-width="1.5"/>
+
+          <text x="35" y="240" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6258" letter-spacing="1">Compute</text>
+          <text x="35" y="260" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6258" letter-spacing="1">↓ pages ↑ wal</text>
+          <text x="35" y="295" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6258" letter-spacing="1">Storage</text>
+        </svg>
+      </div>
+
+      <h3>Cold-start mechanics</h3>
+      <p>Scale-to-zero is real but not free. When a suspended branch receives its first connection, Postgres must boot, attach to storage, and warm essential pages. Typical cold-start: <strong>~3–8 seconds</strong> for a small DB. The pgbouncer pool keeps the user-facing connection waiting transparently. For latency-critical paths (a real-time recommendation API), <strong>disable scale-to-zero</strong> on the production branch and let dev/preview branches sleep.</p>
+
+      <h3>High availability</h3>
+      <p>HA pairs a primary compute in AZ-A with a synchronous standby in AZ-B. Storage is already replicated; HA only protects the compute layer. Failover is typically &lt;30 s and connection strings are stable through it. For RPO=0 critical workloads, enable HA on the primary branch only — branches inherit HA settings independently.</p>
+
+      <h3>Networking</h3>
+      <p>Three connection paths:</p>
+      <ul>
+        <li><strong>Public endpoint over TLS</strong> — default; OAuth tokens via Databricks SDK.</li>
+        <li><strong>Inbound Private Link</strong> — VPC interface endpoint for VPC-to-VPC traffic without leaving the AWS backbone.</li>
+        <li><strong>Performance-intensive Private Link</strong> — dedicated path for high-QPS workloads (Autoscaling only).</li>
+      </ul>
+
+      <div class="callout warn">
+        <span class="callout-label">Pitfall</span>
+        Lakebase uses short-lived OAuth tokens (typically 1 hour). Long-running app pools must refresh tokens transparently — the Databricks Python / JDBC drivers do this; raw <code>psycopg2</code> with a hardcoded password will silently fail after an hour. We'll handle this properly in Module 3.
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- MODULE 3                                               -->
+<!-- ====================================================== -->
+<section class="module" id="m3">
+  <div class="module-header">
+    <div class="module-num">03</div>
+    <div class="module-info">
+      <div class="module-eyebrow">▸ Module Three · Hands-On</div>
+      <h2>Your <em>first</em> Lakebase database</h2>
+      <p class="module-desc">Spin up a project, connect from a Databricks notebook, run real SQL, register in Unity Catalog. End-to-end in one notebook.</p>
+    </div>
+  </div>
+
+  <div class="module-body">
+    <aside class="module-marginalia">
+      <strong>Time</strong>
+      ~60 minutes
+      <strong>Format</strong>
+      100% hands-on
+      <strong>Prerequisites</strong>
+      • Databricks workspace<br>
+      • Workspace admin or<br>
+        DATABASE CREATE entitlement<br>
+      • Serverless or any cluster<br>
+      • SDK ≥ 0.30.0
+    </aside>
+
+    <div class="module-content">
+      <h3>Step 1 · Create the project (UI or SDK)</h3>
+      <p>The fastest path is the UI: <em>Compute → Lakebase → Create Project</em>. But for reproducibility, prefer the SDK. Run this in a Databricks notebook attached to a serverless cluster:</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>create_project.py</span><span class="code-lang">Python · Databricks Notebook</span></div>
+<pre><span class="com"># Cell 1 — Install / upgrade the SDK</span>
+%pip install <span class="str">"databricks-sdk&gt;=0.30.0"</span> psycopg[binary] sqlalchemy
+dbutils.library.restartPython()</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span>create_project.py (cont.)</span><span class="code-lang">Python</span></div>
+<pre><span class="com"># Cell 2 — Create the Lakebase Autoscaling project</span>
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+<span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> (
+    DatabaseProject, ProjectComputeConfig
+)
+
+w = WorkspaceClient()
+
+project = w.database.create_database_project(
+    project=DatabaseProject(
+        name=<span class="str">"rsa-demo-lakebase"</span>,
+        capacity=<span class="str">"CU_1"</span>,         <span class="com"># 1 compute unit baseline</span>
+        retention_window_in_days=<span class="num">7</span>,
+    )
+)
+<span class="fn">print</span>(<span class="str">"Project ID:"</span>, project.uid)
+<span class="fn">print</span>(<span class="str">"Endpoint:  "</span>, project.read_write_dns)</pre>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-label">What just happened</span>
+        Databricks provisioned the page server, the primary compute, and a default <code>main</code> branch. Total provisioning time: ~60–90 seconds.
+      </div>
+
+      <h3>Step 2 · Connect from the notebook</h3>
+      <p>Lakebase issues short-lived OAuth tokens. Always fetch a fresh credential right before opening a connection — never cache a connection string for hours.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>connect.py</span><span class="code-lang">Python</span></div>
+<pre><span class="com"># Cell 3 — Get a credential and open a SQLAlchemy engine</span>
+<span class="kw">import</span> uuid, psycopg
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+
+w   = WorkspaceClient()
+proj = w.database.get_database_project(<span class="str">"rsa-demo-lakebase"</span>)
+
+<span class="com"># Lakebase issues a short-lived password (PG_PASSWORD = OAuth token)</span>
+cred = w.database.generate_database_credential(
+    request_id=<span class="fn">str</span>(uuid.uuid4()),
+    instance_names=[proj.name],
+)
+
+user = w.current_user.me().user_name
+url  = (
+    <span class="str">f"postgresql+psycopg://{user}:{cred.token}"</span>
+    <span class="str">f"@{proj.read_write_dns}:5432/databricks_postgres?sslmode=require"</span>
+)
+
+engine = create_engine(url, pool_pre_ping=<span class="kw">True</span>)
+<span class="kw">with</span> engine.connect() <span class="kw">as</span> conn:
+    v = conn.execute(text(<span class="str">"SELECT version()"</span>)).scalar()
+    <span class="fn">print</span>(v)
+<span class="com"># PostgreSQL 17.x on aarch64-... compiled by ...</span></pre>
+      </div>
+
+      <h3>Step 3 · A real schema</h3>
+      <p>Let's build something resembling production: a tiny e-commerce schema with users, orders, and an audit log.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>schema.sql</span><span class="code-lang">SQL</span></div>
+<pre><span class="kw">CREATE TABLE</span> users (
+    id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+    email       TEXT <span class="kw">UNIQUE NOT NULL</span>,
+    full_name   TEXT,
+    created_at  TIMESTAMPTZ <span class="kw">DEFAULT</span> now()
+);
+
+<span class="kw">CREATE TABLE</span> orders (
+    id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+    user_id     BIGINT <span class="kw">REFERENCES</span> users(id),
+    sku         TEXT <span class="kw">NOT NULL</span>,
+    qty         INT  <span class="kw">CHECK</span> (qty &gt; <span class="num">0</span>),
+    total_cents BIGINT,
+    placed_at   TIMESTAMPTZ <span class="kw">DEFAULT</span> now()
+);
+
+<span class="kw">CREATE INDEX</span> idx_orders_user ON orders(user_id);
+<span class="kw">CREATE INDEX</span> idx_orders_placed_at ON orders <span class="kw">USING</span> BRIN(placed_at);</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span>load.py</span><span class="code-lang">Python</span></div>
+<pre><span class="com"># Cell 4 — Apply DDL and seed data</span>
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> text
+
+ddl = <span class="fn">open</span>(<span class="str">"/Workspace/.../schema.sql"</span>).read() <span class="com"># or paste inline</span>
+
+<span class="kw">with</span> engine.begin() <span class="kw">as</span> conn:
+    <span class="kw">for</span> stmt <span class="kw">in</span> ddl.split(<span class="str">";"</span>):
+        <span class="kw">if</span> stmt.strip():
+            conn.execute(text(stmt))
+
+    conn.execute(text(<span class="str">"""
+        INSERT INTO users (email, full_name) VALUES
+          ('a@x.io','Aria Patel'),
+          ('b@x.io','Ben Liu'),
+          ('c@x.io','Cleo Park')
+        ON CONFLICT (email) DO NOTHING
+    """</span>))</pre>
+      </div>
+
+      <h3>Step 4 · Register in Unity Catalog</h3>
+      <p>Registration makes Lakebase a first-class catalog: now your DBSQL warehouse, notebooks, AI/BI dashboards, and Genie spaces can query Postgres tables alongside Delta.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>register_uc.sql</span><span class="code-lang">SQL · DBSQL</span></div>
+<pre><span class="com">-- Run in a SQL editor or Databricks SQL warehouse</span>
+<span class="kw">CREATE CATALOG</span> rsa_lakebase
+<span class="kw">USING</span> DATABASE_INSTANCE <span class="str">'rsa-demo-lakebase'</span>;
+
+<span class="kw">SHOW SCHEMAS IN</span> rsa_lakebase;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> rsa_lakebase.public.users <span class="kw">LIMIT</span> <span class="num">10</span>;</pre>
+      </div>
+
+      <div class="handson">
+        <h4>Bonus exercise</h4>
+        <p>Create a branch from <code>main</code> called <code>dev</code>, run a destructive query against it (<code>TRUNCATE orders</code>), then drop the branch. Confirm <code>main</code> is untouched. This is the killer feature you'll demo to every customer.</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span>branch_demo.py</span><span class="code-lang">Python</span></div>
+<pre><span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> Branch
+
+dev = w.database.create_branch(
+    project_name=<span class="str">"rsa-demo-lakebase"</span>,
+    branch=Branch(name=<span class="str">"dev"</span>, parent_branch=<span class="str">"main"</span>),
+)
+<span class="fn">print</span>(<span class="str">"dev endpoint:"</span>, dev.read_write_dns)
+
+<span class="com"># ... run destructive SQL against dev ...</span>
+
+w.database.delete_branch(
+    project_name=<span class="str">"rsa-demo-lakebase"</span>, branch_name=<span class="str">"dev"</span>
+)</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- MODULE 4                                               -->
+<!-- ====================================================== -->
+<section class="module" id="m4">
+  <div class="module-header">
+    <div class="module-num">04</div>
+    <div class="module-info">
+      <div class="module-eyebrow">▸ Module Four · Integration</div>
+      <h2>Sync, federate, <em>unify</em></h2>
+      <p class="module-desc">The two flows every customer needs: serving lakehouse data from Lakebase (synced tables) and replicating Lakebase changes back to Delta (Lakehouse Sync).</p>
+    </div>
+  </div>
+
+  <div class="module-body">
+    <aside class="module-marginalia">
+      <strong>Time</strong>
+      ~50 minutes
+      <strong>Format</strong>
+      Theory + hands-on
+      <strong>You will build</strong>
+      • A synced UC → Postgres table<br>
+      • A federated UC catalog<br>
+      • A reverse Lakehouse Sync<br>
+        (Beta on AWS)
+    </aside>
+
+    <div class="module-content">
+      <h3>The three integration patterns</h3>
+      <p>Pick the one that matches the data direction you need:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Pattern</th><th>Direction</th><th>Latency</th><th>When to use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Synced tables</strong></td><td>UC Delta → Lakebase</td><td>Seconds–minutes</td><td>Serve features, profiles, catalog data to apps</td></tr>
+            <tr><td><strong>Lakehouse Sync</strong> (Beta)</td><td>Lakebase → UC Delta</td><td>Continuous CDC</td><td>Analytics on operational data, history, downstream pipelines</td></tr>
+            <tr><td><strong>Query federation</strong></td><td>Live read from DBSQL</td><td>Per-query</td><td>Ad-hoc joins, low-volume reads, exploration</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Hands-on · Synced table</h3>
+      <p>Suppose you have a <code>main.features.user_profile</code> Delta table updated every hour by a job, and your app needs to read the latest profile in &lt;10 ms. A synced table replicates Delta into Lakebase using the platform's managed CDC.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>synced_table.py</span><span class="code-lang">Python</span></div>
+<pre><span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> (
+    SyncedDatabaseTable, SyncedTableSpec, SyncedTableSchedulingPolicy
+)
+
+st = w.database.create_synced_database_table(
+    synced_table=SyncedDatabaseTable(
+        name=<span class="str">"rsa_lakebase.public.user_profile_synced"</span>,
+        spec=SyncedTableSpec(
+            source_table_full_name=<span class="str">"main.features.user_profile"</span>,
+            primary_key_columns=[<span class="str">"user_id"</span>],
+            scheduling_policy=SyncedTableSchedulingPolicy.CONTINUOUS,
+            timeseries_key=<span class="str">"updated_at"</span>,
+        ),
+        database_instance_name=<span class="str">"rsa-demo-lakebase"</span>,
+    )
+)</pre>
+      </div>
+
+      <p>Two scheduling policies are available: <strong>CONTINUOUS</strong> (streaming, ~seconds latency, higher cost) and <strong>SNAPSHOT</strong> (scheduled refresh, minutes latency, cheaper). Always start customers on SNAPSHOT and only upgrade to CONTINUOUS when they prove the latency need.</p>
+
+      <h3>Hands-on · Lakehouse Sync (reverse direction)</h3>
+      <p>For analytics on operational events — "show me the funnel of orders placed in the last hour" — you want Postgres rows in Delta, queryable by Spark. Lakehouse Sync streams logical-replication CDC into Delta tables.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>lakehouse_sync.sql</span><span class="code-lang">SQL · DBSQL</span></div>
+<pre><span class="com">-- Beta on AWS as of 2026.04 - check region availability</span>
+<span class="kw">CREATE</span> LAKEHOUSE_SYNC orders_to_delta
+<span class="kw">FROM</span> DATABASE_INSTANCE <span class="str">'rsa-demo-lakebase'</span>
+<span class="kw">SOURCE</span> public.orders
+<span class="kw">TARGET</span> main.bronze.orders_cdc;</pre>
+      </div>
+
+      <h3>Federation · the lazy option</h3>
+      <p>If volume is low and freshness is critical, just federate. DBSQL queries Lakebase live over the wire. Good for a quarterly auditor's report; bad for a 10M-row join.</p>
+
+      <div class="callout warn">
+        <span class="callout-label">RSA Heuristic</span>
+        Federation is "free" but pushes load onto the OLTP. If a customer asks for federation on a hot production DB, propose a synced table or Lakehouse Sync instead — they'll thank you when their app keeps responding under analyst load.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- MODULE 5                                               -->
+<!-- ====================================================== -->
+<section class="module" id="m5">
+  <div class="module-header">
+    <div class="module-num">05</div>
+    <div class="module-info">
+      <div class="module-eyebrow">▸ Module Five · AI Workloads</div>
+      <h2>Lakebase as a <em>vector store</em></h2>
+      <p class="module-desc">pgvector is built in. Production RAG without bolting on Pinecone, Weaviate, or Mosaic Vector Search. Theory, choices, and a complete RAG pipeline you can run today.</p>
+    </div>
+  </div>
+
+  <div class="module-body">
+    <aside class="module-marginalia">
+      <strong>Time</strong>
+      ~75 minutes
+      <strong>Format</strong>
+      Theory + full build
+      <strong>You will build</strong>
+      • A pgvector schema<br>
+      • Embeddings via Foundation Models<br>
+      • HNSW index<br>
+      • Hybrid search (BM25 + vector)<br>
+      • A RAG retrieval function
+    </aside>
+
+    <div class="module-content">
+      <h3>Why use Lakebase for vectors?</h3>
+      <p>Databricks already ships <strong>Mosaic AI Vector Search</strong> — a purpose-built, scaled vector index that indexes Delta tables. It is the right answer when you have millions to billions of vectors and need the highest recall at scale. So when does Lakebase + pgvector beat it?</p>
+
+      <ul>
+        <li><strong>Transactional consistency</strong> — embeddings live in the same Postgres row as the source document, with the same ACID guarantees. No "did the index catch up?"</li>
+        <li><strong>Hybrid SQL filters</strong> — combine vector similarity with arbitrary JOINs, ROW LEVEL SECURITY, and rich SQL predicates in a single query.</li>
+        <li><strong>Cost &amp; latency for small / medium corpora</strong> — under ~5M vectors, a properly-indexed Postgres usually beats a separate vector service on TCO and end-to-end latency for app queries.</li>
+        <li><strong>Single connection from a Databricks App</strong> — your app already needs Postgres for users/sessions; co-locate the embeddings.</li>
+      </ul>
+
+      <div class="callout note">
+        <span class="callout-label">Decision rule</span>
+        &lt;5M vectors, app-tier latency, hybrid SQL filters → Lakebase + pgvector.<br>
+        &gt;10M vectors, dedicated retrieval service, governance via UC → Mosaic AI Vector Search.<br>
+        Between 5–10M: benchmark both.
+      </div>
+
+      <h3>Schema design for embeddings</h3>
+
+      <div class="code-block">
+        <div class="code-header"><span>vector_schema.sql</span><span class="code-lang">SQL</span></div>
+<pre><span class="kw">CREATE EXTENSION IF NOT EXISTS</span> vector;
+
+<span class="kw">CREATE TABLE</span> documents (
+    id           BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+    source       TEXT,
+    title        TEXT,
+    content      TEXT,
+    metadata     JSONB,
+    embedding    vector(<span class="num">1024</span>),    <span class="com">-- bge-large-en-v1.5 dim</span>
+    tsv          tsvector <span class="kw">GENERATED ALWAYS AS</span>
+                 (to_tsvector(<span class="str">'english'</span>, coalesce(title,<span class="str">''</span>) || <span class="str">' '</span> || coalesce(content,<span class="str">''</span>))) <span class="kw">STORED</span>,
+    created_at   TIMESTAMPTZ <span class="kw">DEFAULT</span> now()
+);
+
+<span class="com">-- HNSW for ANN search; m=16, ef_construction=64 are sane defaults</span>
+<span class="kw">CREATE INDEX</span> idx_doc_embed_hnsw
+ON documents <span class="kw">USING</span> hnsw (embedding vector_cosine_ops)
+<span class="kw">WITH</span> (m = <span class="num">16</span>, ef_construction = <span class="num">64</span>);
+
+<span class="com">-- Inverted index for keyword search (hybrid retrieval)</span>
+<span class="kw">CREATE INDEX</span> idx_doc_tsv ON documents <span class="kw">USING</span> GIN (tsv);
+
+<span class="com">-- Filter pushdown index</span>
+<span class="kw">CREATE INDEX</span> idx_doc_meta ON documents <span class="kw">USING</span> GIN (metadata);</pre>
+      </div>
+
+      <h3>Generating embeddings with Foundation Models</h3>
+      <p>Use the Databricks Foundation Models API — no separate inference infra. The <code>databricks-bge-large-en</code> model returns 1024-dim vectors and is billed per token.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>embed_and_load.py</span><span class="code-lang">Python · Databricks Notebook</span></div>
+<pre><span class="kw">import</span> requests, json, os
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> text
+
+w = WorkspaceClient()
+
+<span class="kw">def</span> <span class="fn">embed</span>(texts: <span class="fn">list</span>[<span class="fn">str</span>]) -&gt; <span class="fn">list</span>[<span class="fn">list</span>[<span class="fn">float</span>]]:
+    client = w.serving_endpoints.get_open_ai_client()
+    resp = client.embeddings.create(
+        model=<span class="str">"databricks-bge-large-en"</span>,
+        input=texts,
+    )
+    <span class="kw">return</span> [d.embedding <span class="kw">for</span> d <span class="kw">in</span> resp.data]
+
+docs = [
+    (<span class="str">"docs/lakebase.md"</span>, <span class="str">"Lakebase Overview"</span>,
+     <span class="str">"Lakebase is a managed Postgres OLTP engine in Databricks."</span>),
+    (<span class="str">"docs/branches.md"</span>, <span class="str">"Branching"</span>,
+     <span class="str">"Branches are copy-on-write clones ready in seconds."</span>),
+    <span class="com"># ... thousands more ...</span>
+]
+
+vectors = embed([d[<span class="num">2</span>] <span class="kw">for</span> d <span class="kw">in</span> docs])
+
+<span class="kw">with</span> engine.begin() <span class="kw">as</span> conn:
+    <span class="kw">for</span> (src, title, content), v <span class="kw">in</span> <span class="fn">zip</span>(docs, vectors):
+        conn.execute(text(<span class="str">"""
+            INSERT INTO documents (source, title, content, embedding, metadata)
+            VALUES (:s, :t, :c, :e, :m)
+        """</span>), <span class="fn">dict</span>(s=src, t=title, c=content,
+                  e=<span class="fn">str</span>(v), m=json.dumps({<span class="str">"lang"</span>: <span class="str">"en"</span>})))</pre>
+      </div>
+
+      <h3>Querying · pure vector vs hybrid</h3>
+
+      <div class="code-block">
+        <div class="code-header"><span>retrieve.sql</span><span class="code-lang">SQL</span></div>
+<pre><span class="com">-- Pure vector top-k</span>
+<span class="kw">SELECT</span> id, title, content,
+       embedding &lt;=&gt; :query_vec <span class="kw">AS</span> distance
+<span class="kw">FROM</span> documents
+<span class="kw">WHERE</span> metadata-&gt;&gt;<span class="str">'lang'</span> = <span class="str">'en'</span>
+<span class="kw">ORDER BY</span> embedding &lt;=&gt; :query_vec
+<span class="kw">LIMIT</span> <span class="num">10</span>;
+
+<span class="com">-- Hybrid: 70% vector + 30% BM25 (Reciprocal Rank Fusion)</span>
+<span class="kw">WITH</span> v <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id, ROW_NUMBER() OVER (<span class="kw">ORDER BY</span> embedding &lt;=&gt; :qv) <span class="kw">AS</span> rk
+  <span class="kw">FROM</span> documents <span class="kw">ORDER BY</span> embedding &lt;=&gt; :qv <span class="kw">LIMIT</span> <span class="num">50</span>
+),
+k <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id, ROW_NUMBER() OVER (<span class="kw">ORDER BY</span> ts_rank(tsv, plainto_tsquery(:q)) <span class="kw">DESC</span>) <span class="kw">AS</span> rk
+  <span class="kw">FROM</span> documents <span class="kw">WHERE</span> tsv @@ plainto_tsquery(:q) <span class="kw">LIMIT</span> <span class="num">50</span>
+)
+<span class="kw">SELECT</span> d.id, d.title,
+       <span class="num">1.0</span>/(<span class="num">60</span>+v.rk) + <span class="num">1.0</span>/(<span class="num">60</span>+k.rk) <span class="kw">AS</span> rrf
+<span class="kw">FROM</span> documents d
+<span class="kw">LEFT JOIN</span> v <span class="kw">USING</span>(id) <span class="kw">LEFT JOIN</span> k <span class="kw">USING</span>(id)
+<span class="kw">WHERE</span> v.id <span class="kw">IS NOT NULL OR</span> k.id <span class="kw">IS NOT NULL</span>
+<span class="kw">ORDER BY</span> rrf <span class="kw">DESC LIMIT</span> <span class="num">10</span>;</pre>
+      </div>
+
+      <div class="handson">
+        <h4>End-to-end RAG function</h4>
+        <p>Wire it together: a single Python function that takes a question, embeds it, runs hybrid retrieval, and feeds the top-5 chunks into <code>databricks-meta-llama-3-3-70b-instruct</code>. Less than 40 lines.</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span>rag.py</span><span class="code-lang">Python</span></div>
+<pre><span class="kw">def</span> <span class="fn">rag</span>(question: <span class="fn">str</span>, k: <span class="fn">int</span> = <span class="num">5</span>) -&gt; <span class="fn">str</span>:
+    qv = embed([question])[<span class="num">0</span>]
+    <span class="kw">with</span> engine.connect() <span class="kw">as</span> conn:
+        rows = conn.execute(text(<span class="str">"""
+          SELECT title, content
+          FROM documents
+          ORDER BY embedding &lt;=&gt; :qv
+          LIMIT :k
+        """</span>), {<span class="str">"qv"</span>: <span class="fn">str</span>(qv), <span class="str">"k"</span>: k}).fetchall()
+
+    context = <span class="str">"\n\n"</span>.join(<span class="fn">f</span><span class="str">"# {r.title}\n{r.content}"</span> <span class="kw">for</span> r <span class="kw">in</span> rows)
+    client = w.serving_endpoints.get_open_ai_client()
+    out = client.chat.completions.create(
+        model=<span class="str">"databricks-meta-llama-3-3-70b-instruct"</span>,
+        messages=[
+          {<span class="str">"role"</span>:<span class="str">"system"</span>,<span class="str">"content"</span>:<span class="str">"Answer using ONLY the context."</span>},
+          {<span class="str">"role"</span>:<span class="str">"user"</span>,
+           <span class="str">"content"</span>:<span class="fn">f</span><span class="str">"Context:\n{context}\n\nQ: {question}"</span>}
+        ],
+        temperature=<span class="num">0.1</span>,
+    )
+    <span class="kw">return</span> out.choices[<span class="num">0</span>].message.content
+
+<span class="fn">print</span>(<span class="fn">rag</span>(<span class="str">"How does Lakebase branching work?"</span>))</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- MODULE 6                                               -->
+<!-- ====================================================== -->
+<section class="module" id="m6">
+  <div class="module-header">
+    <div class="module-num">06</div>
+    <div class="module-info">
+      <div class="module-eyebrow">▸ Module Six · AI Workloads</div>
+      <h2>Memory store for <em>AI agents</em></h2>
+      <p class="module-desc">An agent without memory is a chatbot with amnesia. Lakebase gives stateful agents short-term context, long-term episodic memory, and durable tool-call logs — all in one Postgres.</p>
+    </div>
+  </div>
+
+  <div class="module-body">
+    <aside class="module-marginalia">
+      <strong>Time</strong>
+      ~60 minutes
+      <strong>Format</strong>
+      Theory + agent build
+      <strong>Memory layers</strong>
+      • Short-term (session)<br>
+      • Long-term (episodic)<br>
+      • Semantic (vector)<br>
+      • Procedural (tool calls)
+    </aside>
+
+    <div class="module-content">
+      <h3>The four memory layers</h3>
+      <p>Modern agent frameworks (LangGraph, AutoGen, Mosaic AI Agent Framework) all converge on a similar memory model. Lakebase can store all four cleanly:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Layer</th><th>Lifetime</th><th>Postgres pattern</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Short-term</strong> (current turn)</td><td>Single conversation</td><td><code>messages</code> table keyed by <code>session_id</code></td></tr>
+            <tr><td><strong>Long-term episodic</strong></td><td>Across sessions for one user</td><td><code>episodes</code> table with vector embeddings for retrieval</td></tr>
+            <tr><td><strong>Semantic</strong></td><td>Cross-user knowledge</td><td>Shared <code>documents</code> table (Module 5)</td></tr>
+            <tr><td><strong>Procedural</strong></td><td>Audit trail</td><td><code>tool_calls</code> append-only log</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Schema</h3>
+
+      <div class="code-block">
+        <div class="code-header"><span>agent_memory.sql</span><span class="code-lang">SQL</span></div>
+<pre><span class="kw">CREATE TABLE</span> sessions (
+  id          UUID <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  user_id     TEXT <span class="kw">NOT NULL</span>,
+  agent_name  TEXT,
+  created_at  TIMESTAMPTZ <span class="kw">DEFAULT</span> now(),
+  ended_at    TIMESTAMPTZ
+);
+
+<span class="kw">CREATE TABLE</span> messages (
+  id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+  session_id  UUID <span class="kw">REFERENCES</span> sessions(id) <span class="kw">ON DELETE CASCADE</span>,
+  role        TEXT <span class="kw">CHECK</span> (role <span class="kw">IN</span> (<span class="str">'system'</span>,<span class="str">'user'</span>,<span class="str">'assistant'</span>,<span class="str">'tool'</span>)),
+  content     TEXT,
+  tool_call   JSONB,
+  created_at  TIMESTAMPTZ <span class="kw">DEFAULT</span> now()
+);
+<span class="kw">CREATE INDEX</span> ON messages(session_id, created_at);
+
+<span class="kw">CREATE TABLE</span> episodes (        <span class="com">-- long-term distilled memories</span>
+  id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+  user_id     TEXT <span class="kw">NOT NULL</span>,
+  summary     TEXT,
+  embedding   vector(<span class="num">1024</span>),
+  importance  REAL <span class="kw">DEFAULT</span> <span class="num">0.5</span>,
+  last_seen   TIMESTAMPTZ <span class="kw">DEFAULT</span> now()
+);
+<span class="kw">CREATE INDEX</span> ON episodes <span class="kw">USING</span> hnsw (embedding vector_cosine_ops);
+<span class="kw">CREATE INDEX</span> ON episodes(user_id);
+
+<span class="kw">CREATE TABLE</span> tool_calls (      <span class="com">-- procedural / audit</span>
+  id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+  session_id  UUID <span class="kw">REFERENCES</span> sessions(id),
+  tool_name   TEXT,
+  args        JSONB,
+  result      JSONB,
+  duration_ms INT,
+  ok          BOOL,
+  ts          TIMESTAMPTZ <span class="kw">DEFAULT</span> now()
+);
+<span class="kw">CREATE INDEX</span> ON tool_calls(session_id, ts);</pre>
+      </div>
+
+      <h3>The memory contract</h3>
+      <p>Wrap the schema in a clean Python interface so the agent never writes raw SQL:</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>memory.py</span><span class="code-lang">Python</span></div>
+<pre><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> text
+<span class="kw">import</span> uuid, json
+
+<span class="kw">class</span> AgentMemory:
+    <span class="kw">def</span> __init__(self, engine, embed_fn):
+        self.e, self.embed = engine, embed_fn
+
+    <span class="kw">def</span> <span class="fn">start_session</span>(self, user_id, agent=<span class="str">"assistant"</span>) -&gt; <span class="fn">str</span>:
+        <span class="kw">with</span> self.e.begin() <span class="kw">as</span> c:
+            sid = c.execute(text(<span class="str">"""
+              INSERT INTO sessions(user_id, agent_name)
+              VALUES (:u,:a) RETURNING id
+            """</span>), <span class="fn">dict</span>(u=user_id, a=agent)).scalar()
+        <span class="kw">return</span> <span class="fn">str</span>(sid)
+
+    <span class="kw">def</span> <span class="fn">add_message</span>(self, sid, role, content, tool_call=<span class="kw">None</span>):
+        <span class="kw">with</span> self.e.begin() <span class="kw">as</span> c:
+            c.execute(text(<span class="str">"""
+              INSERT INTO messages(session_id,role,content,tool_call)
+              VALUES (:s,:r,:c,:t)
+            """</span>), <span class="fn">dict</span>(s=sid, r=role, c=content,
+                      t=json.dumps(tool_call) <span class="kw">if</span> tool_call <span class="kw">else None</span>))
+
+    <span class="kw">def</span> <span class="fn">recent_messages</span>(self, sid, n=<span class="num">20</span>):
+        <span class="kw">with</span> self.e.connect() <span class="kw">as</span> c:
+            <span class="kw">return</span> c.execute(text(<span class="str">"""
+              SELECT role, content FROM messages
+              WHERE session_id = :s ORDER BY created_at DESC LIMIT :n
+            """</span>), <span class="fn">dict</span>(s=sid, n=n)).fetchall()[::-<span class="num">1</span>]
+
+    <span class="kw">def</span> <span class="fn">remember</span>(self, user_id, summary, importance=<span class="num">0.5</span>):
+        v = self.embed([summary])[<span class="num">0</span>]
+        <span class="kw">with</span> self.e.begin() <span class="kw">as</span> c:
+            c.execute(text(<span class="str">"""
+              INSERT INTO episodes(user_id, summary, embedding, importance)
+              VALUES (:u, :s, :e, :i)
+            """</span>), <span class="fn">dict</span>(u=user_id, s=summary, e=<span class="fn">str</span>(v), i=importance))
+
+    <span class="kw">def</span> <span class="fn">recall</span>(self, user_id, query, k=<span class="num">5</span>):
+        qv = self.embed([query])[<span class="num">0</span>]
+        <span class="kw">with</span> self.e.connect() <span class="kw">as</span> c:
+            <span class="kw">return</span> c.execute(text(<span class="str">"""
+              SELECT summary, importance,
+                     embedding &lt;=&gt; :q AS dist
+              FROM episodes
+              WHERE user_id = :u
+              ORDER BY (embedding &lt;=&gt; :q) - importance*0.1
+              LIMIT :k
+            """</span>), <span class="fn">dict</span>(u=user_id, q=<span class="fn">str</span>(qv), k=k)).fetchall()</pre>
+      </div>
+
+      <div class="callout success">
+        <span class="callout-label">Production tip</span>
+        Run a nightly job (Databricks Workflow) that distills long sessions into <code>episodes</code> rows: <em>"User A prefers concise answers, works on Snowflake migrations, runs Postgres 17."</em> The next session starts with high-signal context retrieved by <code>recall()</code>.
+      </div>
+
+      <h3>Wiring into Mosaic AI Agent Framework</h3>
+      <p>If the customer is using Mosaic AI Agent Framework with MLflow, the same Lakebase becomes the persistence layer for the framework's <code>checkpoint</code> store. The state of a multi-step agent (LangGraph nodes, tool plans) survives restarts, scales, and is auditable from any DBSQL editor.</p>
+
+      <div class="handson">
+        <h4>Hands-on challenge</h4>
+        <p>Build a 30-line agent loop that: (1) starts a session, (2) recalls top-3 episodes, (3) runs an LLM turn with that context, (4) writes the assistant's reply, (5) at session end, asks the LLM to summarize the conversation and writes a new episode. You now have a Lakebase-native memory layer.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- MODULE 7                                               -->
+<!-- ====================================================== -->
+<section class="module" id="m7">
+  <div class="module-header">
+    <div class="module-num">07</div>
+    <div class="module-info">
+      <div class="module-eyebrow">▸ Module Seven · Application Tier</div>
+      <h2>The brain of <em>Databricks Apps</em></h2>
+      <p class="module-desc">Databricks Apps + Lakebase = full-stack data products without leaving the platform. Auth, persistence, vectors, agents — one stack, one bill, one governance plane.</p>
+    </div>
+  </div>
+
+  <div class="module-body">
+    <aside class="module-marginalia">
+      <strong>Time</strong>
+      ~75 minutes
+      <strong>Format</strong>
+      Full app build
+      <strong>Stack</strong>
+      • Streamlit (or FastAPI / Dash)<br>
+      • Databricks Apps runtime<br>
+      • Lakebase (this DB!)<br>
+      • Foundation Models API<br>
+      • Workspace OAuth
+    </aside>
+
+    <div class="module-content">
+      <h3>Why this combination matters</h3>
+      <p>Before Apps + Lakebase, a "data app" on Databricks meant: deploy a container on EKS, point it at an external Postgres, configure SSO separately, manage secrets, and convince security review. Now: <code>databricks apps deploy</code>, the runtime injects Lakebase credentials at startup, identity is the workspace user, every interaction shows up in audit logs.</p>
+
+      <h3>The runtime contract</h3>
+      <p>When you bind a Lakebase project to an App, the runtime makes three environment variables available to your container:</p>
+      <ul>
+        <li><code>PGHOST</code> — the read-write DNS for the bound project</li>
+        <li><code>PGUSER</code> — the OAuth-on-behalf-of user (the end user, not a service account)</li>
+        <li><code>DATABRICKS_TOKEN</code> — short-lived OBO token used as <code>PGPASSWORD</code></li>
+      </ul>
+      <p>This is the killer detail: <strong>the database connection is opened as the end user, not as the app</strong>. Postgres GRANTs and RLS policies run against the actual workspace identity. Secure-by-default; no service account to leak.</p>
+
+      <h3>Hands-on · Streamlit + Lakebase app</h3>
+      <p>A complete two-file Databricks App that lists orders for the logged-in user:</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>app.yaml</span><span class="code-lang">YAML</span></div>
+<pre>command: [<span class="str">"streamlit"</span>, <span class="str">"run"</span>, <span class="str">"app.py"</span>]
+
+env:
+  - name: PGHOST
+    valueFrom: rsa-demo-lakebase   <span class="com"># Lakebase project binding</span>
+  - name: PGDATABASE
+    value: databricks_postgres
+
+resources:
+  - name: rsa-demo-lakebase
+    description: <span class="str">"Operational store"</span>
+    database:
+      instance_name: rsa-demo-lakebase
+      permission: CAN_USE</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span>app.py</span><span class="code-lang">Python · Streamlit</span></div>
+<pre><span class="kw">import</span> os, streamlit <span class="kw">as</span> st
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+
+<span class="com"># Databricks Apps inject these on every request, scoped to the end user</span>
+host  = os.environ[<span class="str">"PGHOST"</span>]
+user  = os.environ[<span class="str">"PGUSER"</span>]
+token = os.environ[<span class="str">"DATABRICKS_TOKEN"</span>]
+db    = os.environ[<span class="str">"PGDATABASE"</span>]
+
+@st.cache_resource(ttl=<span class="num">300</span>)
+<span class="kw">def</span> <span class="fn">get_engine</span>():
+    url = (<span class="fn">f</span><span class="str">"postgresql+psycopg://{user}:{token}@{host}"</span>
+           <span class="fn">f</span><span class="str">":5432/{db}?sslmode=require"</span>)
+    <span class="kw">return</span> create_engine(url, pool_pre_ping=<span class="kw">True</span>)
+
+st.title(<span class="str">"📦 My Orders"</span>)
+me = WorkspaceClient().current_user.me().user_name
+st.caption(<span class="fn">f</span><span class="str">"Signed in as {me}"</span>)
+
+<span class="kw">with</span> get_engine().connect() <span class="kw">as</span> conn:
+    rows = conn.execute(text(<span class="str">"""
+        SELECT o.id, o.sku, o.qty, o.total_cents, o.placed_at
+        FROM orders o
+        JOIN users u ON u.id = o.user_id
+        WHERE u.email = :me
+        ORDER BY o.placed_at DESC LIMIT 50
+    """</span>), {<span class="str">"me"</span>: me}).fetchall()
+
+st.dataframe(rows)</pre>
+      </div>
+
+      <div class="callout note">
+        <span class="callout-label">Deploy</span>
+        <code>databricks apps deploy --source-dir ./app rsa-orders</code> — visit the auto-generated URL, sign in with your workspace identity, and watch your data appear. The same RLS policy that's enforced for the BI analyst is enforced for the app user.
+      </div>
+
+      <h3>Patterns we see in the field</h3>
+      <ul>
+        <li><strong>Internal admin tools</strong> — replace Retool / Hightouch UI with Lakebase + Streamlit, governed by UC.</li>
+        <li><strong>AI-powered chat over data</strong> — Apps + Lakebase memory + Foundation Models = ChatGPT-for-your-data without third-party SaaS.</li>
+        <li><strong>Approval workflows</strong> — orders/expenses sit in Lakebase, an App provides the approval UI, a Job moves rows to <code>main.silver</code> on approval.</li>
+        <li><strong>Customer 360 lookups</strong> — synced tables feed Lakebase from UC; an App provides &lt;100ms search across millions of customers.</li>
+      </ul>
+
+      <h3>Connection pooling and the OBO gotcha</h3>
+      <p>Because credentials are scoped per request, the naive pattern (one global engine for the app) breaks: every user gets the first user's identity. Two correct patterns:</p>
+      <ol>
+        <li><strong>Per-request engine</strong> — recreate engine per request from the request-scoped token. Simple, slightly slower.</li>
+        <li><strong>Pool keyed by user</strong> — a small LRU of <code>(user, engine)</code> pairs with TTL = token lifetime. Best for high-QPS Apps.</li>
+      </ol>
+
+      <div class="callout warn">
+        <span class="callout-label">RSA Trap</span>
+        Customers will copy a "global engine" pattern from a tutorial and ship it. You'll find out when their security team finds rows of user A appearing for user B. Always review their connection management on the first PR.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- MODULE 8 — CAPSTONE PROJECT                            -->
+<!-- ====================================================== -->
+<section class="module capstone-module" id="m8">
+  <div class="module-header">
+    <div class="module-num">08</div>
+    <div class="module-info">
+      <div class="capstone-badge">◆ Capstone Project</div>
+      <div class="module-eyebrow">▸ Module Eight · The Full-Stack Build</div>
+      <h2>Build <em>"AskMyOrders"</em> end-to-end</h2>
+      <p class="module-desc">A single project that exercises every concept in this roadmap: an internal AI-powered customer support app where agents can chat with a Lakebase-backed memory, retrieve from a pgvector knowledge base, and trigger actions on synced operational data — all delivered as a Databricks App.</p>
+    </div>
+  </div>
+
+  <div class="module-body">
+    <aside class="module-marginalia">
+      <strong>Time</strong>
+      ~4 hours total<br>
+      (5 phases × ~45 min)
+      <strong>Format</strong>
+      End-to-end build
+      <strong>You will produce</strong>
+      • Working Databricks App<br>
+      • Lakebase project + branches<br>
+      • Synced UC tables<br>
+      • RAG knowledge base<br>
+      • Agent with memory<br>
+      • Lakehouse Sync (Beta)
+      <strong>Modules exercised</strong>
+      All of 1 → 7
+    </aside>
+
+    <div class="module-content">
+
+      <h3>The scenario</h3>
+      <p><strong>You are the lead engineer at "Northwind Goods,"</strong> a fictional retailer running on Databricks. Customer support agents currently jump between five tools: a ticketing system, a customer database, a returns portal, a knowledge wiki, and Slack. Leadership wants <em>one app</em>: an AI assistant that answers customer questions using internal docs, knows the customer's order history, remembers prior conversations, and lets the agent record resolutions back to the data platform.</p>
+
+      <p>You will build it as a Databricks App, with Lakebase as the entire operational and AI layer. By the end you will have personally exercised every concept from the previous seven modules.</p>
+
+      <div class="callout note">
+        <span class="callout-label">Why this scenario</span>
+        It's deliberately the scenario customers describe to you in real RSA conversations. Build it once for yourself; reuse the patterns forever.
+      </div>
+
+      <h3>The architecture</h3>
+
+      <div class="arch-wrap">
+        <div class="arch-title">▸ AskMyOrders · System Architecture</div>
+        <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+          <defs>
+            <pattern id="cgrid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(13,15,18,0.05)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="760" height="440" fill="url(#cgrid)"/>
+
+          <!-- Title bands -->
+          <text x="20" y="30" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6258" letter-spacing="2">USER LAYER</text>
+          <text x="20" y="155" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6258" letter-spacing="2">APP LAYER (DATABRICKS APPS)</text>
+          <text x="20" y="265" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6258" letter-spacing="2">DATA LAYER (LAKEBASE + UC)</text>
+          <text x="20" y="395" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6258" letter-spacing="2">LAKEHOUSE (DELTA / UC)</text>
+
+          <!-- User -->
+          <rect x="320" y="40" width="120" height="60" fill="#1e3a5f" rx="2"/>
+          <text x="380" y="65" font-family="Fraunces, serif" font-size="14" fill="#f4efe6" text-anchor="middle" font-style="italic">Support Agent</text>
+          <text x="380" y="85" font-family="JetBrains Mono, monospace" font-size="9" fill="#b8860b" text-anchor="middle" letter-spacing="1">WORKSPACE OAUTH</text>
+
+          <!-- Streamlit App -->
+          <rect x="80" y="170" width="600" height="80" fill="#0d0f12" rx="2"/>
+          <text x="380" y="195" font-family="Fraunces, serif" font-size="16" fill="#f4efe6" text-anchor="middle" font-style="italic">Streamlit App  ·  AskMyOrders</text>
+          <text x="180" y="220" font-family="JetBrains Mono, monospace" font-size="9" fill="#b8860b" text-anchor="middle" letter-spacing="1">CHAT UI</text>
+          <text x="380" y="220" font-family="JetBrains Mono, monospace" font-size="9" fill="#b8860b" text-anchor="middle" letter-spacing="1">AGENT LOOP (LLM + TOOLS)</text>
+          <text x="580" y="220" font-family="JetBrains Mono, monospace" font-size="9" fill="#b8860b" text-anchor="middle" letter-spacing="1">RESOLUTION FORM</text>
+          <text x="380" y="240" font-family="JetBrains Mono, monospace" font-size="9" fill="#a5d6a7" text-anchor="middle" letter-spacing="1">→ CONNECTS AS END USER (OBO)</text>
+
+          <!-- Lakebase blocks -->
+          <rect x="60" y="280" width="160" height="100" fill="#c2410c" rx="2"/>
+          <text x="140" y="305" font-family="Fraunces, serif" font-size="13" fill="#f4efe6" text-anchor="middle" font-style="italic">customers_synced</text>
+          <text x="140" y="325" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">SYNCED FROM UC</text>
+          <text x="140" y="343" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">orders_synced</text>
+          <text x="140" y="361" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">CONTINUOUS</text>
+
+          <rect x="240" y="280" width="160" height="100" fill="#2d4a1f" rx="2"/>
+          <text x="320" y="305" font-family="Fraunces, serif" font-size="13" fill="#f4efe6" text-anchor="middle" font-style="italic">kb_documents</text>
+          <text x="320" y="325" font-family="JetBrains Mono, monospace" font-size="9" fill="#dceacc" text-anchor="middle" letter-spacing="1">PGVECTOR · HNSW</text>
+          <text x="320" y="343" font-family="JetBrains Mono, monospace" font-size="9" fill="#dceacc" text-anchor="middle" letter-spacing="1">HYBRID SEARCH</text>
+          <text x="320" y="361" font-family="JetBrains Mono, monospace" font-size="9" fill="#dceacc" text-anchor="middle" letter-spacing="1">RAG SOURCE</text>
+
+          <rect x="420" y="280" width="160" height="100" fill="#7c2d12" rx="2"/>
+          <text x="500" y="305" font-family="Fraunces, serif" font-size="13" fill="#f4efe6" text-anchor="middle" font-style="italic">agent_memory</text>
+          <text x="500" y="325" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">SESSIONS · MESSAGES</text>
+          <text x="500" y="343" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">EPISODES (VECTOR)</text>
+          <text x="500" y="361" font-family="JetBrains Mono, monospace" font-size="9" fill="#fff5e6" text-anchor="middle" letter-spacing="1">TOOL CALLS</text>
+
+          <rect x="600" y="280" width="120" height="100" fill="#b8860b" rx="2"/>
+          <text x="660" y="305" font-family="Fraunces, serif" font-size="13" fill="#0d0f12" text-anchor="middle" font-style="italic">resolutions</text>
+          <text x="660" y="325" font-family="JetBrains Mono, monospace" font-size="9" fill="#0d0f12" text-anchor="middle" letter-spacing="1">WRITES</text>
+          <text x="660" y="343" font-family="JetBrains Mono, monospace" font-size="9" fill="#0d0f12" text-anchor="middle" letter-spacing="1">→ DELTA VIA</text>
+          <text x="660" y="361" font-family="JetBrains Mono, monospace" font-size="9" fill="#0d0f12" text-anchor="middle" letter-spacing="1">LAKEHOUSE SYNC</text>
+
+          <!-- Delta -->
+          <rect x="60" y="405" width="660" height="25" fill="#1e3a5f" rx="2"/>
+          <text x="390" y="423" font-family="JetBrains Mono, monospace" font-size="10" fill="#f4efe6" text-anchor="middle" letter-spacing="2">main.gold.customers · main.gold.orders · main.silver.support_resolutions</text>
+
+          <!-- Connectors -->
+          <line x1="380" y1="100" x2="380" y2="170" stroke="#0d0f12" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <line x1="180" y1="250" x2="140" y2="280" stroke="#0d0f12" stroke-width="1"/>
+          <line x1="320" y1="250" x2="320" y2="280" stroke="#0d0f12" stroke-width="1"/>
+          <line x1="500" y1="250" x2="500" y2="280" stroke="#0d0f12" stroke-width="1"/>
+          <line x1="600" y1="250" x2="660" y2="280" stroke="#0d0f12" stroke-width="1"/>
+          <line x1="140" y1="380" x2="140" y2="405" stroke="#0d0f12" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="660" y1="380" x2="660" y2="405" stroke="#0d0f12" stroke-width="1" stroke-dasharray="3,3"/>
+        </svg>
+      </div>
+
+      <h3>The stack</h3>
+      <div class="stack-grid">
+        <div class="stack-item">
+          <div class="stack-item-label">Frontend</div>
+          <div class="stack-item-name">Streamlit on Databricks Apps</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-label">Operational DB</div>
+          <div class="stack-item-name">Lakebase Autoscaling</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-label">Vector index</div>
+          <div class="stack-item-name">pgvector + HNSW</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-label">LLM</div>
+          <div class="stack-item-name">Llama 3.3 70B (FM API)</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-label">Embeddings</div>
+          <div class="stack-item-name">bge-large-en-v1.5</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-label">UC → Lakebase</div>
+          <div class="stack-item-name">Synced Tables</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-label">Lakebase → UC</div>
+          <div class="stack-item-name">Lakehouse Sync (Beta)</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-label">Identity</div>
+          <div class="stack-item-name">Workspace OAuth (OBO)</div>
+        </div>
+      </div>
+
+      <h3>Five phases · build it like a real project</h3>
+
+      <!-- ======== PHASE 1 ======== -->
+      <div class="phase-card">
+        <div class="phase-header">
+          <div class="phase-title"><span class="phase-num">PHASE 01</span>Foundation &amp; provisioning</div>
+          <div class="phase-meta">~30 min · Modules 1–3</div>
+        </div>
+        <div class="phase-body">
+          <p>Stand up the project, create a <code>main</code> branch and a <code>dev</code> branch, register in Unity Catalog, and seed the operational schema (customers, orders, returns, resolutions).</p>
+          <ul class="phase-tasks">
+            <li>Create Lakebase project <code>askmyorders</code> (CU_1, retention 7d, HA off for now)</li>
+            <li>Branch <code>dev</code> off <code>main</code> for schema iteration</li>
+            <li>Apply DDL: <code>customers</code>, <code>orders</code>, <code>returns</code>, <code>resolutions</code></li>
+            <li>Create the <code>vector</code> extension and the <code>kb_documents</code>, <code>sessions</code>, <code>messages</code>, <code>episodes</code>, <code>tool_calls</code> tables</li>
+            <li>Register Lakebase as catalog <code>askmyorders_db</code> in Unity Catalog</li>
+            <li>Verify connection from a notebook using OAuth credential generation</li>
+          </ul>
+          <div class="phase-modules">Exercises: <span>M1 Foundations</span><span>M2 Architecture</span><span>M3 First DB</span></div>
+        </div>
+      </div>
+
+      <!-- ======== PHASE 2 ======== -->
+      <div class="phase-card">
+        <div class="phase-header">
+          <div class="phase-title"><span class="phase-num">PHASE 02</span>Hydrate from the lakehouse</div>
+          <div class="phase-meta">~45 min · Module 4</div>
+        </div>
+        <div class="phase-body">
+          <p>Customers and orders already live in <code>main.gold.*</code> Delta tables. Don't duplicate the pipeline — sync them into Lakebase so the app reads at app latency without reverse-ETL.</p>
+          <ul class="phase-tasks">
+            <li>Create synced table <code>askmyorders_db.public.customers_synced</code> from <code>main.gold.customers</code> (CONTINUOUS, PK = <code>customer_id</code>)</li>
+            <li>Create synced table <code>askmyorders_db.public.orders_synced</code> from <code>main.gold.orders</code> (CONTINUOUS, PK = <code>order_id</code>, timeseries = <code>placed_at</code>)</li>
+            <li>Verify a write to the source Delta appears in Lakebase within seconds</li>
+            <li>Add B-tree index on <code>orders_synced(customer_id)</code> and BRIN on <code>placed_at</code></li>
+            <li>Test row-level latency: a SELECT for one customer's last 10 orders should return in &lt; 30 ms</li>
+          </ul>
+          <div class="phase-modules">Exercises: <span>M4 Sync &amp; Federation</span><span>M2 Architecture</span></div>
+        </div>
+      </div>
+
+      <!-- ======== PHASE 3 ======== -->
+      <div class="phase-card">
+        <div class="phase-header">
+          <div class="phase-title"><span class="phase-num">PHASE 03</span>Build the knowledge base (RAG)</div>
+          <div class="phase-meta">~60 min · Module 5</div>
+        </div>
+        <div class="phase-body">
+          <p>Load the company's support docs (returns policy, shipping FAQ, warranty terms) into <code>kb_documents</code> with embeddings. Build hybrid retrieval and a thin <code>retrieve()</code> tool function.</p>
+          <ul class="phase-tasks">
+            <li>Chunk source docs into ~500-token segments with 50-token overlap</li>
+            <li>Generate embeddings with <code>databricks-bge-large-en</code> via Foundation Models API</li>
+            <li>Bulk-load into <code>kb_documents</code> (one transaction per 1000 rows)</li>
+            <li>Create HNSW index <code>(m=16, ef_construction=64)</code> on the embedding column</li>
+            <li>Create GIN index on the generated <code>tsvector</code> for hybrid retrieval</li>
+            <li>Implement <code>retrieve(query, k=5)</code> using Reciprocal Rank Fusion (vector + BM25)</li>
+            <li>Smoke test: <em>"What's the return window for opened electronics?"</em> should retrieve the right policy chunk</li>
+          </ul>
+          <div class="phase-modules">Exercises: <span>M5 Vector Store</span><span>M3 First DB</span></div>
+        </div>
+      </div>
+
+      <!-- ======== PHASE 4 ======== -->
+      <div class="phase-card">
+        <div class="phase-header">
+          <div class="phase-title"><span class="phase-num">PHASE 04</span>The agent with memory</div>
+          <div class="phase-meta">~60 min · Module 6</div>
+        </div>
+        <div class="phase-body">
+          <p>Wire the four-layer memory model into a working agent loop. Each conversation is a session; each turn writes a message; at session end, an LLM distills an episode for future recall. The agent has three tools: <code>retrieve</code> (knowledge), <code>get_orders</code> (operational), and <code>recall</code> (memory).</p>
+          <ul class="phase-tasks">
+            <li>Implement the <code>AgentMemory</code> class from Module 6 against the project schema</li>
+            <li>Define the three tool functions with explicit JSON schemas</li>
+            <li>Build the agent loop: system prompt → recall episodes → retrieve docs → LLM → tool calls → response → log message → log tool calls</li>
+            <li>On <code>end_session</code>: ask the LLM for a 3-sentence summary, embed, write as an episode</li>
+            <li>Test cross-session memory: start a session as user X with "I prefer email replies", end it; start a new session — agent should recall the preference</li>
+          </ul>
+          <div class="phase-modules">Exercises: <span>M6 Agent Memory</span><span>M5 Vectors</span></div>
+        </div>
+      </div>
+
+      <!-- ======== PHASE 5 ======== -->
+      <div class="phase-card">
+        <div class="phase-header">
+          <div class="phase-title"><span class="phase-num">PHASE 05</span>Ship as a Databricks App + close the loop</div>
+          <div class="phase-meta">~45 min · Modules 7 + 4 (reverse)</div>
+        </div>
+        <div class="phase-body">
+          <p>Wrap the agent in a Streamlit UI, bind Lakebase, deploy as a Databricks App, and configure Lakehouse Sync to stream <code>resolutions</code> back into Delta for analytics on the support team's KPIs.</p>
+          <ul class="phase-tasks">
+            <li>Streamlit UI: chat panel (left), customer context panel (right, queried live from <code>customers_synced</code> + <code>orders_synced</code>)</li>
+            <li>Use the per-request OBO engine pattern — each user's queries run as their workspace identity</li>
+            <li>"Save resolution" form writes to the <code>resolutions</code> table</li>
+            <li><code>app.yaml</code> binds the <code>askmyorders</code> Lakebase project</li>
+            <li>Deploy: <code>databricks apps deploy</code> — verify identity flows correctly (try as two different users)</li>
+            <li>Configure Lakehouse Sync: <code>resolutions</code> → <code>main.silver.support_resolutions</code> (Beta)</li>
+            <li>Build a DBSQL dashboard on top of <code>main.silver.support_resolutions</code> for support team metrics</li>
+          </ul>
+          <div class="phase-modules">Exercises: <span>M7 Databricks Apps</span><span>M4 Lakehouse Sync</span><span>M2 OBO Pattern</span></div>
+        </div>
+      </div>
+
+      <h3>Reference: the directory layout</h3>
+      <div class="code-block">
+        <div class="code-header"><span>askmyorders/</span><span class="code-lang">Project Tree</span></div>
+<pre>askmyorders/
+├── notebooks/
+│   ├── 01_provision.py        <span class="com"># Phase 1: project + branches + DDL</span>
+│   ├── 02_sync_tables.py      <span class="com"># Phase 2: synced tables + indexes</span>
+│   ├── 03_build_kb.py         <span class="com"># Phase 3: chunk, embed, index</span>
+│   └── 04_agent_smoke_test.py <span class="com"># Phase 4: agent loop validation</span>
+├── app/
+│   ├── app.py                 <span class="com"># Phase 5: Streamlit entrypoint</span>
+│   ├── agent.py               <span class="com"># agent loop + tool definitions</span>
+│   ├── memory.py              <span class="com"># AgentMemory class</span>
+│   ├── retrieve.py            <span class="com"># hybrid RAG function</span>
+│   ├── db.py                  <span class="com"># per-request OBO engine factory</span>
+│   ├── requirements.txt
+│   └── app.yaml               <span class="com"># Databricks App manifest</span>
+├── sql/
+│   ├── schema.sql             <span class="com"># operational + memory + KB DDL</span>
+│   └── lakehouse_sync.sql     <span class="com"># resolutions → Delta</span>
+└── README.md</pre>
+      </div>
+
+      <h3>The agent loop · the one piece worth seeing in full</h3>
+      <p>The other phases reuse code patterns from earlier modules. The agent loop is where everything composes — read it carefully:</p>
+
+      <div class="code-block">
+        <div class="code-header"><span>app/agent.py</span><span class="code-lang">Python</span></div>
+<pre><span class="kw">import</span> json
+<span class="kw">from</span> .memory <span class="kw">import</span> AgentMemory
+<span class="kw">from</span> .retrieve <span class="kw">import</span> retrieve
+
+TOOLS = [
+  {<span class="str">"type"</span>:<span class="str">"function"</span>,<span class="str">"function"</span>:{
+    <span class="str">"name"</span>:<span class="str">"retrieve"</span>,
+    <span class="str">"description"</span>:<span class="str">"Search the support knowledge base."</span>,
+    <span class="str">"parameters"</span>:{<span class="str">"type"</span>:<span class="str">"object"</span>,
+      <span class="str">"properties"</span>:{<span class="str">"query"</span>:{<span class="str">"type"</span>:<span class="str">"string"</span>}},
+      <span class="str">"required"</span>:[<span class="str">"query"</span>]}}},
+  {<span class="str">"type"</span>:<span class="str">"function"</span>,<span class="str">"function"</span>:{
+    <span class="str">"name"</span>:<span class="str">"get_orders"</span>,
+    <span class="str">"description"</span>:<span class="str">"Fetch recent orders for a customer email."</span>,
+    <span class="str">"parameters"</span>:{<span class="str">"type"</span>:<span class="str">"object"</span>,
+      <span class="str">"properties"</span>:{<span class="str">"email"</span>:{<span class="str">"type"</span>:<span class="str">"string"</span>}},
+      <span class="str">"required"</span>:[<span class="str">"email"</span>]}}},
+]
+
+<span class="kw">def</span> <span class="fn">run_turn</span>(engine, embed_fn, llm, sid, user_id, user_msg):
+    mem = AgentMemory(engine, embed_fn)
+
+    <span class="com"># 1. Recall long-term episodes</span>
+    episodes = mem.recall(user_id, user_msg, k=<span class="num">3</span>)
+    epi_text = <span class="str">"\n"</span>.join(<span class="fn">f</span><span class="str">"- {e.summary}"</span> <span class="kw">for</span> e <span class="kw">in</span> episodes)
+
+    <span class="com"># 2. Build the message stack</span>
+    history = mem.recent_messages(sid, n=<span class="num">10</span>)
+    messages = [
+      {<span class="str">"role"</span>:<span class="str">"system"</span>,
+       <span class="str">"content"</span>: <span class="fn">f</span><span class="str">"You are a Northwind support agent assistant. "</span>
+                  <span class="fn">f</span><span class="str">"Known about the user:\n{epi_text}"</span>},
+      *[{<span class="str">"role"</span>:m.role,<span class="str">"content"</span>:m.content} <span class="kw">for</span> m <span class="kw">in</span> history],
+      {<span class="str">"role"</span>:<span class="str">"user"</span>,<span class="str">"content"</span>:user_msg},
+    ]
+    mem.add_message(sid, <span class="str">"user"</span>, user_msg)
+
+    <span class="com"># 3. Tool-using loop (max 4 iterations)</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="num">4</span>):
+        out = llm.chat.completions.create(
+            model=<span class="str">"databricks-meta-llama-3-3-70b-instruct"</span>,
+            messages=messages, tools=TOOLS, temperature=<span class="num">0.1</span>)
+        msg = out.choices[<span class="num">0</span>].message
+
+        <span class="kw">if not</span> msg.tool_calls:
+            mem.add_message(sid, <span class="str">"assistant"</span>, msg.content)
+            <span class="kw">return</span> msg.content
+
+        messages.append(msg)
+        <span class="kw">for</span> tc <span class="kw">in</span> msg.tool_calls:
+            args = json.loads(tc.function.arguments)
+            <span class="kw">if</span> tc.function.name == <span class="str">"retrieve"</span>:
+                result = retrieve(engine, embed_fn, args[<span class="str">"query"</span>])
+            <span class="kw">elif</span> tc.function.name == <span class="str">"get_orders"</span>:
+                result = _get_orders(engine, args[<span class="str">"email"</span>])
+            messages.append({<span class="str">"role"</span>:<span class="str">"tool"</span>,
+                             <span class="str">"tool_call_id"</span>:tc.id,
+                             <span class="str">"content"</span>:json.dumps(result)})
+            mem.log_tool_call(sid, tc.function.name, args, result)
+
+    <span class="kw">return</span> <span class="str">"(reached tool-call limit)"</span></pre>
+      </div>
+
+      <h3>Definition of done</h3>
+      <p>You have completed the capstone when all of these are true:</p>
+      <div style="margin: 24px 0;">
+        <div class="deliverable-row"><span class="check">✓</span><span><strong>Project provisioned</strong> with both <code>main</code> and at least one feature branch demonstrated</span></div>
+        <div class="deliverable-row"><span class="check">✓</span><span><strong>UC catalog registered</strong> — Lakebase tables visible from DBSQL and the Catalog Explorer</span></div>
+        <div class="deliverable-row"><span class="check">✓</span><span><strong>Two synced tables live</strong> — writing to the Delta source propagates within ~10s</span></div>
+        <div class="deliverable-row"><span class="check">✓</span><span><strong>Knowledge base loaded</strong> — at least 200 chunks indexed with HNSW; hybrid retrieval returns sane results on three test queries</span></div>
+        <div class="deliverable-row"><span class="check">✓</span><span><strong>Agent demonstrates cross-session memory</strong> — preference set in session 1 is remembered in session 2</span></div>
+        <div class="deliverable-row"><span class="check">✓</span><span><strong>Agent uses both tools</strong> — at least one conversation turn in your test invokes <code>retrieve</code> AND <code>get_orders</code></span></div>
+        <div class="deliverable-row"><span class="check">✓</span><span><strong>App deployed</strong> — accessible via the Databricks App URL, two different users see different data via OBO</span></div>
+        <div class="deliverable-row"><span class="check">✓</span><span><strong>Lakehouse Sync running</strong> — resolutions written in the app appear in <code>main.silver.support_resolutions</code> in Delta</span></div>
+        <div class="deliverable-row"><span class="check">✓</span><span><strong>DBSQL dashboard built</strong> on the Delta resolutions table — at least three tiles (count by day, top resolution categories, average resolution time)</span></div>
+      </div>
+
+      <h3>Stretch goals · for the truly committed</h3>
+      <ul>
+        <li><strong>Add HA</strong> on the production primary; simulate a failover and confirm the app reconnects transparently.</li>
+        <li><strong>Add a read replica</strong> and route the customer-context panel reads to it (write traffic stays on primary).</li>
+        <li><strong>Use point-in-time restore</strong>: corrupt a row deliberately, then create a branch from 5 minutes ago and verify recovery.</li>
+        <li><strong>Add Inbound Private Link</strong> if your workspace is in a VPC — measure latency vs public endpoint.</li>
+        <li><strong>Wire MLflow tracing</strong> around <code>run_turn</code> to capture every agent trajectory for offline evaluation.</li>
+        <li><strong>Add row-level security</strong> on <code>orders_synced</code> so support agents only see customers in their assigned region.</li>
+      </ul>
+
+      <div class="callout success">
+        <span class="callout-label">When you've finished</span>
+        Record a 5-minute walkthrough of the working app for yourself. Watch it. The mental model you'll have built is exactly what's needed to lead a customer through their own first Lakebase architecture in Module 9.
+      </div>
+
+      <div class="handson">
+        <h4>Final checkpoint</h4>
+        <p>Ship the capstone before moving to Module 9. The RSA Toolkit is dramatically more useful when you've actually built the thing you're about to recommend to others.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- MODULE 9 — RSA SPECIAL                                 -->
+<!-- ====================================================== -->
+<section class="module rsa-module" id="m9">
+  <div class="module-header">
+    <div class="module-num">09</div>
+    <div class="module-info">
+      <div class="rsa-badge">★ RSA Toolkit</div>
+      <div class="module-eyebrow">▸ Module Nine · Comparison &amp; Field Manual</div>
+      <h2>The conversations <em>customers actually have</em></h2>
+      <p class="module-desc">Lakebase vs RDS, Aurora, Cloud SQL, Neon, Supabase, Mosaic Vector Search. Best practices, hard limits, and the question every customer asks: "should I migrate?"</p>
+    </div>
+  </div>
+
+  <div class="module-body">
+    <aside class="module-marginalia">
+      <strong>Time</strong>
+      ~90 minutes
+      <strong>Audience</strong>
+      RSAs, SAs, FE
+      <strong>Outcomes</strong>
+      • Confident comparison talk track<br>
+      • Limit-aware design reviews<br>
+      • Migration heuristic<br>
+      • Anti-pattern catalog
+    </aside>
+
+    <div class="module-content">
+      <h3>Lakebase vs the PostgreSQL competitive set</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Lakebase Autoscaling</th>
+              <th>AWS Aurora PG</th>
+              <th>Neon</th>
+              <th>Supabase</th>
+              <th>RDS PG / Cloud SQL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Compute model</td>
+              <td>Autoscale + S2Z</td>
+              <td>Aurora Serverless v2</td>
+              <td>Autoscale + S2Z</td>
+              <td>Fixed</td>
+              <td>Fixed</td>
+            </tr>
+            <tr>
+              <td>Branching (CoW)</td>
+              <td class="yes">Native, instant</td>
+              <td>Aurora clones (slower)</td>
+              <td class="yes">Native</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Lakehouse integration</td>
+              <td class="yes">Synced + Federation + UC</td>
+              <td>Manual ETL</td>
+              <td>Manual ETL</td>
+              <td>Manual ETL</td>
+              <td>Manual ETL</td>
+            </tr>
+            <tr>
+              <td>Identity / Auth</td>
+              <td class="yes">Workspace OAuth, OBO</td>
+              <td>IAM auth (custom)</td>
+              <td>Postgres roles only</td>
+              <td>Supabase Auth</td>
+              <td>IAM / native</td>
+            </tr>
+            <tr>
+              <td>Vector search</td>
+              <td class="yes">pgvector + UC + Mosaic</td>
+              <td>pgvector</td>
+              <td>pgvector</td>
+              <td>pgvector</td>
+              <td>pgvector</td>
+            </tr>
+            <tr>
+              <td>App framework</td>
+              <td class="yes">Databricks Apps native</td>
+              <td>Bring your own</td>
+              <td>BYO</td>
+              <td>Edge Functions</td>
+              <td>BYO</td>
+            </tr>
+            <tr>
+              <td>Governance</td>
+              <td class="yes">Unity Catalog</td>
+              <td>IAM / tags</td>
+              <td>Project ACLs</td>
+              <td>RLS only</td>
+              <td>IAM / tags</td>
+            </tr>
+            <tr>
+              <td>Best when</td>
+              <td>You're on Databricks</td>
+              <td>AWS-native large OLTP</td>
+              <td>Pure dev workflow</td>
+              <td>Mobile/JAMstack apps</td>
+              <td>Legacy lift-and-shift</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <span class="callout-label">Honest take</span>
+        Lakebase is not a "better Postgres than Aurora at being Aurora." It is a <em>different product class</em>: a Postgres that is governed, branched, and synchronized as part of a lakehouse. If the customer's value driver is none of those three, recommend Aurora or RDS without hesitation. RSAs who push Lakebase into pure-Postgres workloads erode trust.
+      </div>
+
+      <h3>Best practices · the short list</h3>
+
+      <h4>Schema &amp; query</h4>
+      <ul>
+        <li><strong>Use BIGSERIAL / BIGINT</strong> primary keys, not UUIDs as PKs (UUIDs as secondary keys are fine). Index locality matters more on Lakebase than on a beefy single-node Postgres because pages are remote.</li>
+        <li><strong>Prefer BRIN over B-tree</strong> for monotonically-increasing columns (timestamps, sequences). 100x smaller, identical query plans for range scans.</li>
+        <li><strong>Avoid SELECT *</strong> from synced tables. The page server fetches whole rows; project the columns you need.</li>
+        <li><strong>Batch writes</strong> in transactions of 1k–10k rows. Many tiny commits inflate WAL.</li>
+      </ul>
+
+      <h4>Indexing</h4>
+      <ul>
+        <li><strong>HNSW for vectors</strong> over IVFFlat. Higher build cost, dramatically better recall/latency for app workloads.</li>
+        <li><strong>Partial indexes</strong> on hot predicates: <code>WHERE deleted_at IS NULL</code>.</li>
+        <li><strong>JSONB GIN indexes</strong> only on columns you query — they're expensive to maintain.</li>
+      </ul>
+
+      <h4>Connections</h4>
+      <ul>
+        <li><strong>Always use connection pooling</strong>. Lakebase's bundled pgbouncer caps at ~1k connections per branch. Naive frameworks (some Node ORMs) open a connection per request — they will exhaust the pool.</li>
+        <li><strong>Refresh OAuth tokens proactively</strong>. Tokens are ~1h; refresh at 50 min. The Databricks Python and JDBC drivers do this; raw clients do not.</li>
+        <li><strong>Disable scale-to-zero on prod primary</strong>. Cold starts ruin p99 SLAs.</li>
+      </ul>
+
+      <h4>Branching workflow</h4>
+      <ul>
+        <li><strong>One branch per PR</strong> for schema changes. Merge = run migration on main.</li>
+        <li><strong>Ephemeral branches in CI</strong> auto-deleted on PR close.</li>
+        <li><strong>Never run perf tests on main</strong>. Branch, test, drop.</li>
+      </ul>
+
+      <h4>Cost</h4>
+      <ul>
+        <li><strong>Tag everything</strong> with cost center, env, owner. Use UC tags + Lakebase tags for chargeback.</li>
+        <li><strong>Set retention to the minimum business-acceptable window</strong> (default 7d, max 30d). Storage cost is per page-version × time.</li>
+        <li><strong>Aggregate cold tables into Delta</strong> via Lakehouse Sync, then drop in Postgres.</li>
+      </ul>
+
+      <h3>Limitations · what to flag in design reviews</h3>
+      <p>This is the list customers will hit and blame you for not surfacing earlier:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Limit</th><th>Impact</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Postgres extensions are a curated allowlist</td>
+              <td>No <code>pg_cron</code>, no <code>pgaudit</code> custom builds</td>
+              <td>Use Databricks Workflows for scheduling; UC audit logs for compliance</td>
+            </tr>
+            <tr>
+              <td>No superuser</td>
+              <td>Some ORM tools fail (e.g., default Hibernate DDL)</td>
+              <td>Create roles with required GRANTs; run migrations as DDL-capable role</td>
+            </tr>
+            <tr>
+              <td>Logical replication slots: limited</td>
+              <td>Custom CDC tools (Debezium) need orchestration</td>
+              <td>Use Lakehouse Sync for CDC to UC; for external CDC plan slot count carefully</td>
+            </tr>
+            <tr>
+              <td>OAuth token TTL ≈ 1 hour</td>
+              <td>Long batch jobs / app pools fail mid-flight</td>
+              <td>Use Databricks driver token refresh; for batch, chunk &lt; 1h or refresh in loop</td>
+            </tr>
+            <tr>
+              <td>Region availability is not universal</td>
+              <td>Customer in unsupported region cannot use Autoscaling</td>
+              <td>Check region matrix in docs <em>before</em> the design call; offer Provisioned where available</td>
+            </tr>
+            <tr>
+              <td>Cold starts on scale-to-zero (~3–8s)</td>
+              <td>p99 spikes on first request after idle</td>
+              <td>Disable S2Z on prod primary; enable on dev/preview only</td>
+            </tr>
+            <tr>
+              <td>Synced table latency is seconds–minutes</td>
+              <td>Not suitable for "instant" UC → Lakebase consistency</td>
+              <td>Use direct writes for write-once-read-fast; reserve sync for read-only mirrors</td>
+            </tr>
+            <tr>
+              <td>Lakehouse Sync (reverse) is Beta on AWS</td>
+              <td>SLA / GA status varies by region</td>
+              <td>For mission-critical CDC to Delta, validate region GA status; have fallback plan</td>
+            </tr>
+            <tr>
+              <td>Not a billion-row vector store</td>
+              <td>HNSW index build &amp; memory grow with N</td>
+              <td>Switch to Mosaic AI Vector Search above ~10M vectors</td>
+            </tr>
+            <tr>
+              <td>No cross-region active-active</td>
+              <td>Global apps need additional architecture</td>
+              <td>Use HA across AZs; for multi-region, replicate via UC + Lakehouse Sync</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>When to use Lakebase · decision tree</h3>
+
+      <div class="callout success">
+        <span class="callout-label">Strong YES</span>
+        Customer is on Databricks, building an app or agent that needs operational state, vector retrieval, or low-latency feature serving. Wants single bill, single governance, single auth. Vector corpus &lt; 10M. Postgres is acceptable.
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-label">Mixed</span>
+        Customer has a 100M-row OLTP on Aurora today. Migration cost is real; Lakebase doesn't make their existing app faster. Recommend Lakebase for <em>new</em> apps in the same workspace — coexist, don't migrate-for-migration's-sake.
+      </div>
+
+      <div class="callout">
+        <span class="callout-label">Honest NO</span>
+        Customer needs MySQL, SQL Server, or Oracle compatibility. Workload exceeds the published limits (e.g., &gt; few TB hot working set, &gt; 50k QPS, billion-vector index, regions Lakebase doesn't yet support). Don't force-fit; recommend the right tool, retain the trust.
+      </div>
+
+      <h3>Why Lakebase · the one-sentence pitch you'll give 100 times</h3>
+      <p style="font-family:'Fraunces',serif; font-size: 22px; font-style: italic; color: var(--gold); border-left: 3px solid var(--gold); padding-left: 24px; margin: 32px 0;">
+        "Lakebase is the operational database that finally lives in the same governance plane as your analytical lakehouse — so your apps, agents, and features stop being second-class citizens of your data platform."
+      </p>
+
+      <h3>Anti-patterns to refuse politely</h3>
+      <ul>
+        <li><strong>"Use Lakebase as our primary 50TB Aurora replacement next quarter"</strong> — too aggressive. Pilot a single new app first.</li>
+        <li><strong>"Run our analytics dashboards directly off Lakebase to skip Delta"</strong> — Postgres is OLTP. Push aggregations to Delta + DBSQL; serve hot reads from Lakebase.</li>
+        <li><strong>"Store 1 billion document vectors here"</strong> — use Mosaic AI Vector Search. Lakebase + pgvector is for &lt;10M.</li>
+        <li><strong>"Avoid Unity Catalog registration to keep things simple"</strong> — without UC, you lose governance, federation, AI/BI access. Always register.</li>
+        <li><strong>"Hardcode the Postgres password in our app config"</strong> — tokens expire. Use the SDK's credential provider every time.</li>
+      </ul>
+
+      <h3>The 30-second customer answer</h3>
+      <p>When a customer asks: <em>"Why Lakebase instead of just running Postgres on Aurora?"</em></p>
+      <ol>
+        <li><strong>Governance.</strong> Lakebase tables register in Unity Catalog. Same RBAC, same tags, same audit.</li>
+        <li><strong>Zero ETL.</strong> Synced tables eliminate reverse-ETL pipelines from Delta to your app DB.</li>
+        <li><strong>Identity.</strong> Apps connect on behalf of the end user — RLS works against workspace identity for free.</li>
+        <li><strong>Branching.</strong> Schema changes get tested on copy-on-write branches in seconds, not on a staging RDS that was last refreshed 6 weeks ago.</li>
+        <li><strong>One bill, one platform.</strong> Compute, storage, vectors, models, apps — all on Databricks.</li>
+      </ol>
+
+      <p>If none of those five matter to the customer, Aurora is the right answer. Tell them so.</p>
+
+      <div class="handson">
+        <h4>Final exercise · the design review</h4>
+        <p>Write a 1-page design review template in your notes app: customer scenario → fit score (1–5) on each of {governance, zero-ETL, identity, branching, single-platform} → recommendation. Run every Lakebase customer conversation through it. You will close more deals and prevent more failures than any feature pitch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ====================================================== -->
+<!-- FOOTER                                                 -->
+<!-- ====================================================== -->
+<footer>
+  <h3>End of roadmap.</h3>
+  <p>Nine modules, one trajectory: from "what is Lakebase?" to "I can run a customer design review tomorrow." The hands-on labs and capstone are reproducible in any Databricks workspace with Lakebase enabled.</p>
+
+  <div style="margin: 40px auto; max-width: 540px; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--paper-2); line-height: 1.8;">
+    <strong style="color: var(--gold); letter-spacing:0.2em;">▸ NEXT STEPS</strong><br>
+    01 · Run Module 3 in your workspace, end-to-end.<br>
+    02 · Build the RAG pipeline from Module 5.<br>
+    03 · Ship one Databricks App from Module 7.<br>
+    04 · Complete the Module 8 capstone.<br>
+    05 · Use the Module 9 design review on your next call.
+  </div>
+
+  <div class="footer-meta">
+    Lakebase Roadmap · RSA Edition · Compiled April 2026 · Field Manual № 04
+  </div>
+</footer>
+
+<script>
+  // progress bar
+  const bar = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    bar.style.width = pct + '%';
+  });
+
+  // smooth nav highlights (could expand)
+  document.querySelectorAll('.index-list a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+
+</body>
+</html>

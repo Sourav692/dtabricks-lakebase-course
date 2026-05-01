@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 01 · Lab 1.4 — Workspace Prerequisites &amp; Sanity Check</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  --code-bg: #020509;
+  --code-text: #e8dcc4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 56px 48px 48px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 70% at 90% 30%, rgba(168,85,247,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 80%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.crumb .tag {
+  color: var(--accent-purple);
+  padding: 4px 12px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.06);
+  border-radius: 2px;
+}
+.crumb .tag.lab {
+  color: var(--accent-orange);
+  border-color: rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-purple); }
+
+.lede {
+  font-size: 16.5px; color: var(--text-dim);
+  max-width: 740px; line-height: 1.75;
+  margin-bottom: 28px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 17px; font-weight: 500;
+  color: var(--accent-purple);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── PROGRESS TRACKER (sticky) ─── */
+.tracker {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,8,15,0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 48px;
+}
+.tracker-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
+}
+.tracker-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.steps {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.step-pill::before {
+  content: '○';
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.step-pill:hover {
+  border-color: var(--accent-purple);
+  color: var(--text);
+}
+.step-pill.done {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.4);
+  color: var(--accent-green);
+}
+.step-pill.done::before {
+  content: '✓';
+  color: var(--accent-green);
+}
+.step-pill.active {
+  background: rgba(168,85,247,0.1);
+  border-color: var(--accent-purple);
+  color: var(--text);
+}
+.tracker-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-purple);
+  white-space: nowrap;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 48px 100px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 12px 0 18px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 5px 0 5px 22px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  color: var(--accent-purple);
+  font-size: 16px;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  margin: 0 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  margin: 28px 0 12px;
+  color: var(--text);
+}
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 22px 0 10px;
+}
+
+/* ─── INTRO BLOCK ─── */
+.intro-block {
+  margin-bottom: 56px;
+}
+
+/* ─── PREREQ BOX ─── */
+.prereq {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0 40px;
+}
+.prereq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 22px;
+}
+.prereq-card.need {
+  border-left: 3px solid var(--accent-green);
+}
+.prereq-card.skip {
+  border-left: 3px solid var(--text-muted);
+  opacity: 0.85;
+}
+.prereq-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.prereq-card.need .prereq-title { color: var(--accent-green); }
+.prereq-card.skip .prereq-title { color: var(--text-muted); }
+.prereq-card ul { margin: 0; }
+.prereq-card li { padding: 4px 0 4px 20px; font-size: 13.5px; }
+.prereq-card.need li::before { content: '✓'; color: var(--accent-green); }
+.prereq-card.skip li::before { content: '×'; color: var(--text-muted); }
+
+/* ─── STEP CARD ─── */
+.step {
+  margin: 0 0 56px;
+  scroll-margin-top: 90px;
+}
+.step-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.step-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-purple);
+  padding: 4px 10px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.06);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  letter-spacing: -0.005em;
+  flex: 1;
+}
+.step-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.step-mark:hover {
+  border-color: var(--accent-green);
+  color: var(--text);
+}
+.step-mark.done {
+  background: rgba(34,197,94,0.08);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+/* ─── CODE CELL ─── */
+.cell {
+  margin: 16px 0 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.cell-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.cell-label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.cell-label::before {
+  content: '▸';
+  color: var(--accent-orange);
+}
+.cell-lang {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  margin-left: 8px;
+}
+.cell-actions {
+  display: flex;
+  gap: 6px;
+}
+.copy-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 5px 11px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: var(--accent-orange);
+  color: #fff;
+  border-color: var(--accent-orange);
+}
+.copy-btn.copied {
+  background: var(--accent-green);
+  color: #fff;
+  border-color: var(--accent-green);
+}
+.cell pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--code-text);
+  white-space: pre;
+}
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.st { color: #c3e88d; }
+.cm { color: var(--text-muted); font-style: italic; }
+.nm { color: var(--accent-orange); }
+.nu { color: #f78c6c; }
+
+/* ─── EXPECTED OUTPUT BLOCK ─── */
+.expect {
+  margin: 0 0 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-teal);
+  background: var(--surface);
+}
+.expect-header {
+  padding: 8px 16px;
+  background: rgba(0,191,165,0.05);
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+}
+.expect pre {
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  overflow-x: auto;
+  white-space: pre;
+}
+.expect pre .ok-line { color: var(--accent-green); }
+
+/* ─── PROVE/IF-FAILS ─── */
+.proves {
+  margin: 12px 0 0;
+  padding: 12px 16px;
+  background: rgba(0,191,165,0.04);
+  border-left: 2px solid var(--accent-teal);
+  border-radius: 0 4px 4px 0;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.proves strong { color: var(--accent-teal); }
+
+/* ─── TROUBLESHOOTING TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 20px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 11px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.55;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+td code {
+  font-size: 11.5px;
+  padding: 0 5px;
+  background: var(--code-bg);
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.callout strong { color: var(--text); }
+.callout-note {
+  background: rgba(74,158,255,0.05);
+  border-left-color: var(--accent-blue);
+}
+.callout-warn {
+  background: rgba(251,191,36,0.05);
+  border-left-color: var(--accent-yellow);
+}
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+.callout-note .callout-label { color: var(--accent-blue); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+
+/* ─── INTERACTIVE CHECKLIST ─── */
+.checklist-section {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 30px;
+  margin: 40px 0;
+}
+.checklist-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.checklist-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--text);
+}
+.checklist-title em { color: var(--accent-purple); }
+.checklist-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+.checklist-status.complete {
+  background: rgba(34,197,94,0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 200px 28px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.check-row:last-child { border-bottom: none; }
+.check-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.check-name {
+  font-size: 14.5px;
+  color: var(--text);
+}
+.check-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.check-detail {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: right;
+  padding-right: 8px;
+}
+.check-toggle {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  padding: 0;
+}
+.check-toggle:hover {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+.check-toggle.checked {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #fff;
+}
+
+.checklist-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reset-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reset-btn:hover {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+/* ─── COMPLETION BANNER ─── */
+.done-banner {
+  margin-top: 56px;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(168,85,247,0.04) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.done-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.done-banner h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 24px;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+.done-banner h3 em { color: var(--accent-purple); }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main, .tracker { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 28px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+  .prereq { grid-template-columns: 1fr; }
+  .check-row {
+    grid-template-columns: 1fr 28px;
+    grid-template-rows: auto auto;
+  }
+  .check-num { grid-column: 1; grid-row: 1; }
+  .check-detail { grid-column: 1; grid-row: 2; text-align: left; padding: 0; }
+  .check-toggle { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+  .step-banner { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 01</span>
+      <span>/</span>
+      <span class="tag lab">Lab 1.4</span>
+      <span>/</span>
+      <span>Hands-on · Workspace Setup</span>
+    </div>
+    <h1>Workspace Prerequisites<br>&amp; <em>Sanity Check</em></h1>
+    <p class="lede">Verify your workspace is ready to run every other lab in this roadmap. If this lab passes end-to-end, every Module 2–9 lab will work. If it fails, the diagnostic table at the end tells you exactly which lever to pull. Run this <strong>before</strong> Module 2.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">7</span><span class="meta-lbl">Steps</span></div>
+      <div class="meta-item"><span class="meta-val">~30 min</span><span class="meta-lbl">Duration</span></div>
+      <div class="meta-item"><span class="meta-val">9</span><span class="meta-lbl">Checks</span></div>
+      <div class="meta-item"><span class="meta-val">100%</span><span class="meta-lbl">Hands-On</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── STICKY PROGRESS TRACKER ── -->
+<div class="tracker" id="tracker">
+  <div class="tracker-inner">
+    <span class="tracker-label">Progress →</span>
+    <div class="steps">
+      <a href="#step1" class="step-pill" data-step="1">Step 1 · Install</a>
+      <a href="#step2" class="step-pill" data-step="2">Step 2 · Identity</a>
+      <a href="#step3" class="step-pill" data-step="3">Step 3 · Entitlement</a>
+      <a href="#step4" class="step-pill" data-step="4">Step 4 · FM API</a>
+      <a href="#step5" class="step-pill" data-step="5">Step 5 · UC Schema</a>
+      <a href="#step6" class="step-pill" data-step="6">Step 6 · Config</a>
+      <a href="#step7" class="step-pill" data-step="7">Step 7 · Final Check</a>
+    </div>
+    <span class="tracker-count" id="trackerCount">0 / 7</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- ─── INTRO ─── -->
+  <section class="intro-block">
+    <h2>Why this lab exists</h2>
+    <p>Every later lab in this roadmap assumes five things are true about your environment:</p>
+    <ul>
+      <li>The <strong>Databricks SDK</strong> is installed at a recent enough version to expose the <code>database</code> namespace</li>
+      <li>Your user has the <strong>DATABASE_CREATE</strong> entitlement (or you're a workspace admin)</li>
+      <li>Your workspace is in a <strong>region where Lakebase Autoscaling is generally available</strong></li>
+      <li>The <strong>Foundation Models API</strong> is reachable (Modules 5 and 6 require embeddings + chat)</li>
+      <li>You have a <strong>Unity Catalog schema</strong> to use as a sandbox for the rest of the tutorial</li>
+    </ul>
+    <p>If any of those is wrong, the natural first place you'd discover it is halfway through Module 3 when <code>create_database_project()</code> returns a confusing error. We'd rather you discover it now, in 30 quiet minutes, than there.</p>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Run mode</span>
+      <p>Do this lab in a <strong>Databricks notebook</strong> attached to a serverless cluster. All cells run in Python except where SQL is explicitly called out. Copy each cell into your own notebook as you go — every code block on this page has a Copy button.</p>
+    </div>
+
+    <h3>Prerequisites</h3>
+    <div class="prereq">
+      <div class="prereq-card need">
+        <div class="prereq-title">▸ You need</div>
+        <ul>
+          <li>Access to a Databricks workspace where you can create resources</li>
+          <li>An attached compute cluster (serverless is recommended)</li>
+          <li>Permission to create a UC schema, OR an existing schema you own</li>
+        </ul>
+      </div>
+      <div class="prereq-card skip">
+        <div class="prereq-title">▸ You do NOT need</div>
+        <ul>
+          <li>An existing Lakebase project (you'll create one in Module 3)</li>
+          <li>Any data loaded anywhere</li>
+          <li>Foundation Models endpoints to be explicitly configured</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 1 -->
+  <section class="step" id="step1">
+    <div class="step-banner">
+      <span class="step-num">STEP 01</span>
+      <h2 class="step-title">Install the SDK and dependencies</h2>
+      <button class="step-mark" data-step="1" onclick="markStep(1)">Mark done</button>
+    </div>
+    <p>Lakebase requires <code>databricks-sdk &gt;= 0.30.0</code> for the <code>database</code> namespace, plus a few common Postgres clients you'll use in later modules.</p>
+
+    <div class="cell" id="cell-1">
+      <div class="cell-header">
+        <span class="cell-label">Cell 1 · install dependencies<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-1')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 1 — install dependencies</span>
+%pip install --quiet <span class="st">"databricks-sdk&gt;=0.30.0"</span> <span class="st">"psycopg[binary]"</span> sqlalchemy pgvector
+dbutils.library.<span class="fn">restartPython</span>()</pre>
+    </div>
+
+    <p><strong>Expected behavior:</strong> the cell completes in 30–90 seconds. The Python kernel restarts automatically (that's the <code>restartPython()</code> line).</p>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>Could not find a version that satisfies the requirement databricks-sdk&gt;=0.30.0</code></td>
+            <td>Cluster is air-gapped from PyPI</td>
+            <td>Install from a workspace artifact repo, or talk to your platform team about PyPI proxy access</td>
+          </tr>
+          <tr>
+            <td><code>Failed to install psycopg</code></td>
+            <td>Older runtime missing system libs</td>
+            <td>Use a newer Databricks Runtime (DBR 14+) or serverless</td>
+          </tr>
+          <tr>
+            <td>Cell hangs forever</td>
+            <td>Cluster still spinning up</td>
+            <td>Wait for the cluster status to go green, then re-run</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 2 -->
+  <section class="step" id="step2">
+    <div class="step-banner">
+      <span class="step-num">STEP 02</span>
+      <h2 class="step-title">Confirm your identity and workspace</h2>
+      <button class="step-mark" data-step="2" onclick="markStep(2)">Mark done</button>
+    </div>
+    <p>Now we verify the SDK is wired up correctly and you can see your own workspace context.</p>
+
+    <div class="cell" id="cell-2">
+      <div class="cell-header">
+        <span class="cell-label">Cell 2 · identity check<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-2')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 2 — identity check</span>
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+
+w = <span class="fn">WorkspaceClient</span>()
+
+<span class="fn">print</span>(<span class="st">"User:      "</span>, w.current_user.<span class="fn">me</span>().user_name)
+<span class="fn">print</span>(<span class="st">"Workspace: "</span>, w.config.host)
+<span class="fn">print</span>(<span class="st">"Auth type: "</span>, w.config.auth_type)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (yours will differ in the obvious way)</div>
+<pre>User:       you@example.com
+Workspace:  https://your-workspace.cloud.databricks.com
+Auth type:  oauth</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the SDK can authenticate, find your workspace, and identify you. If this works, every later Lakebase API call will too.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Meaning</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>default auth: cannot configure default credentials</code></td>
+            <td>SDK can't find auth context</td>
+            <td>Re-attach to the cluster; ensure you're logged in to Databricks</td>
+          </tr>
+          <tr>
+            <td><code>403 Forbidden</code> on <code>current_user.me()</code></td>
+            <td>Workspace identity is misconfigured</td>
+            <td>Talk to a workspace admin</td>
+          </tr>
+          <tr>
+            <td>Empty <code>user_name</code></td>
+            <td>Authenticated as a service principal</td>
+            <td>Acceptable, but note this for Module 7 (OBO patterns assume user identity)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 3 -->
+  <section class="step" id="step3">
+    <div class="step-banner">
+      <span class="step-num">STEP 03</span>
+      <h2 class="step-title">Verify the DATABASE_CREATE entitlement</h2>
+      <button class="step-mark" data-step="3" onclick="markStep(3)">Mark done</button>
+    </div>
+    <p>The ability to create Lakebase projects is gated by the <code>DATABASE_CREATE</code> entitlement. The cleanest way to check is to <em>try</em> listing projects — if that call doesn't error, you're authorized to operate on the database namespace.</p>
+
+    <div class="cell" id="cell-3">
+      <div class="cell-header">
+        <span class="cell-label">Cell 3 · entitlement &amp; region check<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-3')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 3 — entitlement &amp; region check</span>
+projects = <span class="fn">list</span>(w.database.<span class="fn">list_database_projects</span>())
+<span class="fn">print</span>(<span class="st">f"Found </span><span class="nm">{len(projects)}</span><span class="st"> existing project(s):"</span>)
+<span class="kw">for</span> p <span class="kw">in</span> projects:
+    <span class="fn">print</span>(<span class="st">f"  · </span><span class="nm">{p.name}</span><span class="st"> (</span><span class="nm">{p.uid}</span><span class="st">)"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (empty list is fine)</div>
+<pre>Found 0 existing project(s):</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> you have permission to query the database namespace, and Lakebase is enabled in your workspace's region.
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">⚠ Region check is the #1 thing RSAs forget</span>
+      <p>If this cell errors with a region-related message, <strong>every other lab in the roadmap will fail in the same way</strong>. Resolve this now, not in Module 3. Module 9 includes a region availability matrix you can reference for customer conversations.</p>
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>PermissionDenied: Missing entitlement DATABASE_CREATE</code></td>
+            <td>User lacks the entitlement</td>
+            <td>Admin → Identity &amp; Access → Entitlements; grant DATABASE_CREATE to your user or a group</td>
+          </tr>
+          <tr>
+            <td><code>NotFound</code> or "Lakebase is not available in this region"</td>
+            <td>Region doesn't have Lakebase Autoscaling yet</td>
+            <td>Use a workspace in a supported region (US regions widely available)</td>
+          </tr>
+          <tr>
+            <td><code>ConnectionError</code></td>
+            <td>Network issue</td>
+            <td>Reconnect to the cluster; check VPN/proxy if applicable</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 4 -->
+  <section class="step" id="step4">
+    <div class="step-banner">
+      <span class="step-num">STEP 04</span>
+      <h2 class="step-title">Verify Foundation Models API access</h2>
+      <button class="step-mark" data-step="4" onclick="markStep(4)">Mark done</button>
+    </div>
+    <p>Modules 5 (vector search) and 6 (agent memory) both call the Foundation Models API for embeddings and chat. Let's make sure both endpoints are reachable.</p>
+
+    <h3>Step 4a — Embeddings</h3>
+    <div class="cell" id="cell-4a">
+      <div class="cell-header">
+        <span class="cell-label">Cell 4a · embeddings sanity check<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-4a')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 4a — embeddings sanity check</span>
+client = w.serving_endpoints.<span class="fn">get_open_ai_client</span>()
+
+resp = client.embeddings.<span class="fn">create</span>(
+    model=<span class="st">"databricks-bge-large-en"</span>,
+    input=[<span class="st">"Lakebase brings OLTP into the lakehouse."</span>],
+)
+
+vec = resp.data[<span class="nu">0</span>].embedding
+<span class="fn">print</span>(<span class="st">f"Model:           databricks-bge-large-en"</span>)
+<span class="fn">print</span>(<span class="st">f"Vector dim:      </span><span class="nm">{len(vec)}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"First 3 values:  </span><span class="nm">{vec[:3]}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>Model:           databricks-bge-large-en
+Vector dim:      1024
+First 3 values:  [0.0123, -0.0456, 0.0789]   <span class="cm"># your numbers will differ</span></pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> Foundation Models embeddings are reachable, returning the expected 1024-dim BGE vectors. Module 5's RAG pipeline will work.
+    </div>
+
+    <h3>Step 4b — Chat completion</h3>
+    <div class="cell" id="cell-4b">
+      <div class="cell-header">
+        <span class="cell-label">Cell 4b · chat sanity check<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-4b')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 4b — chat sanity check</span>
+out = client.chat.completions.<span class="fn">create</span>(
+    model=<span class="st">"databricks-meta-llama-3-3-70b-instruct"</span>,
+    messages=[
+        {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"Reply in exactly one sentence."</span>},
+        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"What is OLTP, in one sentence?"</span>},
+    ],
+    temperature=<span class="nu">0.0</span>,
+    max_tokens=<span class="nu">80</span>,
+)
+<span class="fn">print</span>(out.choices[<span class="nu">0</span>].message.content)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (a single sentence; exact wording will differ)</div>
+<pre>OLTP (Online Transaction Processing) is a class of database
+workload focused on many small, low-latency reads and writes
+that power user-facing applications.</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> Foundation Models chat is reachable. Module 6's agent loop will work.
+    </div>
+
+    <h4>If either 4a or 4b fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>404 model not found</code></td>
+            <td>Foundation Models not enabled, or different model names in your region</td>
+            <td>Talk to admin; check <code>w.serving_endpoints.list()</code> for available models</td>
+          </tr>
+          <tr>
+            <td><code>429 Too many requests</code></td>
+            <td>Rate-limited at the workspace level</td>
+            <td>Wait 30s and retry; for tutorial-scale work this should not persist</td>
+          </tr>
+          <tr>
+            <td><code>403 Forbidden</code></td>
+            <td>User lacks <code>Can Query</code> on the serving endpoints</td>
+            <td>Admin → Serving → endpoint → grant Can Query</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 5 -->
+  <section class="step" id="step5">
+    <div class="step-banner">
+      <span class="step-num">STEP 05</span>
+      <h2 class="step-title">Reserve a Unity Catalog schema for tutorial assets</h2>
+      <button class="step-mark" data-step="5" onclick="markStep(5)">Mark done</button>
+    </div>
+    <p>Every later lab will write something to UC: synced table targets, Lakehouse Sync targets, registered Lakebase catalogs. You want a single, clearly-labeled schema to keep all that tutorial work together.</p>
+
+    <div class="cell" id="cell-5">
+      <div class="cell-header">
+        <span class="cell-label">Cell 5 · create or confirm tutorial schema<span class="cell-lang">SQL · via spark.sql</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-5')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 5 — create or confirm a tutorial schema</span>
+spark.<span class="fn">sql</span>(<span class="st">"CREATE SCHEMA IF NOT EXISTS main.lakebase_tutorial"</span>)
+spark.<span class="fn">sql</span>(<span class="st">"SHOW SCHEMAS IN main"</span>).<span class="fn">show</span>(truncate=<span class="kw">False</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (your schemas will vary; lakebase_tutorial should be in there)</div>
+<pre>+-------------------+
+|namespace          |
++-------------------+
+|default            |
+|gold               |
+|<span class="ok-line">lakebase_tutorial</span>  |
+|silver             |
++-------------------+</pre>
+    </div>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Customize as needed</span>
+      <p>If you don't have permissions on <code>main</code>, substitute a catalog you do own (for example <code>users.${your_user}.lakebase_tutorial</code>). The labs only require <em>some</em> schema you can write to — the exact path is yours. Just remember to update <code>TUTORIAL["catalog"]</code> in Step 6 accordingly.</p>
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>CREATE SCHEMA permission denied</code></td>
+            <td>You don't own the catalog</td>
+            <td>Use a catalog you do own, or ask an admin to grant USE CATALOG + CREATE SCHEMA</td>
+          </tr>
+          <tr>
+            <td><code>Catalog 'main' not found</code></td>
+            <td>Workspace uses a non-default catalog name</td>
+            <td>Run <code>SHOW CATALOGS</code> and pick one</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 6 -->
+  <section class="step" id="step6">
+    <div class="step-banner">
+      <span class="step-num">STEP 06</span>
+      <h2 class="step-title">Save your tutorial config (optional but recommended)</h2>
+      <button class="step-mark" data-step="6" onclick="markStep(6)">Mark done</button>
+    </div>
+    <p>So you don't have to re-type the same constants in every Module 2–9 lab, save them as workspace-scoped variables now.</p>
+
+    <div class="cell" id="cell-6">
+      <div class="cell-header">
+        <span class="cell-label">Cell 6 · tutorial constants<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-6')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 6 — tutorial constants you'll reuse</span>
+TUTORIAL = {
+    <span class="st">"catalog"</span>:        <span class="st">"main"</span>,
+    <span class="st">"schema"</span>:         <span class="st">"lakebase_tutorial"</span>,
+    <span class="st">"project_name"</span>:   <span class="st">"lakebase-tutorial"</span>,
+    <span class="st">"embed_model"</span>:    <span class="st">"databricks-bge-large-en"</span>,
+    <span class="st">"chat_model"</span>:     <span class="st">"databricks-meta-llama-3-3-70b-instruct"</span>,
+    <span class="st">"user"</span>:           w.current_user.<span class="fn">me</span>().user_name,
+    <span class="st">"host"</span>:           w.config.host,
+}
+<span class="fn">print</span>(<span class="st">"Tutorial config:"</span>)
+<span class="kw">for</span> k, v <span class="kw">in</span> TUTORIAL.<span class="fn">items</span>():
+    <span class="fn">print</span>(<span class="st">f"  </span><span class="nm">{k:14s}</span><span class="st">  </span><span class="nm">{v}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <p>Keep this cell as the second cell of every notebook in the roadmap. The labs assume <code>TUTORIAL["project_name"]</code> is <code>lakebase-tutorial</code> — change it once here if you want a different name and the rest follows.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 7 -->
+  <section class="step" id="step7">
+    <div class="step-banner">
+      <span class="step-num">STEP 07</span>
+      <h2 class="step-title">The pass/fail checklist</h2>
+      <button class="step-mark" data-step="7" onclick="markStep(7)">Mark done</button>
+    </div>
+    <p>Run this final cell. It re-checks every prerequisite and prints a single line per check. The lab is <strong>complete</strong> when every line ends in <code>✅</code>.</p>
+
+    <div class="cell" id="cell-7">
+      <div class="cell-header">
+        <span class="cell-label">Cell 7 · final automated checklist<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-7')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 7 — final checklist</span>
+<span class="kw">import</span> importlib
+
+checks = []
+
+<span class="cm"># Check 1: SDK version</span>
+<span class="kw">try</span>:
+    <span class="kw">import</span> databricks.sdk
+    v = databricks.sdk.version.__version__
+    ok = <span class="fn">tuple</span>(<span class="fn">int</span>(x) <span class="kw">for</span> x <span class="kw">in</span> v.<span class="fn">split</span>(<span class="st">"."</span>)[:<span class="nu">2</span>]) &gt;= (<span class="nu">0</span>, <span class="nu">30</span>)
+    checks.<span class="fn">append</span>((<span class="st">"Databricks SDK ≥ 0.30.0"</span>, v, ok))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Databricks SDK ≥ 0.30.0"</span>, <span class="fn">str</span>(e), <span class="kw">False</span>))
+
+<span class="cm"># Check 2: psycopg + sqlalchemy + pgvector importable</span>
+<span class="kw">for</span> mod <span class="kw">in</span> [<span class="st">"psycopg"</span>, <span class="st">"sqlalchemy"</span>, <span class="st">"pgvector"</span>]:
+    <span class="kw">try</span>:
+        importlib.<span class="fn">import_module</span>(mod)
+        checks.<span class="fn">append</span>((<span class="st">f"</span><span class="nm">{mod}</span><span class="st"> importable"</span>, <span class="st">"yes"</span>, <span class="kw">True</span>))
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        checks.<span class="fn">append</span>((<span class="st">f"</span><span class="nm">{mod}</span><span class="st"> importable"</span>, <span class="fn">str</span>(e), <span class="kw">False</span>))
+
+<span class="cm"># Check 3: identity</span>
+<span class="kw">try</span>:
+    me = w.current_user.<span class="fn">me</span>().user_name
+    checks.<span class="fn">append</span>((<span class="st">"Workspace identity"</span>, me, <span class="fn">bool</span>(me)))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Workspace identity"</span>, <span class="fn">str</span>(e), <span class="kw">False</span>))
+
+<span class="cm"># Check 4: DATABASE_CREATE / region</span>
+<span class="kw">try</span>:
+    <span class="fn">list</span>(w.database.<span class="fn">list_database_projects</span>())
+    checks.<span class="fn">append</span>((<span class="st">"DATABASE_CREATE &amp; region"</span>, <span class="st">"ok"</span>, <span class="kw">True</span>))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"DATABASE_CREATE &amp; region"</span>, <span class="fn">str</span>(e)[:<span class="nu">60</span>], <span class="kw">False</span>))
+
+<span class="cm"># Check 5: embeddings</span>
+<span class="kw">try</span>:
+    client = w.serving_endpoints.<span class="fn">get_open_ai_client</span>()
+    r = client.embeddings.<span class="fn">create</span>(model=<span class="st">"databricks-bge-large-en"</span>, input=[<span class="st">"ping"</span>])
+    checks.<span class="fn">append</span>((<span class="st">"Foundation Models embed"</span>, <span class="st">f"dim=</span><span class="nm">{len(r.data[0].embedding)}</span><span class="st">"</span>, <span class="kw">True</span>))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Foundation Models embed"</span>, <span class="fn">str</span>(e)[:<span class="nu">60</span>], <span class="kw">False</span>))
+
+<span class="cm"># Check 6: chat</span>
+<span class="kw">try</span>:
+    r = client.chat.completions.<span class="fn">create</span>(
+        model=<span class="st">"databricks-meta-llama-3-3-70b-instruct"</span>,
+        messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:<span class="st">"ok?"</span>}],
+        max_tokens=<span class="nu">5</span>,
+    )
+    checks.<span class="fn">append</span>((<span class="st">"Foundation Models chat"</span>, <span class="st">"ok"</span>, <span class="kw">True</span>))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Foundation Models chat"</span>, <span class="fn">str</span>(e)[:<span class="nu">60</span>], <span class="kw">False</span>))
+
+<span class="cm"># Check 7: tutorial schema</span>
+<span class="kw">try</span>:
+    spark.<span class="fn">sql</span>(<span class="st">f"DESCRIBE SCHEMA </span><span class="nm">{TUTORIAL['catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['schema']}</span><span class="st">"</span>).<span class="fn">collect</span>()
+    checks.<span class="fn">append</span>((<span class="st">"Tutorial UC schema"</span>, <span class="st">f"</span><span class="nm">{TUTORIAL['catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['schema']}</span><span class="st">"</span>, <span class="kw">True</span>))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Tutorial UC schema"</span>, <span class="fn">str</span>(e)[:<span class="nu">60</span>], <span class="kw">False</span>))
+
+<span class="cm"># Print result</span>
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">72</span>)
+<span class="fn">print</span>(<span class="st">f"</span><span class="nm">{'CHECK':&lt;32}</span><span class="st"> </span><span class="nm">{'DETAIL':&lt;28}</span><span class="st"> STATUS"</span>)
+<span class="fn">print</span>(<span class="st">"-"</span> * <span class="nu">72</span>)
+<span class="kw">for</span> name, detail, ok <span class="kw">in</span> checks:
+    icon = <span class="st">"✅"</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="st">"❌"</span>
+    <span class="fn">print</span>(<span class="st">f"</span><span class="nm">{name:&lt;32}</span><span class="st"> </span><span class="nm">{str(detail)[:28]:&lt;28}</span><span class="st"> </span><span class="nm">{icon}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">72</span>)
+
+passed = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> _, _, ok <span class="kw">in</span> checks <span class="kw">if</span> ok)
+total = <span class="fn">len</span>(checks)
+<span class="kw">if</span> passed == total:
+    <span class="fn">print</span>(<span class="st">f"\n🎯 ALL </span><span class="nm">{total}</span><span class="st"> CHECKS PASSED — workspace is ready for Module 2 onwards."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">f"\n⚠ </span><span class="nm">{passed}</span><span class="st">/</span><span class="nm">{total}</span><span class="st"> passed. Resolve the ❌ rows before moving on."</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (the success case)</div>
+<pre>========================================================================
+CHECK                            DETAIL                       STATUS
+------------------------------------------------------------------------
+Databricks SDK ≥ 0.30.0          0.34.0                       <span class="ok-line">✅</span>
+psycopg importable               yes                          <span class="ok-line">✅</span>
+sqlalchemy importable            yes                          <span class="ok-line">✅</span>
+pgvector importable              yes                          <span class="ok-line">✅</span>
+Workspace identity               you@example.com              <span class="ok-line">✅</span>
+DATABASE_CREATE &amp; region         ok                           <span class="ok-line">✅</span>
+Foundation Models embed          dim=1024                     <span class="ok-line">✅</span>
+Foundation Models chat           ok                           <span class="ok-line">✅</span>
+Tutorial UC schema               main.lakebase_tutorial       <span class="ok-line">✅</span>
+========================================================================
+
+<span class="ok-line">🎯 ALL 9 CHECKS PASSED — workspace is ready for Module 2 onwards.</span></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ INTERACTIVE CHECKLIST -->
+  <section class="checklist-section">
+    <div class="checklist-header">
+      <h2 class="checklist-title">Manual progress checklist · <em>tick as you go</em></h2>
+      <span class="checklist-status" id="clStatus">0 / 9 complete</span>
+    </div>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
+      As Cell 7 prints each ✅, tap the corresponding row below. Your progress is saved in this browser tab.
+    </p>
+
+    <div id="checks">
+      <div class="check-row">
+        <span class="check-num">01</span>
+        <div>
+          <div class="check-name">Databricks SDK ≥ 0.30.0</div>
+          <div class="check-desc">version &gt;= 0.30.0 from cell 1</div>
+        </div>
+        <span class="check-detail" id="d1">— pending —</span>
+        <button class="check-toggle" data-check="1" onclick="toggleCheck(1)" aria-label="Mark complete">○</button>
+      </div>
+
+      <div class="check-row">
+        <span class="check-num">02</span>
+        <div>
+          <div class="check-name">psycopg importable</div>
+          <div class="check-desc">Python Postgres driver</div>
+        </div>
+        <span class="check-detail" id="d2">— pending —</span>
+        <button class="check-toggle" data-check="2" onclick="toggleCheck(2)" aria-label="Mark complete">○</button>
+      </div>
+
+      <div class="check-row">
+        <span class="check-num">03</span>
+        <div>
+          <div class="check-name">sqlalchemy importable</div>
+          <div class="check-desc">connection &amp; engine layer</div>
+        </div>
+        <span class="check-detail" id="d3">— pending —</span>
+        <button class="check-toggle" data-check="3" onclick="toggleCheck(3)" aria-label="Mark complete">○</button>
+      </div>
+
+      <div class="check-row">
+        <span class="check-num">04</span>
+        <div>
+          <div class="check-name">pgvector importable</div>
+          <div class="check-desc">vector type bindings (Module 5)</div>
+        </div>
+        <span class="check-detail" id="d4">— pending —</span>
+        <button class="check-toggle" data-check="4" onclick="toggleCheck(4)" aria-label="Mark complete">○</button>
+      </div>
+
+      <div class="check-row">
+        <span class="check-num">05</span>
+        <div>
+          <div class="check-name">Workspace identity</div>
+          <div class="check-desc">your user/email visible to SDK</div>
+        </div>
+        <span class="check-detail" id="d5">— pending —</span>
+        <button class="check-toggle" data-check="5" onclick="toggleCheck(5)" aria-label="Mark complete">○</button>
+      </div>
+
+      <div class="check-row">
+        <span class="check-num">06</span>
+        <div>
+          <div class="check-name">DATABASE_CREATE &amp; region</div>
+          <div class="check-desc">list_database_projects() succeeds</div>
+        </div>
+        <span class="check-detail" id="d6">— pending —</span>
+        <button class="check-toggle" data-check="6" onclick="toggleCheck(6)" aria-label="Mark complete">○</button>
+      </div>
+
+      <div class="check-row">
+        <span class="check-num">07</span>
+        <div>
+          <div class="check-name">Foundation Models · embed</div>
+          <div class="check-desc">bge-large-en returns 1024-dim</div>
+        </div>
+        <span class="check-detail" id="d7">— pending —</span>
+        <button class="check-toggle" data-check="7" onclick="toggleCheck(7)" aria-label="Mark complete">○</button>
+      </div>
+
+      <div class="check-row">
+        <span class="check-num">08</span>
+        <div>
+          <div class="check-name">Foundation Models · chat</div>
+          <div class="check-desc">llama-3-3-70b responds</div>
+        </div>
+        <span class="check-detail" id="d8">— pending —</span>
+        <button class="check-toggle" data-check="8" onclick="toggleCheck(8)" aria-label="Mark complete">○</button>
+      </div>
+
+      <div class="check-row">
+        <span class="check-num">09</span>
+        <div>
+          <div class="check-name">Tutorial UC schema</div>
+          <div class="check-desc">main.lakebase_tutorial exists</div>
+        </div>
+        <span class="check-detail" id="d9">— pending —</span>
+        <button class="check-toggle" data-check="9" onclick="toggleCheck(9)" aria-label="Mark complete">○</button>
+      </div>
+    </div>
+
+    <div class="checklist-footer">
+      <span id="clMessage">▸ Run Cell 7. Tap each ✅ above as it appears.</span>
+      <button class="reset-btn" onclick="resetChecks()">Reset</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ MASTER TROUBLESHOOTING -->
+  <section style="margin-top:48px;">
+    <h2>Master troubleshooting reference</h2>
+    <p>If your final checklist has any ❌ rows, find the row in the table below and apply the fix. <strong>Don't proceed to Module 2 with failing checks</strong> — Module 3's labs will fail on the same root cause and you'll waste an hour debugging.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>❌ Failing row</th><th>Most common cause</th><th>Resolution path</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SDK ≥ 0.30.0</strong></td>
+            <td>Older SDK pinned in cluster libraries</td>
+            <td>Re-run <code>%pip install --upgrade databricks-sdk</code> in cell 1, then <code>dbutils.library.restartPython()</code></td>
+          </tr>
+          <tr>
+            <td><strong>psycopg / sqlalchemy / pgvector importable</strong></td>
+            <td>Install didn't take</td>
+            <td>Re-run cell 1; ensure <code>restartPython()</code> ran; verify with <code>import psycopg</code> in a fresh cell</td>
+          </tr>
+          <tr>
+            <td><strong>Workspace identity</strong></td>
+            <td>Auth context lost after kernel restart</td>
+            <td>Detach + reattach the cluster, then re-run from cell 2</td>
+          </tr>
+          <tr>
+            <td><strong>DATABASE_CREATE &amp; region</strong> (entitlement)</td>
+            <td>User lacks entitlement</td>
+            <td>Admin Console → Identity &amp; Access → your user/group → grant DATABASE_CREATE</td>
+          </tr>
+          <tr>
+            <td><strong>DATABASE_CREATE &amp; region</strong> (region)</td>
+            <td>Lakebase Autoscaling not yet GA in your region</td>
+            <td>Use a workspace in a supported region; Module 9 includes a region matrix</td>
+          </tr>
+          <tr>
+            <td><strong>FM embed / FM chat</strong> (404)</td>
+            <td>Foundation Models endpoint not provisioned</td>
+            <td><code>w.serving_endpoints.list()</code> to see what's available; talk to admin</td>
+          </tr>
+          <tr>
+            <td><strong>FM embed / FM chat</strong> (403)</td>
+            <td>User lacks Can Query on the endpoint</td>
+            <td>Serving → endpoint → permissions → grant Can Query</td>
+          </tr>
+          <tr>
+            <td><strong>Tutorial UC schema</strong></td>
+            <td>No CREATE SCHEMA on <code>main</code></td>
+            <td>Use a catalog you own; update <code>TUTORIAL['catalog']</code> accordingly</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ DONE -->
+  <section class="done-banner">
+    <h3>Lab 1.4 — <em>complete when…</em></h3>
+    <p>If your final cell printed <code>🎯 ALL 9 CHECKS PASSED</code>, you can:</p>
+    <ul>
+      <li>Programmatically authenticate as yourself in the workspace</li>
+      <li>Provision Lakebase resources via SDK (the gate for Module 3)</li>
+      <li>Generate embeddings and call chat models (the gate for Modules 5 &amp; 6)</li>
+      <li>Write to a UC schema (the gate for Modules 4 &amp; 8)</li>
+      <li>Use psycopg, SQLAlchemy, and pgvector at the Python layer (the gate for everything)</li>
+    </ul>
+    <p style="margin-top:14px;"><strong>That's every prerequisite for the entire roadmap, validated in one notebook.</strong> Save the notebook somewhere you can find it again — if any later lab errors mysteriously, re-running this checklist is the fastest way to diagnose what changed.</p>
+
+    <div style="margin-top:24px; padding:18px 22px; background:rgba(168,85,247,0.05); border:1px solid rgba(168,85,247,0.25); border-radius:6px;">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--accent-purple); margin-bottom:8px;">▸ Module 1 — Complete</div>
+      <p style="margin:0;">You finished the three theory topics (1.1–1.3) and the prerequisite lab (1.4). You now have the vocabulary to describe Lakebase to a customer, a workspace verified ready for every lab ahead, and the decision rule for Autoscaling vs Provisioned. <strong>Next up: Module 2</strong> — the architecture deep dive. Separated compute and storage, copy-on-write branching internals, scale-to-zero mechanics, and the OAuth token TTL trap that ruins Friday afternoons.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ COPY BUTTONS ═══════════════
+function copyCell(cellId) {
+  const cell = document.getElementById(cellId);
+  const pre = cell.querySelector('pre');
+  const text = pre.innerText;
+  const btn = cell.querySelector('.copy-btn');
+
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.textContent = 'COPIED ✓';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = 'COPY';
+    }, 1800);
+  }).catch(() => {
+    btn.textContent = 'PRESS ⌘+C';
+    // Fallback: select the text
+    const range = document.createRange();
+    range.selectNode(pre);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    setTimeout(() => { btn.textContent = 'COPY'; }, 2200);
+  });
+}
+
+// ═══════════════ STEP TRACKER ═══════════════
+const STEP_KEY = 'lakebase_lab14_steps';
+const CHECK_KEY = 'lakebase_lab14_checks';
+
+function loadSteps() {
+  try {
+    return JSON.parse(localStorage.getItem(STEP_KEY) || '{}');
+  } catch (e) { return {}; }
+}
+function saveSteps(s) {
+  try { localStorage.setItem(STEP_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+function markStep(n) {
+  const steps = loadSteps();
+  steps[n] = !steps[n];
+  saveSteps(steps);
+  renderSteps();
+}
+
+function renderSteps() {
+  const steps = loadSteps();
+  const total = 7;
+  let done = 0;
+  for (let i = 1; i <= total; i++) {
+    const pill = document.querySelector(`.step-pill[data-step="${i}"]`);
+    const btn = document.querySelector(`.step-mark[data-step="${i}"]`);
+    if (steps[i]) {
+      done++;
+      if (pill) pill.classList.add('done');
+      if (btn) {
+        btn.classList.add('done');
+        btn.textContent = '✓ Done';
+      }
+    } else {
+      if (pill) pill.classList.remove('done');
+      if (btn) {
+        btn.classList.remove('done');
+        btn.textContent = 'Mark done';
+      }
+    }
+  }
+  const counter = document.getElementById('trackerCount');
+  if (counter) {
+    counter.textContent = `${done} / ${total}`;
+    if (done === total) {
+      counter.style.color = 'var(--accent-green)';
+    } else {
+      counter.style.color = 'var(--accent-purple)';
+    }
+  }
+}
+
+// Highlight active step on scroll
+function highlightActive() {
+  const sections = document.querySelectorAll('section.step');
+  const scrollY = window.scrollY + 200;
+  let active = null;
+  sections.forEach(s => {
+    if (s.offsetTop <= scrollY) active = s.id;
+  });
+  document.querySelectorAll('.step-pill').forEach(p => p.classList.remove('active'));
+  if (active) {
+    const n = active.replace('step', '');
+    const pill = document.querySelector(`.step-pill[data-step="${n}"]`);
+    if (pill && !pill.classList.contains('done')) pill.classList.add('active');
+  }
+}
+window.addEventListener('scroll', highlightActive);
+
+// ═══════════════ INTERACTIVE CHECKLIST ═══════════════
+const CHECK_DETAILS = {
+  1: '0.30.0+',
+  2: 'imported',
+  3: 'imported',
+  4: 'imported',
+  5: 'workspace user',
+  6: 'list_projects() ok',
+  7: 'dim=1024',
+  8: 'response received',
+  9: 'schema reachable'
+};
+
+function loadChecks() {
+  try {
+    return JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+  } catch (e) { return {}; }
+}
+function saveChecks(c) {
+  try { localStorage.setItem(CHECK_KEY, JSON.stringify(c)); } catch (e) {}
+}
+
+function toggleCheck(n) {
+  const checks = loadChecks();
+  checks[n] = !checks[n];
+  saveChecks(checks);
+  renderChecks();
+}
+
+function resetChecks() {
+  if (!confirm('Reset all checks?')) return;
+  saveChecks({});
+  renderChecks();
+}
+
+function renderChecks() {
+  const checks = loadChecks();
+  const total = 9;
+  let done = 0;
+  for (let i = 1; i <= total; i++) {
+    const btn = document.querySelector(`.check-toggle[data-check="${i}"]`);
+    const detail = document.getElementById('d' + i);
+    if (checks[i]) {
+      done++;
+      if (btn) {
+        btn.classList.add('checked');
+        btn.textContent = '✓';
+      }
+      if (detail) {
+        detail.textContent = CHECK_DETAILS[i];
+        detail.style.color = 'var(--accent-green)';
+      }
+    } else {
+      if (btn) {
+        btn.classList.remove('checked');
+        btn.textContent = '○';
+      }
+      if (detail) {
+        detail.textContent = '— pending —';
+        detail.style.color = 'var(--text-muted)';
+      }
+    }
+  }
+  const status = document.getElementById('clStatus');
+  const msg = document.getElementById('clMessage');
+  if (status) {
+    status.textContent = `${done} / ${total} complete`;
+    if (done === total) status.classList.add('complete');
+    else status.classList.remove('complete');
+  }
+  if (msg) {
+    if (done === 0) {
+      msg.textContent = '▸ Run Cell 7. Tap each ✅ above as it appears.';
+    } else if (done < total) {
+      msg.textContent = `▸ ${total - done} check${total - done === 1 ? '' : 's'} remaining. Keep going.`;
+    } else {
+      msg.textContent = '🎯 All checks complete — workspace is ready for Module 2.';
+      msg.style.color = 'var(--accent-green)';
+    }
+  }
+}
+
+// initial render
+renderSteps();
+renderChecks();
+highlightActive();
+</script>
+
+</body>
+</html>

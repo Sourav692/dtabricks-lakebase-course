@@ -1,0 +1,21 @@
+# This is a Databricks asset bundle definition for dtabricks-lakebase-course.
+# The Databricks extension requires databricks.yml configuration file.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+
+bundle:
+  name: dtabricks-lakebase-course
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://e2-demo-field-eng.cloud.databricks.com
+      root_path: /Workspace/Users/saurabh.bhattacharya@databricks.com/1. Tutorials/6. Lakebase
+
+  ## Optionally, there could be 'staging' or 'prod' targets here.
+  #
+  # prod:
+  #   workspace:
+  #     host: https://e2-demo-field-eng.cloud.databricks.coms
+  #    root_path: /Workspace/Users/sourav.banerjee@databricks.com/1. Tutorials/6. Lakebase

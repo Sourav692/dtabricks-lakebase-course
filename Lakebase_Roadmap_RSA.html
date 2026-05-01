@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lakebase Mastery — Complete Databricks Tutorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --orange: #f97316;
+
+  --l0: #22c55e; /* beginner */
+  --l1: #3b82f6; /* beginner-int */
+  --l2: #f59e0b; /* intermediate */
+  --l3: #f97316; /* advanced */
+  --l4: #ef4444; /* expert */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  position: relative;
+  padding: 64px 48px 56px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(255,107,53,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(0,191,165,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 30% 40% at 60% 80%, rgba(74,158,255,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.header-inner { max-width: 1140px; margin: 0 auto; position: relative; }
+
+.header-eyebrow {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+}
+
+.eyebrow-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--accent-orange);
+  padding: 5px 14px;
+  border: 1px solid rgba(255,107,53,0.3);
+  border-radius: 2px;
+  background: rgba(255,107,53,0.06);
+}
+
+.eyebrow-line {
+  height: 1px; width: 48px;
+  background: linear-gradient(to right, rgba(255,107,53,0.4), transparent);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 68px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--accent-orange);
+}
+
+.header-sub {
+  font-size: 16px; color: var(--text-dim);
+  max-width: 680px; line-height: 1.75;
+  margin-bottom: 40px;
+}
+
+.meta-row {
+  display: flex; gap: 0; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.meta-item {
+  padding: 14px 24px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 22px; font-weight: 500;
+  color: var(--accent-teal);
+}
+
+.meta-lbl {
+  font-size: 11px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ── COVERAGE BANNER ── */
+.coverage-bar {
+  background: rgba(0,191,165,0.05);
+  border-bottom: 1px solid rgba(0,191,165,0.15);
+  padding: 14px 48px;
+}
+
+.coverage-inner {
+  max-width: 1140px; margin: 0 auto;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+
+.coverage-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--accent-teal);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.coverage-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.ctag {
+  font-size: 11px; padding: 3px 10px;
+  border-radius: 2px; font-weight: 500;
+  border: 1px solid;
+}
+
+.ctag-new { background: rgba(255,107,53,0.1); color: var(--accent-orange); border-color: rgba(255,107,53,0.25); }
+.ctag-updated { background: rgba(0,191,165,0.08); color: var(--accent-teal); border-color: rgba(0,191,165,0.2); }
+
+/* ── LEGEND ── */
+.legend-strip {
+  padding: 16px 48px;
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+}
+
+.legend-strip-inner { max-width: 1140px; margin: 0 auto; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; width: 100%; }
+
+.leg-group { display: flex; gap: 16px; align-items: center; }
+
+.leg-sep { width: 1px; height: 18px; background: var(--border); }
+
+.leg { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-dim); }
+.leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.leg-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
+
+/* ── MAIN ── */
+main { max-width: 1140px; margin: 0 auto; padding: 48px 48px 100px; }
+
+/* ── SECTION HEADER ── */
+.section-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 32px; margin-top: 8px;
+}
+
+.section-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text-muted);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+
+.section-line { flex: 1; height: 1px; background: var(--border); }
+
+/* ── MODULE ── */
+.module { margin-bottom: 40px; position: relative; }
+
+.mod-header {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 0;
+  align-items: stretch;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 10px 10px 0 0;
+  background: var(--surface);
+  transition: border-color 0.2s;
+  overflow: hidden;
+}
+
+.mod-header:hover { border-color: var(--border2); }
+
+.mod-num-col {
+  display: flex; align-items: center; justify-content: center;
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  writing-mode: vertical-rl;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; letter-spacing: 0.18em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.mod-main { padding: 20px 24px; }
+
+.mod-level {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; font-weight: 500;
+  padding: 3px 10px; border-radius: 2px;
+  margin-bottom: 8px;
+  border: 1px solid;
+}
+
+.lv0 { color: var(--l0); background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2); }
+.lv1 { color: var(--l1); background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); }
+.lv2 { color: var(--l2); background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.2); }
+.lv3 { color: var(--l3); background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.2); }
+.lv4 { color: var(--l4); background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+
+.mod-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 21px; line-height: 1.2;
+  margin-bottom: 5px;
+}
+
+.mod-subtitle {
+  font-size: 13px; color: var(--text-dim); line-height: 1.5;
+}
+
+.mod-toggle-col {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 20px;
+  border-left: 1px solid var(--border);
+}
+
+.toggle-btn {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+
+.mod-header:hover .toggle-btn {
+  background: var(--surface3);
+  color: var(--text);
+}
+
+/* ── MODULE BODY ── */
+.mod-body {
+  display: none;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.mod-body.open { display: block; }
+
+.topics-list { padding: 0; }
+
+/* ── TOPIC ── */
+.topic {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.topic:last-child { border-bottom: none; }
+.topic:hover { background: rgba(255,255,255,0.015); }
+
+.topic-inner { padding: 18px 24px; }
+
+.topic-header {
+  display: flex; align-items: flex-start; gap: 16px;
+  margin-bottom: 10px;
+}
+
+.t-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-muted);
+  min-width: 36px; padding-top: 1px;
+  flex-shrink: 0;
+}
+
+.t-title {
+  font-size: 14px; font-weight: 600;
+  color: var(--text); flex: 1; line-height: 1.4;
+}
+
+.t-tags { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
+
+.tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; padding: 2px 8px;
+  border-radius: 2px; border: 1px solid;
+  font-weight: 500; letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.tag-T { color: var(--accent-teal); background: rgba(0,191,165,0.08); border-color: rgba(0,191,165,0.2); }
+.tag-H { color: var(--accent-purple); background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.2); }
+.tag-N { color: var(--accent-orange); background: rgba(255,107,53,0.08); border-color: rgba(255,107,53,0.2); }
+.tag-C { color: var(--accent-yellow); background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.25); }
+
+.t-desc {
+  font-size: 12.5px; color: var(--text-dim);
+  padding-left: 52px; margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.t-points {
+  padding-left: 52px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+
+.t-pt {
+  display: flex; gap: 10px;
+  font-size: 12.5px; color: var(--text-dim); line-height: 1.5;
+}
+
+.t-pt::before {
+  content: '›';
+  color: var(--accent-orange);
+  flex-shrink: 0; font-size: 13px;
+}
+
+/* ── CODE BLOCK ── */
+.code-block {
+  margin-top: 12px; margin-left: 52px;
+  background: #020509;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-blue);
+  border-radius: 0 6px 6px 0;
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.8;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.st { color: #c3e88d; }
+.cm { color: var(--text-muted); }
+.nm { color: var(--accent-orange); }
+.nu { color: #f78c6c; }
+
+/* ── NOTE BOX ── */
+.note-box {
+  margin-top: 12px; margin-left: 52px;
+  padding: 10px 14px;
+  background: rgba(251,191,36,0.05);
+  border: 1px solid rgba(251,191,36,0.15);
+  border-radius: 6px;
+  font-size: 12px; color: var(--amber);
+  line-height: 1.6;
+}
+.note-box::before { content: '⚠ '; }
+
+/* ── MODULE OUTCOME ── */
+.mod-outcome {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,191,165,0.03);
+  display: flex; gap: 12px; align-items: flex-start;
+}
+
+.outcome-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+.outcome-text {
+  font-size: 12.5px; color: var(--text-dim); line-height: 1.6;
+}
+
+.outcome-text strong { color: var(--accent-teal); font-weight: 600; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+@media (max-width: 700px) {
+  header, main, .coverage-bar, .legend-strip { padding-left: 20px; padding-right: 20px; }
+  .meta-row { flex-direction: column; width: 100%; border-radius: 8px; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+  h1 { font-size: 30px; }
+  .mod-header { grid-template-columns: 1fr auto; }
+  .mod-num-col { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-eyebrow">
+      <span class="eyebrow-tag">Databricks · Lakebase · OLTP</span>
+      <span class="eyebrow-line"></span>
+    </div>
+    <h1>Lakebase Mastery<br><em>Zero to RSA-Ready</em> — Complete Path</h1>
+    <p class="header-sub">A practitioner's tutorial covering every pillar of Lakebase — the managed Postgres OLTP engine inside the Databricks Lakehouse — from architectural foundations through vector search, agent memory, Databricks Apps, and a full capstone, with all labs designed to run natively on Databricks.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">9</span><span class="meta-lbl">Modules</span></div>
+      <div class="meta-item"><span class="meta-val">48</span><span class="meta-lbl">Topics</span></div>
+      <div class="meta-item"><span class="meta-val">~28h</span><span class="meta-lbl">Est. Duration</span></div>
+      <div class="meta-item"><span class="meta-val">60%</span><span class="meta-lbl">Hands-On</span></div>
+      <div class="meta-item"><span class="meta-val">100%</span><span class="meta-lbl">Databricks Native</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="coverage-bar">
+  <div class="coverage-inner">
+    <span class="coverage-label">Coverage →</span>
+    <div class="coverage-tags">
+      <span class="ctag ctag-new">Lakebase Autoscaling</span>
+      <span class="ctag ctag-new">Branching &amp; PIT Restore</span>
+      <span class="ctag ctag-new">Synced Tables (UC → PG)</span>
+      <span class="ctag ctag-new">Lakehouse Sync (PG → Delta)</span>
+      <span class="ctag ctag-new">pgvector + HNSW</span>
+      <span class="ctag ctag-new">Agent Memory Layers</span>
+      <span class="ctag ctag-new">Databricks Apps + OBO</span>
+      <span class="ctag ctag-updated">Capstone build</span>
+      <span class="ctag ctag-updated">RSA Field Manual</span>
+    </div>
+  </div>
+</div>
+
+<div class="legend-strip">
+  <div class="legend-strip-inner">
+    <span class="leg-title">Type</span>
+    <div class="leg-group">
+      <span class="leg"><span class="leg-dot" style="background:var(--accent-teal)"></span> Theory</span>
+      <span class="leg"><span class="leg-dot" style="background:var(--accent-purple)"></span> Hands-On (Databricks)</span>
+      <span class="leg"><span class="leg-dot" style="background:var(--accent-orange)"></span> New Concept</span>
+      <span class="leg"><span class="leg-dot" style="background:var(--accent-yellow)"></span> Capstone</span>
+    </div>
+    <span class="leg-sep"></span>
+    <span class="leg-title">Level</span>
+    <div class="leg-group">
+      <span class="leg"><span class="leg-dot" style="background:var(--l0)"></span> Beginner</span>
+      <span class="leg"><span class="leg-dot" style="background:var(--l1)"></span> Beg–Int</span>
+      <span class="leg"><span class="leg-dot" style="background:var(--l2)"></span> Intermediate</span>
+      <span class="leg"><span class="leg-dot" style="background:var(--l3)"></span> Advanced</span>
+      <span class="leg"><span class="leg-dot" style="background:var(--l4)"></span> Expert</span>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════════════ MODULE 1 -->
+<div class="module" id="m1">
+  <div class="mod-header" onclick="toggle('m1')">
+    <div class="mod-num-col">Module 01</div>
+    <div class="mod-main">
+      <div class="mod-level lv0">Beginner · ~2h</div>
+      <div class="mod-title">Foundations &amp; the Lakebase Mental Model</div>
+      <div class="mod-subtitle">Why OLTP belongs in the Lakehouse, what Lakebase replaces in a typical customer stack, and the difference between Autoscaling and Provisioned editions.</div>
+    </div>
+    <div class="mod-toggle-col"><div class="toggle-btn" id="tb-m1">▼</div></div>
+  </div>
+  <div class="mod-body open" id="body-m1">
+    <div class="topics-list">
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">1.1</span>
+            <span class="t-title">Why Operational Databases Belong in the Lakehouse</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">The OLTP/OLAP split: row-level reads/writes vs. analytical scans — historically two stacks</div>
+            <div class="t-pt">Reverse-ETL friction: Fivetran/Hightouch/Census pipelines from Delta to a sidecar Postgres</div>
+            <div class="t-pt">The seam tax: separate IAM, separate audit, separate billing, separate SLAs</div>
+            <div class="t-pt">What Lakebase eliminates: the seam — same governance, same identity, same data plane, same bill</div>
+            <div class="t-pt">Five killer use cases: app backends, feature serving, AI agent memory, vector search, reverse-ETL replacement</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">1.2</span>
+            <span class="t-title">The Lakebase Stack — The Full Map</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Core objects: Project, Branch, Compute, Database, Synced Table, Read Replica</div>
+            <div class="t-pt">Two layers: separated storage (page server, object-backed) and elastic compute (Postgres)</div>
+            <div class="t-pt">Integration plane: Unity Catalog registration, synced tables, query federation, Lakehouse Sync</div>
+            <div class="t-pt">Operational plane: SQL Editor, Tables Editor, Postgres clients (psql, JDBC), PostgREST Data API</div>
+            <div class="t-pt">Application plane: Databricks Apps, Feature Store, Notebooks, stateful AI agents</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">1.3</span>
+            <span class="t-title">Autoscaling vs Provisioned — What &amp; When</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-N">New</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Lakebase Autoscaling (default since March 2026): scale-to-zero, branching, instant restore, read replicas, Data API</div>
+            <div class="t-pt">Lakebase Provisioned (legacy): fixed-size compute, manual scaling — maintenance mode, no new feature work</div>
+            <div class="t-pt">Choosing: Autoscaling for all new projects; Provisioned only retained for backward compatibility</div>
+            <div class="t-pt">Region availability matters — verify in docs before designing for a customer in a non-US region</div>
+            <div class="t-pt">Upgrade path: existing Provisioned instances continue to be supported, no forced migration</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">1.4</span>
+            <span class="t-title">Lab: Workspace Prerequisites &amp; Sanity Check</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <p class="t-desc">Verify your workspace is ready: SDK installed, entitlements granted, region supports Autoscaling.</p>
+          <div class="t-points">
+            <div class="t-pt">Install: <code>%pip install "databricks-sdk&gt;=0.30.0" "psycopg[binary]" sqlalchemy pgvector</code></div>
+            <div class="t-pt">Confirm DATABASE_CREATE entitlement on your user (UI: Admin → Identity &amp; Access)</div>
+            <div class="t-pt">Verify region availability via SDK: <code>w.database.list_database_projects()</code> should not error</div>
+            <div class="t-pt">Confirm Foundation Model API access — required for Modules 5 and 6</div>
+            <div class="t-pt">Set up a UC schema for tutorial assets: <code>main.lakebase_tutorial</code></div>
+          </div>
+          <div class="code-block"><span class="cm"># Cell 1 — install</span>
+%pip install <span class="st">"databricks-sdk&gt;=0.30.0"</span> <span class="st">"psycopg[binary]"</span> sqlalchemy pgvector
+dbutils.library.<span class="fn">restartPython</span>()
+
+<span class="cm"># Cell 2 — sanity check</span>
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+w = <span class="fn">WorkspaceClient</span>()
+
+<span class="fn">print</span>(<span class="st">"User:    "</span>, w.current_user.<span class="fn">me</span>().user_name)
+<span class="fn">print</span>(<span class="st">"Host:    "</span>, w.config.host)
+<span class="fn">print</span>(<span class="st">"Projects:"</span>, <span class="fn">list</span>(w.database.<span class="fn">list_database_projects</span>()))
+
+<span class="cm"># Cell 3 — Foundation Models reachable?</span>
+client = w.serving_endpoints.<span class="fn">get_open_ai_client</span>()
+resp = client.embeddings.<span class="fn">create</span>(
+    model=<span class="st">"databricks-bge-large-en"</span>,
+    input=[<span class="st">"hello lakebase"</span>]
+)
+<span class="fn">print</span>(<span class="st">"Embed dim:"</span>, <span class="fn">len</span>(resp.data[<span class="nu">0</span>].embedding))</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mod-outcome">
+      <div class="outcome-icon">🎯</div>
+      <div class="outcome-text"><strong>Outcome:</strong> You understand what Lakebase is, what it replaces in a typical stack, and why Autoscaling is the default choice. Your workspace is verified and ready for every lab ahead.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ MODULE 2 -->
+<div class="module" id="m2">
+  <div class="mod-header" onclick="toggle('m2')">
+    <div class="mod-num-col">Module 02</div>
+    <div class="mod-main">
+      <div class="mod-level lv1">Beg–Int · ~2.5h</div>
+      <div class="mod-title">Architecture Deep Dive — Compute, Storage, Branches</div>
+      <div class="mod-subtitle">The architectural choices that make Lakebase feel different from RDS — separated compute and storage, copy-on-write branching, scale-to-zero, HA, and networking.</div>
+    </div>
+    <div class="mod-toggle-col"><div class="toggle-btn" id="tb-m2">▶</div></div>
+  </div>
+  <div class="mod-body" id="body-m2">
+    <div class="topics-list">
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">2.1</span>
+            <span class="t-title">Separated Compute &amp; Storage — The Defining Move</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Storage: multi-tenant page server backed by object storage; durable, versioned, copy-on-write</div>
+            <div class="t-pt">Compute: a Postgres process that lazily fetches pages and caches them locally</div>
+            <div class="t-pt">Why this matters: every "magical" capability (branches, instant restore, scale-to-zero) flows from this separation</div>
+            <div class="t-pt">Trade-off: cold pages incur a fetch from the page server — index design matters more than on a single-node Postgres</div>
+            <div class="t-pt">Mental model: think Neon/Aurora-style architecture, deeply integrated with Databricks identity and UC</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">2.2</span>
+            <span class="t-title">Branches — Git-Like Workflows for Data</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-N">New</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">A branch = new compute pointing at a copy-on-write snapshot of storage; ready in seconds, no data copied</div>
+            <div class="t-pt">Use cases: PR-based schema migrations, ephemeral CI databases, blue-green deploys, "what-if" analysis</div>
+            <div class="t-pt">Branches inherit from a parent at a point in time; children diverge as they write</div>
+            <div class="t-pt">Lifecycle: create → diverge → merge-by-promotion or drop; never copied, always linked</div>
+            <div class="t-pt">Cost model: pay for branch compute + the deltas vs. parent storage</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">2.3</span>
+            <span class="t-title">Scale-to-Zero &amp; Cold-Start Mechanics</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-N">New</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">When idle (~5 min), compute suspends; storage stays warm; cost drops to storage-only</div>
+            <div class="t-pt">Cold start latency: typical ~3–8s for a small DB; pgbouncer holds the client connection during boot</div>
+            <div class="t-pt">Production rule: disable scale-to-zero on prod primary; enable it on dev/preview branches</div>
+            <div class="t-pt">Page warming: first queries pull cold pages from the page server; performance ramps over the first minute</div>
+            <div class="t-pt">Anti-pattern: latency-sensitive APIs running against a scale-to-zero branch — you'll see p99 spikes</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">2.4</span>
+            <span class="t-title">High Availability &amp; Read Replicas</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">HA: primary in AZ-A + synchronous standby in AZ-B; failover &lt;30s; connection strings are stable</div>
+            <div class="t-pt">Storage is already replicated — HA only protects the compute tier</div>
+            <div class="t-pt">Read replicas: extra compute nodes sharing the same storage; zero replication lag for committed pages</div>
+            <div class="t-pt">Pattern: primary handles writes + hot reads; replica absorbs analyst / dashboard queries</div>
+            <div class="t-pt">Provisioned offering uses "readable secondaries"; Autoscaling has true read replicas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">2.5</span>
+            <span class="t-title">Networking, Auth &amp; the OAuth Token TTL Trap</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Three connection paths: public TLS, Inbound Private Link, and performance-intensive Private Link</div>
+            <div class="t-pt">Auth: workspace OAuth token used as the Postgres password (PG_PASSWORD)</div>
+            <div class="t-pt">Token TTL ≈ 1 hour — the trap: hardcoded passwords silently fail after 60 minutes</div>
+            <div class="t-pt">Mitigation: Databricks Python and JDBC drivers refresh tokens automatically; raw clients must implement refresh</div>
+            <div class="t-pt">Compliance security profiles (HIPAA / C5 / TISAX) supported on Autoscaling</div>
+          </div>
+          <div class="note-box">Token expiry is the #1 cause of mysterious "connection refused" issues in app pools running for hours. Always use the Databricks credential provider, never hardcode.</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mod-outcome">
+      <div class="outcome-icon">🎯</div>
+      <div class="outcome-text"><strong>Outcome:</strong> You can explain Lakebase's architectural decisions and know when each capability (branches, scale-to-zero, replicas, HA) is the right tool. You understand the OAuth lifecycle and can avoid the most common production trap.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ MODULE 3 -->
+<div class="module" id="m3">
+  <div class="mod-header" onclick="toggle('m3')">
+    <div class="mod-num-col">Module 03</div>
+    <div class="mod-main">
+      <div class="mod-level lv1">Beg–Int · ~3h</div>
+      <div class="mod-title">Hands-On — Your First Lakebase Project</div>
+      <div class="mod-subtitle">From SDK provisioning to UC registration in one notebook. Real schema, real connections, real branching demo.</div>
+    </div>
+    <div class="mod-toggle-col"><div class="toggle-btn" id="tb-m3">▶</div></div>
+  </div>
+  <div class="mod-body" id="body-m3">
+    <div class="topics-list">
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">3.1</span>
+            <span class="t-title">Lab: Provision a Lakebase Autoscaling Project via SDK</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <p class="t-desc">UI is fastest for one-off; SDK is reproducible. Always automate.</p>
+          <div class="t-points">
+            <div class="t-pt">Use <code>w.database.create_database_project()</code> with name, capacity (CU_1), and retention window</div>
+            <div class="t-pt">Watch the project transition: PROVISIONING → READY (~60–90s)</div>
+            <div class="t-pt">Inspect the auto-created <code>main</code> branch and its <code>read_write_dns</code> endpoint</div>
+            <div class="t-pt">Verify in the UI under Compute → Lakebase</div>
+          </div>
+          <div class="code-block"><span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+<span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> DatabaseProject
+
+w = <span class="fn">WorkspaceClient</span>()
+
+project = w.database.<span class="fn">create_database_project</span>(
+    project=<span class="fn">DatabaseProject</span>(
+        name=<span class="st">"lakebase-tutorial"</span>,
+        capacity=<span class="st">"CU_1"</span>,
+        retention_window_in_days=<span class="nu">7</span>,
+    )
+)
+<span class="fn">print</span>(<span class="st">"Project UID:"</span>, project.uid)
+<span class="fn">print</span>(<span class="st">"Endpoint:   "</span>, project.read_write_dns)</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">3.2</span>
+            <span class="t-title">Lab: Connect with Auto-Refreshing OAuth Credentials</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-N">New</span></div>
+          </div>
+          <p class="t-desc">The right way to open a SQLAlchemy engine against Lakebase from a notebook.</p>
+          <div class="t-points">
+            <div class="t-pt">Generate a credential via <code>w.database.generate_database_credential()</code> immediately before use</div>
+            <div class="t-pt">Build the URL: <code>postgresql+psycopg://{user}:{token}@{host}:5432/databricks_postgres?sslmode=require</code></div>
+            <div class="t-pt">Engine settings: <code>pool_pre_ping=True</code>, modest pool size (5–10) for notebooks</div>
+            <div class="t-pt">Verify with <code>SELECT version()</code> — should return PostgreSQL 17.x</div>
+          </div>
+          <div class="code-block"><span class="kw">import</span> uuid
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+
+proj = w.database.<span class="fn">get_database_project</span>(<span class="st">"lakebase-tutorial"</span>)
+
+cred = w.database.<span class="fn">generate_database_credential</span>(
+    request_id=<span class="fn">str</span>(uuid.<span class="fn">uuid4</span>()),
+    instance_names=[proj.name],
+)
+
+user = w.current_user.<span class="fn">me</span>().user_name
+url  = (<span class="st">f"postgresql+psycopg://</span><span class="nm">{user}</span><span class="st">:</span><span class="nm">{cred.token}</span><span class="st">"</span>
+        <span class="st">f"@</span><span class="nm">{proj.read_write_dns}</span><span class="st">:5432/databricks_postgres?sslmode=require"</span>)
+
+engine = <span class="fn">create_engine</span>(url, pool_pre_ping=<span class="kw">True</span>)
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+    <span class="fn">print</span>(c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT version()"</span>)).<span class="fn">scalar</span>())</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">3.3</span>
+            <span class="t-title">Lab: Apply Production-Grade Schema</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <p class="t-desc">A small e-commerce schema with the right indexing patterns from day one.</p>
+          <div class="t-points">
+            <div class="t-pt">BIGSERIAL primary keys (UUIDs hurt index locality on remote-paged storage)</div>
+            <div class="t-pt">B-tree on FK columns; BRIN on monotonically-increasing timestamps</div>
+            <div class="t-pt">CHECK constraints for invariants (e.g., qty &gt; 0)</div>
+            <div class="t-pt">JSONB for sparse attributes; GIN index only on columns you query</div>
+          </div>
+          <div class="code-block"><span class="kw">CREATE TABLE</span> users (
+    id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+    email       <span class="kw">TEXT UNIQUE NOT NULL</span>,
+    full_name   <span class="kw">TEXT</span>,
+    created_at  <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>()
+);
+
+<span class="kw">CREATE TABLE</span> orders (
+    id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+    user_id     <span class="kw">BIGINT REFERENCES</span> users(id),
+    sku         <span class="kw">TEXT NOT NULL</span>,
+    qty         <span class="kw">INT CHECK</span> (qty &gt; <span class="nu">0</span>),
+    total_cents <span class="kw">BIGINT</span>,
+    placed_at   <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>()
+);
+
+<span class="kw">CREATE INDEX</span> idx_orders_user ON orders(user_id);
+<span class="kw">CREATE INDEX</span> idx_orders_placed ON orders <span class="kw">USING</span> BRIN(placed_at);</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">3.4</span>
+            <span class="t-title">Lab: Register Lakebase in Unity Catalog</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <p class="t-desc">Make Lakebase a first-class catalog so DBSQL, AI/BI, Genie, and notebooks can all read it.</p>
+          <div class="t-points">
+            <div class="t-pt">Run <code>CREATE CATALOG ... USING DATABASE_INSTANCE</code> in DBSQL</div>
+            <div class="t-pt">Verify schema list with <code>SHOW SCHEMAS IN catalog_name</code></div>
+            <div class="t-pt">Apply UC tags for cost center / environment / owner — these flow to billing reports</div>
+            <div class="t-pt">Grant SELECT to the analyst group so DBSQL queries inherit Postgres-level RBAC</div>
+          </div>
+          <div class="code-block"><span class="cm">-- Run in DBSQL or a SQL warehouse</span>
+<span class="kw">CREATE CATALOG</span> lakebase_tutorial
+<span class="kw">USING</span> DATABASE_INSTANCE <span class="st">'lakebase-tutorial'</span>;
+
+<span class="kw">SHOW SCHEMAS IN</span> lakebase_tutorial;
+
+<span class="kw">SELECT</span> <span class="fn">count</span>(*) <span class="kw">FROM</span> lakebase_tutorial.<span class="kw">public</span>.users;
+
+<span class="kw">ALTER CATALOG</span> lakebase_tutorial
+  <span class="kw">SET TAGS</span> (<span class="st">'env'</span>=<span class="st">'tutorial'</span>, <span class="st">'owner'</span>=<span class="st">'rsa-team'</span>);</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">3.5</span>
+            <span class="t-title">Lab: Branch, Mutate, Drop — Demo the Killer Feature</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-N">New</span></div>
+          </div>
+          <p class="t-desc">Run a destructive query on a branch and verify <code>main</code> is untouched. This is the demo you'll show every customer.</p>
+          <div class="t-points">
+            <div class="t-pt">Create a <code>dev</code> branch from <code>main</code> via SDK; ready in seconds</div>
+            <div class="t-pt">Connect to the branch endpoint (different DNS) and run <code>TRUNCATE orders</code></div>
+            <div class="t-pt">Verify <code>main.orders</code> still has the original rows — branches are isolated</div>
+            <div class="t-pt">Drop the branch when done; storage cost reverts to the parent</div>
+          </div>
+          <div class="code-block"><span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> Branch
+
+dev = w.database.<span class="fn">create_branch</span>(
+    project_name=<span class="st">"lakebase-tutorial"</span>,
+    branch=<span class="fn">Branch</span>(name=<span class="st">"dev"</span>, parent_branch=<span class="st">"main"</span>),
+)
+<span class="fn">print</span>(<span class="st">"dev DNS:"</span>, dev.read_write_dns)
+
+<span class="cm"># ... open engine against dev DNS, run destructive SQL ...</span>
+<span class="cm"># ... verify main is untouched ...</span>
+
+w.database.<span class="fn">delete_branch</span>(
+    project_name=<span class="st">"lakebase-tutorial"</span>, branch_name=<span class="st">"dev"</span>
+)</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">3.6</span>
+            <span class="t-title">Lab: Point-in-Time Restore via Branch from Timestamp</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Corrupt a row deliberately on <code>main</code>: <code>UPDATE users SET email='oops' WHERE id=1</code></div>
+            <div class="t-pt">Wait 60 seconds (so the timestamp is in the past)</div>
+            <div class="t-pt">Create a branch from a timestamp 5 minutes ago; verify the original row is intact</div>
+            <div class="t-pt">Selectively re-import the bad row from the recovery branch into <code>main</code></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mod-outcome">
+      <div class="outcome-icon">🎯</div>
+      <div class="outcome-text"><strong>Outcome:</strong> You have a fully working Lakebase project with a real schema, OAuth-based connections, UC registration, and personal experience with branching and PIT restore — the two features that most differentiate Lakebase from RDS.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ MODULE 4 -->
+<div class="module" id="m4">
+  <div class="mod-header" onclick="toggle('m4')">
+    <div class="mod-num-col">Module 04</div>
+    <div class="mod-main">
+      <div class="mod-level lv2">Intermediate · ~3h</div>
+      <div class="mod-title">Sync, Federate &amp; Unify with Unity Catalog</div>
+      <div class="mod-subtitle">Three integration patterns: synced tables (UC → PG), Lakehouse Sync (PG → Delta), and federation. Pick the right one for the data direction you need.</div>
+    </div>
+    <div class="mod-toggle-col"><div class="toggle-btn" id="tb-m4">▶</div></div>
+  </div>
+  <div class="mod-body" id="body-m4">
+    <div class="topics-list">
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">4.1</span>
+            <span class="t-title">The Three Integration Patterns — When To Use Each</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt"><strong>Synced tables</strong> — UC Delta → Lakebase, seconds-to-minutes latency, for serving features and profiles to apps</div>
+            <div class="t-pt"><strong>Lakehouse Sync</strong> (Beta on AWS) — Lakebase → Delta via continuous CDC, for analytics on operational data</div>
+            <div class="t-pt"><strong>Federation</strong> — DBSQL queries Lakebase live; per-query latency, for ad-hoc joins and exploration</div>
+            <div class="t-pt">Decision rule: write direction + freshness need → synced tables. Read for analytics → Lakehouse Sync. Occasional joins → federation.</div>
+            <div class="t-pt">Anti-pattern: federation for high-volume reads — pushes load onto your OLTP and degrades app latency</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">4.2</span>
+            <span class="t-title">Lab: Create a Synced Table from a Delta Source</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-N">New</span></div>
+          </div>
+          <p class="t-desc">Replicate a UC Delta table into Lakebase so an app can read at app latency.</p>
+          <div class="t-points">
+            <div class="t-pt">Pre-req: a Delta table in <code>main.features.user_profile</code> with primary key <code>user_id</code></div>
+            <div class="t-pt">Create with <code>w.database.create_synced_database_table()</code></div>
+            <div class="t-pt">Choose scheduling: SNAPSHOT (cheap, minutes) vs. CONTINUOUS (streaming, seconds)</div>
+            <div class="t-pt">Verify: insert a row in Delta → SELECT it from Lakebase within seconds</div>
+            <div class="t-pt">Add Postgres-side indexes after sync — the synced table is a read mirror, but you query it like any table</div>
+          </div>
+          <div class="code-block"><span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> (
+    SyncedDatabaseTable, SyncedTableSpec, SyncedTableSchedulingPolicy
+)
+
+st = w.database.<span class="fn">create_synced_database_table</span>(
+    synced_table=<span class="fn">SyncedDatabaseTable</span>(
+        name=<span class="st">"lakebase_tutorial.public.user_profile_synced"</span>,
+        spec=<span class="fn">SyncedTableSpec</span>(
+            source_table_full_name=<span class="st">"main.features.user_profile"</span>,
+            primary_key_columns=[<span class="st">"user_id"</span>],
+            scheduling_policy=SyncedTableSchedulingPolicy.CONTINUOUS,
+            timeseries_key=<span class="st">"updated_at"</span>,
+        ),
+        database_instance_name=<span class="st">"lakebase-tutorial"</span>,
+    )
+)</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">4.3</span>
+            <span class="t-title">Lab: Stream Lakebase Changes Back to Delta (Lakehouse Sync)</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-N">New</span></div>
+          </div>
+          <p class="t-desc">Capture operational events into Delta for analytics — without rolling your own Debezium.</p>
+          <div class="t-points">
+            <div class="t-pt">Beta on AWS as of 2026.04 — verify region availability before designing for prod</div>
+            <div class="t-pt">Create with SQL: <code>CREATE LAKEHOUSE_SYNC ... FROM DATABASE_INSTANCE ... SOURCE ... TARGET ...</code></div>
+            <div class="t-pt">Underlying mechanism: Postgres logical replication slots → managed CDC → Delta</div>
+            <div class="t-pt">Inspect target: a bronze Delta table arrives with all CDC columns (<code>_change_type</code>, <code>_commit_version</code>)</div>
+            <div class="t-pt">Build a silver layer with Delta MERGE for the latest state per primary key</div>
+          </div>
+          <div class="code-block"><span class="cm">-- Run in DBSQL</span>
+<span class="kw">CREATE</span> LAKEHOUSE_SYNC orders_to_delta
+<span class="kw">FROM</span> DATABASE_INSTANCE <span class="st">'lakebase-tutorial'</span>
+<span class="kw">SOURCE</span> <span class="kw">public</span>.orders
+<span class="kw">TARGET</span> main.bronze.orders_cdc;
+
+<span class="cm">-- Build current-state silver via MERGE on _change_type</span>
+<span class="kw">MERGE INTO</span> main.silver.orders s
+<span class="kw">USING</span> (
+  <span class="kw">SELECT</span> * <span class="kw">FROM</span> main.bronze.orders_cdc
+  <span class="kw">QUALIFY</span> <span class="fn">row_number</span>() <span class="kw">OVER</span>
+    (<span class="kw">PARTITION BY</span> id <span class="kw">ORDER BY</span> _commit_version <span class="kw">DESC</span>) = <span class="nu">1</span>
+) c <span class="kw">ON</span> s.id = c.id
+<span class="kw">WHEN MATCHED AND</span> c._change_type = <span class="st">'delete'</span> <span class="kw">THEN DELETE</span>
+<span class="kw">WHEN MATCHED THEN UPDATE SET</span> *
+<span class="kw">WHEN NOT MATCHED AND</span> c._change_type &lt;&gt; <span class="st">'delete'</span>
+  <span class="kw">THEN INSERT</span> *;</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">4.4</span>
+            <span class="t-title">Lab: Federated Query — When Live Reads Are Right</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">After UC registration, Lakebase tables are immediately federable from DBSQL</div>
+            <div class="t-pt">Join Postgres rows directly with Delta tables: <code>SELECT ... FROM lakebase_tutorial.public.orders o JOIN main.gold.products p ...</code></div>
+            <div class="t-pt">Push-down: simple predicates and projections push to Postgres; complex aggregations may pull rows</div>
+            <div class="t-pt">Use case: quarterly auditor's one-off report; bad fit for hourly scheduled jobs</div>
+            <div class="t-pt">RSA heuristic: if you'd run it more than once a week, build a synced table or Lakehouse Sync instead</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">4.5</span>
+            <span class="t-title">Cost &amp; Latency Comparison Between The Three</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Synced tables: pay for the sync compute + Lakebase storage; CONTINUOUS &gt; SNAPSHOT cost-wise</div>
+            <div class="t-pt">Lakehouse Sync: pay for the CDC pipeline + Delta storage; cheap once steady-state</div>
+            <div class="t-pt">Federation: zero ongoing cost, but every query taxes the Postgres primary</div>
+            <div class="t-pt">Latency: synced tables ~seconds; Lakehouse Sync ~tens of seconds; federation = network round-trip</div>
+            <div class="t-pt">Always start with SNAPSHOT scheduling and only upgrade to CONTINUOUS when latency is proven necessary</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mod-outcome">
+      <div class="outcome-icon">🎯</div>
+      <div class="outcome-text"><strong>Outcome:</strong> You can choose the correct integration pattern for any data direction, build all three on Databricks, and articulate the cost/latency trade-offs to a customer.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ MODULE 5 -->
+<div class="module" id="m5">
+  <div class="mod-header" onclick="toggle('m5')">
+    <div class="mod-num-col">Module 05</div>
+    <div class="mod-main">
+      <div class="mod-level lv2">Intermediate · ~3.5h</div>
+      <div class="mod-title">Lakebase as a Vector Store — pgvector at App Latency</div>
+      <div class="mod-subtitle">Production RAG without bolting on a third-party vector DB. When pgvector is right, when Mosaic AI Vector Search is right, and how to build hybrid retrieval correctly.</div>
+    </div>
+    <div class="mod-toggle-col"><div class="toggle-btn" id="tb-m5">▶</div></div>
+  </div>
+  <div class="mod-body" id="body-m5">
+    <div class="topics-list">
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">5.1</span>
+            <span class="t-title">When To Use Lakebase + pgvector vs. Mosaic AI Vector Search</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Lakebase + pgvector wins for: &lt;5M vectors, hybrid SQL filters, transactional consistency, single-DB apps</div>
+            <div class="t-pt">Mosaic AI Vector Search wins for: &gt;10M vectors, dedicated retrieval service, governance via UC, large-scale recall</div>
+            <div class="t-pt">Between 5M and 10M: benchmark both — query patterns matter more than corpus size</div>
+            <div class="t-pt">Hybrid filter advantage: pgvector lets you mix vector similarity with arbitrary SQL JOINs and RLS</div>
+            <div class="t-pt">Co-location advantage: if your app already needs Lakebase for users/sessions, embeddings live one query away</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">5.2</span>
+            <span class="t-title">Schema Design for Embeddings — Indexes That Matter</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-N">New</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Use HNSW over IVFFlat — higher build cost, dramatically better recall/latency for app workloads</div>
+            <div class="t-pt">HNSW parameters: <code>m=16</code>, <code>ef_construction=64</code> are sane defaults; tune <code>ef_search</code> per query</div>
+            <div class="t-pt">Generated <code>tsvector</code> column + GIN index for keyword/BM25 component of hybrid retrieval</div>
+            <div class="t-pt">JSONB metadata + GIN index for filter pushdown (lang, source, tenant, etc.)</div>
+            <div class="t-pt">Choose embedding dimension based on model: <code>databricks-bge-large-en</code> = 1024-dim</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">5.3</span>
+            <span class="t-title">Lab: Build the pgvector Schema from Scratch</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Create the <code>vector</code> extension: <code>CREATE EXTENSION IF NOT EXISTS vector</code></div>
+            <div class="t-pt">Define a <code>documents</code> table with content, JSONB metadata, vector embedding, and generated tsvector</div>
+            <div class="t-pt">Add HNSW index using cosine distance (<code>vector_cosine_ops</code>)</div>
+            <div class="t-pt">Add GIN index on tsvector and JSONB metadata</div>
+          </div>
+          <div class="code-block"><span class="kw">CREATE EXTENSION IF NOT EXISTS</span> vector;
+
+<span class="kw">CREATE TABLE</span> documents (
+    id         BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+    source     <span class="kw">TEXT</span>,
+    title      <span class="kw">TEXT</span>,
+    content    <span class="kw">TEXT</span>,
+    metadata   JSONB,
+    embedding  vector(<span class="nu">1024</span>),
+    tsv        tsvector <span class="kw">GENERATED ALWAYS AS</span>
+               (<span class="fn">to_tsvector</span>(<span class="st">'english'</span>,
+                  <span class="fn">coalesce</span>(title,<span class="st">''</span>) || <span class="st">' '</span> || <span class="fn">coalesce</span>(content,<span class="st">''</span>))) <span class="kw">STORED</span>,
+    created_at <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>()
+);
+
+<span class="kw">CREATE INDEX</span> idx_doc_hnsw ON documents
+  <span class="kw">USING</span> hnsw (embedding vector_cosine_ops)
+  <span class="kw">WITH</span> (m = <span class="nu">16</span>, ef_construction = <span class="nu">64</span>);
+
+<span class="kw">CREATE INDEX</span> idx_doc_tsv ON documents <span class="kw">USING</span> GIN (tsv);
+<span class="kw">CREATE INDEX</span> idx_doc_meta ON documents <span class="kw">USING</span> GIN (metadata);</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">5.4</span>
+            <span class="t-title">Lab: Embed &amp; Bulk-Load Documents via Foundation Models API</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-N">New</span></div>
+          </div>
+          <p class="t-desc">No separate inference infra — Foundation Models gives you embeddings on the same platform.</p>
+          <div class="t-points">
+            <div class="t-pt">Use the OpenAI-compatible client from the SDK: <code>w.serving_endpoints.get_open_ai_client()</code></div>
+            <div class="t-pt">Embed in batches of 32–64 to balance throughput and rate limits</div>
+            <div class="t-pt">Insert in transactions of 500–1000 rows to amortize commit cost</div>
+            <div class="t-pt">For datasets &gt; 1M rows: use <code>COPY</code> via <code>psycopg.copy</code> for 10–50× faster ingest</div>
+          </div>
+          <div class="code-block"><span class="kw">import</span> json
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> text
+
+client = w.serving_endpoints.<span class="fn">get_open_ai_client</span>()
+
+<span class="kw">def</span> <span class="fn">embed</span>(texts):
+    r = client.embeddings.<span class="fn">create</span>(
+        model=<span class="st">"databricks-bge-large-en"</span>, input=texts)
+    <span class="kw">return</span> [d.embedding <span class="kw">for</span> d <span class="kw">in</span> r.data]
+
+docs = [(<span class="st">"docs/lakebase.md"</span>, <span class="st">"Overview"</span>,
+         <span class="st">"Lakebase is a managed Postgres OLTP engine in Databricks."</span>),
+        (<span class="st">"docs/branches.md"</span>, <span class="st">"Branching"</span>,
+         <span class="st">"Branches are copy-on-write clones ready in seconds."</span>)]
+
+vecs = <span class="fn">embed</span>([d[<span class="nu">2</span>] <span class="kw">for</span> d <span class="kw">in</span> docs])
+
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> c:
+    <span class="kw">for</span> (src, title, content), v <span class="kw">in</span> <span class="fn">zip</span>(docs, vecs):
+        c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+          INSERT INTO documents (source, title, content, embedding, metadata)
+          VALUES (:s, :t, :c, :e, :m)
+        """</span>), <span class="fn">dict</span>(s=src, t=title, c=content,
+                  e=<span class="fn">str</span>(v), m=json.<span class="fn">dumps</span>({<span class="st">"lang"</span>: <span class="st">"en"</span>})))</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">5.5</span>
+            <span class="t-title">Lab: Hybrid Retrieval with Reciprocal Rank Fusion</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-N">New</span></div>
+          </div>
+          <p class="t-desc">Vector alone misses keyword matches; BM25 alone misses semantic matches. RRF fuses both.</p>
+          <div class="t-points">
+            <div class="t-pt">Run two CTEs: top-50 by vector distance, top-50 by ts_rank</div>
+            <div class="t-pt">Combine with RRF: <code>1/(60+rank_v) + 1/(60+rank_k)</code></div>
+            <div class="t-pt">Apply metadata filters in the WHERE clause for tenant isolation</div>
+            <div class="t-pt">Tune <code>ef_search</code> per query for the recall/latency trade-off</div>
+          </div>
+          <div class="code-block"><span class="kw">WITH</span> v <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id, ROW_NUMBER() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> embedding &lt;=&gt; :qv) <span class="kw">AS</span> rk
+  <span class="kw">FROM</span> documents <span class="kw">ORDER BY</span> embedding &lt;=&gt; :qv <span class="kw">LIMIT</span> <span class="nu">50</span>
+),
+k <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id, ROW_NUMBER() <span class="kw">OVER</span>
+    (<span class="kw">ORDER BY</span> <span class="fn">ts_rank</span>(tsv, <span class="fn">plainto_tsquery</span>(:q)) <span class="kw">DESC</span>) <span class="kw">AS</span> rk
+  <span class="kw">FROM</span> documents
+  <span class="kw">WHERE</span> tsv @@ <span class="fn">plainto_tsquery</span>(:q) <span class="kw">LIMIT</span> <span class="nu">50</span>
+)
+<span class="kw">SELECT</span> d.id, d.title,
+       <span class="nu">1.0</span>/(<span class="nu">60</span>+v.rk) + <span class="nu">1.0</span>/(<span class="nu">60</span>+k.rk) <span class="kw">AS</span> rrf
+<span class="kw">FROM</span> documents d
+<span class="kw">LEFT JOIN</span> v <span class="kw">USING</span>(id) <span class="kw">LEFT JOIN</span> k <span class="kw">USING</span>(id)
+<span class="kw">WHERE</span> v.id <span class="kw">IS NOT NULL OR</span> k.id <span class="kw">IS NOT NULL</span>
+<span class="kw">ORDER BY</span> rrf <span class="kw">DESC LIMIT</span> <span class="nu">10</span>;</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">5.6</span>
+            <span class="t-title">Lab: End-to-End RAG Function in &lt;40 Lines</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Embed the question, run the hybrid retrieval, build a context block</div>
+            <div class="t-pt">Call <code>databricks-meta-llama-3-3-70b-instruct</code> with system prompt + context + question</div>
+            <div class="t-pt">Set temperature low (0.0–0.2) for grounded answers; raise for creative tasks</div>
+            <div class="t-pt">Wire it into a notebook UI cell to test interactively</div>
+          </div>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">rag</span>(question: <span class="fn">str</span>, k: <span class="fn">int</span> = <span class="nu">5</span>) -&gt; <span class="fn">str</span>:
+    qv = <span class="fn">embed</span>([question])[<span class="nu">0</span>]
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        rows = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+            SELECT title, content FROM documents
+            ORDER BY embedding &lt;=&gt; :qv LIMIT :k
+        """</span>), {<span class="st">"qv"</span>: <span class="fn">str</span>(qv), <span class="st">"k"</span>: k}).<span class="fn">fetchall</span>()
+    ctx = <span class="st">"\n\n"</span>.<span class="fn">join</span>(<span class="st">f"# </span><span class="nm">{r.title}</span><span class="st">\n</span><span class="nm">{r.content}</span><span class="st">"</span> <span class="kw">for</span> r <span class="kw">in</span> rows)
+    out = client.chat.completions.<span class="fn">create</span>(
+        model=<span class="st">"databricks-meta-llama-3-3-70b-instruct"</span>,
+        messages=[
+          {<span class="st">"role"</span>:<span class="st">"system"</span>,<span class="st">"content"</span>:<span class="st">"Answer using ONLY the context."</span>},
+          {<span class="st">"role"</span>:<span class="st">"user"</span>,
+           <span class="st">"content"</span>:<span class="st">f"Context:\n</span><span class="nm">{ctx}</span><span class="st">\n\nQ: </span><span class="nm">{question}</span><span class="st">"</span>}],
+        temperature=<span class="nu">0.1</span>)
+    <span class="kw">return</span> out.choices[<span class="nu">0</span>].message.content</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mod-outcome">
+      <div class="outcome-icon">🎯</div>
+      <div class="outcome-text"><strong>Outcome:</strong> You can decide between Lakebase + pgvector and Mosaic AI Vector Search for any customer scenario, build a complete hybrid RAG pipeline in Postgres, and ship retrieval that mixes vector similarity with arbitrary SQL filters.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ MODULE 6 -->
+<div class="module" id="m6">
+  <div class="mod-header" onclick="toggle('m6')">
+    <div class="mod-num-col">Module 06</div>
+    <div class="mod-main">
+      <div class="mod-level lv2">Intermediate · ~3h</div>
+      <div class="mod-title">Lakebase as Memory Store for AI Agents</div>
+      <div class="mod-subtitle">An agent without memory is a chatbot with amnesia. The four memory layers — short-term, episodic, semantic, procedural — and how to model them all in a single Postgres.</div>
+    </div>
+    <div class="mod-toggle-col"><div class="toggle-btn" id="tb-m6">▶</div></div>
+  </div>
+  <div class="mod-body" id="body-m6">
+    <div class="topics-list">
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">6.1</span>
+            <span class="t-title">The Four Memory Layers — Conceptual Model</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-N">New</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt"><strong>Short-term</strong> — current conversation messages, keyed by <code>session_id</code></div>
+            <div class="t-pt"><strong>Long-term episodic</strong> — distilled memories from past sessions for one user, vector-retrievable</div>
+            <div class="t-pt"><strong>Semantic</strong> — cross-user knowledge base (the <code>documents</code> table from Module 5)</div>
+            <div class="t-pt"><strong>Procedural</strong> — append-only audit trail of tool calls (args, result, duration, success)</div>
+            <div class="t-pt">All four can live in the same Lakebase database — one auth, one bill, one query plane</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">6.2</span>
+            <span class="t-title">Lab: Schema for Sessions, Messages, Episodes, Tool Calls</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Use UUID primary keys for sessions (clients can generate them client-side)</div>
+            <div class="t-pt">Foreign key from messages and tool_calls to sessions with ON DELETE CASCADE</div>
+            <div class="t-pt">Episodes get a vector embedding for retrieval and an importance score for ranking</div>
+            <div class="t-pt">Add a (session_id, created_at) index on messages for fast history retrieval</div>
+          </div>
+          <div class="code-block"><span class="kw">CREATE TABLE</span> sessions (
+  id          UUID <span class="kw">PRIMARY KEY DEFAULT</span> <span class="fn">gen_random_uuid</span>(),
+  user_id     <span class="kw">TEXT NOT NULL</span>,
+  agent_name  <span class="kw">TEXT</span>,
+  created_at  <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>(),
+  ended_at    <span class="kw">TIMESTAMPTZ</span>
+);
+
+<span class="kw">CREATE TABLE</span> messages (
+  id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+  session_id  UUID <span class="kw">REFERENCES</span> sessions(id) <span class="kw">ON DELETE CASCADE</span>,
+  role        <span class="kw">TEXT CHECK</span> (role <span class="kw">IN</span>
+              (<span class="st">'system'</span>,<span class="st">'user'</span>,<span class="st">'assistant'</span>,<span class="st">'tool'</span>)),
+  content     <span class="kw">TEXT</span>,
+  tool_call   JSONB,
+  created_at  <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>()
+);
+<span class="kw">CREATE INDEX</span> ON messages(session_id, created_at);
+
+<span class="kw">CREATE TABLE</span> episodes (
+  id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+  user_id     <span class="kw">TEXT NOT NULL</span>,
+  summary     <span class="kw">TEXT</span>,
+  embedding   vector(<span class="nu">1024</span>),
+  importance  <span class="kw">REAL DEFAULT</span> <span class="nu">0.5</span>,
+  last_seen   <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>()
+);
+<span class="kw">CREATE INDEX</span> ON episodes <span class="kw">USING</span> hnsw (embedding vector_cosine_ops);
+<span class="kw">CREATE INDEX</span> ON episodes(user_id);
+
+<span class="kw">CREATE TABLE</span> tool_calls (
+  id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+  session_id  UUID <span class="kw">REFERENCES</span> sessions(id),
+  tool_name   <span class="kw">TEXT</span>,
+  args        JSONB,
+  result      JSONB,
+  duration_ms <span class="kw">INT</span>,
+  ok          <span class="kw">BOOL</span>,
+  ts          <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>()
+);</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">6.3</span>
+            <span class="t-title">Lab: The AgentMemory Class — Clean Python Contract</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-N">New</span></div>
+          </div>
+          <p class="t-desc">Wrap raw SQL behind methods so the agent never sees Postgres directly.</p>
+          <div class="t-points">
+            <div class="t-pt">Methods: <code>start_session</code>, <code>add_message</code>, <code>recent_messages</code>, <code>remember</code>, <code>recall</code>, <code>log_tool_call</code></div>
+            <div class="t-pt"><code>recall</code> uses vector distance + importance bonus for memory ranking</div>
+            <div class="t-pt">Always parameterized SQL — no string concatenation, no SQL injection risk</div>
+            <div class="t-pt">Make the class injectable with the engine and embed function for testability</div>
+          </div>
+          <div class="code-block"><span class="kw">class</span> <span class="fn">AgentMemory</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, engine, embed_fn):
+        self.e, self.embed = engine, embed_fn
+
+    <span class="kw">def</span> <span class="fn">start_session</span>(self, user_id, agent=<span class="st">"assistant"</span>):
+        <span class="kw">with</span> self.e.<span class="fn">begin</span>() <span class="kw">as</span> c:
+            sid = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+              INSERT INTO sessions(user_id, agent_name)
+              VALUES (:u,:a) RETURNING id"""</span>),
+              <span class="fn">dict</span>(u=user_id, a=agent)).<span class="fn">scalar</span>()
+        <span class="kw">return</span> <span class="fn">str</span>(sid)
+
+    <span class="kw">def</span> <span class="fn">remember</span>(self, user_id, summary, importance=<span class="nu">0.5</span>):
+        v = self.<span class="fn">embed</span>([summary])[<span class="nu">0</span>]
+        <span class="kw">with</span> self.e.<span class="fn">begin</span>() <span class="kw">as</span> c:
+            c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+              INSERT INTO episodes(user_id, summary, embedding, importance)
+              VALUES (:u, :s, :e, :i)"""</span>),
+              <span class="fn">dict</span>(u=user_id, s=summary, e=<span class="fn">str</span>(v), i=importance))
+
+    <span class="kw">def</span> <span class="fn">recall</span>(self, user_id, query, k=<span class="nu">5</span>):
+        qv = self.<span class="fn">embed</span>([query])[<span class="nu">0</span>]
+        <span class="kw">with</span> self.e.<span class="fn">connect</span>() <span class="kw">as</span> c:
+            <span class="kw">return</span> c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+              SELECT summary, importance, embedding &lt;=&gt; :q AS dist
+              FROM episodes WHERE user_id = :u
+              ORDER BY (embedding &lt;=&gt; :q) - importance*0.1
+              LIMIT :k"""</span>),
+              <span class="fn">dict</span>(u=user_id, q=<span class="fn">str</span>(qv), k=k)).<span class="fn">fetchall</span>()</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">6.4</span>
+            <span class="t-title">Lab: Cross-Session Memory Demo</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <p class="t-desc">Prove the agent remembers a user preference across sessions — the killer demo.</p>
+          <div class="t-points">
+            <div class="t-pt">Session 1: user says "I prefer concise email replies." Agent calls <code>remember()</code> at session end</div>
+            <div class="t-pt">Session 2 (same user): agent calls <code>recall()</code> with the new query, gets the preference back</div>
+            <div class="t-pt">Inject the recalled summaries into the system prompt of the next turn</div>
+            <div class="t-pt">Verify the new response respects the remembered preference</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">6.5</span>
+            <span class="t-title">Episode Distillation — Nightly Memory Compression</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Run a nightly Databricks Workflow that ends sessions older than 24h</div>
+            <div class="t-pt">For each ended session, ask the LLM to summarize key facts and preferences in 3 sentences</div>
+            <div class="t-pt">Embed the summary and write it as an episode with importance scored by the LLM</div>
+            <div class="t-pt">Optional: prune low-importance episodes &gt; 90 days old to control storage</div>
+            <div class="t-pt">This is exactly the pattern used by ChatGPT's memory and LangGraph's checkpoint summarization</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">6.6</span>
+            <span class="t-title">Wiring into Mosaic AI Agent Framework</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-N">New</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Mosaic AI Agent Framework supports pluggable persistence — Lakebase becomes the checkpoint store</div>
+            <div class="t-pt">Agent state (LangGraph nodes, tool plans) survives restarts and scale events</div>
+            <div class="t-pt">Auditability: every checkpoint is queryable from DBSQL — no opaque pickle blobs</div>
+            <div class="t-pt">MLflow Tracing pairs naturally — span attributes can include <code>session_id</code> for cross-correlation</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mod-outcome">
+      <div class="outcome-icon">🎯</div>
+      <div class="outcome-text"><strong>Outcome:</strong> You can model all four memory layers in a single Postgres, ship a working <code>AgentMemory</code> contract, demonstrate cross-session recall, and run nightly distillation — exactly the pattern modern agent frameworks expect.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ MODULE 7 -->
+<div class="module" id="m7">
+  <div class="mod-header" onclick="toggle('m7')">
+    <div class="mod-num-col">Module 07</div>
+    <div class="mod-main">
+      <div class="mod-level lv3">Advanced · ~3.5h</div>
+      <div class="mod-title">Powering Databricks Apps with Lakebase</div>
+      <div class="mod-subtitle">The OBO identity model, per-request engine factories, the connection-pooling trap, and a complete Streamlit + Lakebase app deployed end-to-end.</div>
+    </div>
+    <div class="mod-toggle-col"><div class="toggle-btn" id="tb-m7">▶</div></div>
+  </div>
+  <div class="mod-body" id="body-m7">
+    <div class="topics-list">
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">7.1</span>
+            <span class="t-title">Why Apps + Lakebase Is Different from "App + Some Postgres"</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Before: deploy a container on EKS, point at external Postgres, configure SSO, manage secrets</div>
+            <div class="t-pt">After: <code>databricks apps deploy</code>; runtime injects creds; identity is the workspace user</div>
+            <div class="t-pt">Single bill, single audit, single governance plane — apps are first-class data products</div>
+            <div class="t-pt">Use cases we see: internal admin tools, AI chat-over-data, approval workflows, customer 360 lookups</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">7.2</span>
+            <span class="t-title">The OBO Runtime Contract — On-Behalf-Of Auth</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-N">New</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Bound apps receive <code>PGHOST</code>, <code>PGUSER</code>, <code>DATABRICKS_TOKEN</code>, <code>PGDATABASE</code> as env vars</div>
+            <div class="t-pt">The token is scoped to the end user, not the app — every connection runs under their identity</div>
+            <div class="t-pt">Postgres GRANTs and RLS policies operate against the workspace user — secure-by-default</div>
+            <div class="t-pt">Implication: there is no service account to leak, no shared secret to rotate</div>
+            <div class="t-pt">The trap: a global SQLAlchemy engine reuses the first user's token for everyone — never do this</div>
+          </div>
+          <div class="note-box">The connection-pooling trap is the #1 security incident vector in real-world Apps deployments. Read 7.4 carefully.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">7.3</span>
+            <span class="t-title">Lab: Streamlit App.yaml Manifest with Lakebase Binding</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Declare the Lakebase project as a resource with <code>permission: CAN_USE</code></div>
+            <div class="t-pt">Map env vars from the resource into the runtime container</div>
+            <div class="t-pt">Keep secrets out of the manifest — everything is identity-driven</div>
+          </div>
+          <div class="code-block">command: [<span class="st">"streamlit"</span>, <span class="st">"run"</span>, <span class="st">"app.py"</span>]
+
+env:
+  - name: PGHOST
+    valueFrom: lakebase-tutorial
+  - name: PGDATABASE
+    value: databricks_postgres
+
+resources:
+  - name: lakebase-tutorial
+    description: <span class="st">"Operational store"</span>
+    database:
+      instance_name: lakebase-tutorial
+      permission: CAN_USE</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">7.4</span>
+            <span class="t-title">Lab: Per-Request Engine Factory — Doing OBO Correctly</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-N">New</span></div>
+          </div>
+          <p class="t-desc">Two correct patterns; pick based on your traffic profile.</p>
+          <div class="t-points">
+            <div class="t-pt">Pattern 1 (simple): rebuild the engine per request from the request-scoped token</div>
+            <div class="t-pt">Pattern 2 (high QPS): keep an LRU cache keyed by (user_id, token_hash), TTL = token lifetime</div>
+            <div class="t-pt">Always set <code>pool_pre_ping=True</code> to detect token expiry mid-flight</div>
+            <div class="t-pt">Never share an engine across users — rows from user A will appear for user B</div>
+          </div>
+          <div class="code-block"><span class="kw">import</span> os, streamlit <span class="kw">as</span> st
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+
+host  = os.environ[<span class="st">"PGHOST"</span>]
+user  = os.environ[<span class="st">"PGUSER"</span>]
+token = os.environ[<span class="st">"DATABRICKS_TOKEN"</span>]
+db    = os.environ[<span class="st">"PGDATABASE"</span>]
+
+<span class="nm">@st.cache_resource(ttl=300)</span>   <span class="cm"># refresh under token TTL</span>
+<span class="kw">def</span> <span class="fn">get_engine</span>():
+    url = (<span class="st">f"postgresql+psycopg://</span><span class="nm">{user}</span><span class="st">:</span><span class="nm">{token}</span><span class="st">"</span>
+           <span class="st">f"@</span><span class="nm">{host}</span><span class="st">:5432/</span><span class="nm">{db}</span><span class="st">?sslmode=require"</span>)
+    <span class="kw">return</span> <span class="fn">create_engine</span>(url, pool_pre_ping=<span class="kw">True</span>)
+
+st.<span class="fn">title</span>(<span class="st">"📦 My Orders"</span>)
+me = <span class="fn">WorkspaceClient</span>().current_user.<span class="fn">me</span>().user_name
+st.<span class="fn">caption</span>(<span class="st">f"Signed in as </span><span class="nm">{me}</span><span class="st">"</span>)
+
+<span class="kw">with</span> <span class="fn">get_engine</span>().<span class="fn">connect</span>() <span class="kw">as</span> c:
+    rows = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        SELECT o.id, o.sku, o.qty, o.placed_at
+        FROM orders o JOIN users u ON u.id = o.user_id
+        WHERE u.email = :me ORDER BY o.placed_at DESC LIMIT 50
+    """</span>), {<span class="st">"me"</span>: me}).<span class="fn">fetchall</span>()
+
+st.<span class="fn">dataframe</span>(rows)</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">7.5</span>
+            <span class="t-title">Lab: Deploy &amp; Verify Identity Flow</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Deploy: <code>databricks apps deploy --source-dir ./app lakebase-orders</code></div>
+            <div class="t-pt">Open the app URL — you should see only your rows</div>
+            <div class="t-pt">Have a teammate log in — they should see only theirs (or nothing)</div>
+            <div class="t-pt">Verify in Postgres logs that connections come in as different users</div>
+            <div class="t-pt">Add a Postgres RLS policy and confirm it's enforced for the app, not bypassed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">7.6</span>
+            <span class="t-title">Common App Patterns in the Field</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt"><strong>Internal admin tools</strong> — replace Retool / Hightouch UI; UC-governed; cheaper TCO</div>
+            <div class="t-pt"><strong>AI chat-over-data</strong> — Apps + Lakebase memory + Foundation Models = ChatGPT for your data, no third-party SaaS</div>
+            <div class="t-pt"><strong>Approval workflows</strong> — orders/expenses sit in Lakebase, app provides UI, Job promotes on approve</div>
+            <div class="t-pt"><strong>Customer 360 lookups</strong> — synced tables feed Lakebase from UC; sub-100ms search across millions of rows</div>
+            <div class="t-pt"><strong>Feature serving for ML</strong> — Feature Store with Lakebase as the online layer, not Redis</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mod-outcome">
+      <div class="outcome-icon">🎯</div>
+      <div class="outcome-text"><strong>Outcome:</strong> You can ship a Databricks App backed by Lakebase using the OBO identity model correctly, avoid the connection-pooling trap, and architect every common app pattern customers actually deploy.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ MODULE 8 — CAPSTONE -->
+<div class="module" id="m8">
+  <div class="mod-header" onclick="toggle('m8')">
+    <div class="mod-num-col">Module 08</div>
+    <div class="mod-main">
+      <div class="mod-level lv3">Advanced · ~4h</div>
+      <div class="mod-title">CAPSTONE — Build "AskMyOrders" End-to-End</div>
+      <div class="mod-subtitle">A single project that exercises every concept in this roadmap: an internal AI-powered customer support app with Lakebase-backed memory, RAG retrieval, synced operational data, and Lakehouse Sync to close the analytics loop.</div>
+    </div>
+    <div class="mod-toggle-col"><div class="toggle-btn" id="tb-m8">▶</div></div>
+  </div>
+  <div class="mod-body" id="body-m8">
+    <div class="topics-list">
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">8.1</span>
+            <span class="t-title">Capstone Scenario &amp; Architecture</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-C">Capstone</span></div>
+          </div>
+          <p class="t-desc">You are the lead engineer at "Northwind Goods," a fictional retailer on Databricks. Build a unified AI assistant that replaces five disparate support tools (ticketing, customer DB, returns portal, knowledge wiki, Slack).</p>
+          <div class="t-points">
+            <div class="t-pt"><strong>User layer</strong> — Support agent, signed in via workspace OAuth</div>
+            <div class="t-pt"><strong>App layer</strong> — Streamlit on Databricks Apps; chat UI + customer context panel + resolution form</div>
+            <div class="t-pt"><strong>Data layer (Lakebase)</strong> — synced customer/order tables, pgvector knowledge base, agent memory schema, resolutions table</div>
+            <div class="t-pt"><strong>Lakehouse layer</strong> — UC Delta sources for sync; resolutions stream back to Delta via Lakehouse Sync</div>
+            <div class="t-pt">Every concept from Modules 1–7 is exercised in exactly one place</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">8.2</span>
+            <span class="t-title">Phase 1 — Foundation &amp; Provisioning (~30 min)</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-C">Capstone</span></div>
+          </div>
+          <p class="t-desc">Stand up the project, create dev branch, register in UC, seed operational schema.</p>
+          <div class="t-points">
+            <div class="t-pt">Create Lakebase project <code>askmyorders</code> (CU_1, 7-day retention, HA off for now)</div>
+            <div class="t-pt">Branch <code>dev</code> off <code>main</code> for schema iteration</div>
+            <div class="t-pt">Apply DDL: <code>customers</code>, <code>orders</code>, <code>returns</code>, <code>resolutions</code></div>
+            <div class="t-pt">Create vector extension and KB/memory tables: <code>kb_documents</code>, <code>sessions</code>, <code>messages</code>, <code>episodes</code>, <code>tool_calls</code></div>
+            <div class="t-pt">Register Lakebase as catalog <code>askmyorders_db</code> in Unity Catalog</div>
+            <div class="t-pt">Verify connection from a notebook using OAuth credential generation</div>
+          </div>
+          <div class="note-box">Exercises Modules 1, 2, 3 — Foundations, Architecture, First DB.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">8.3</span>
+            <span class="t-title">Phase 2 — Hydrate from the Lakehouse (~45 min)</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-C">Capstone</span></div>
+          </div>
+          <p class="t-desc">Customer and order data already lives in <code>main.gold.*</code> Delta. Don't duplicate the pipeline — sync into Lakebase.</p>
+          <div class="t-points">
+            <div class="t-pt">Create synced table <code>askmyorders_db.public.customers_synced</code> from <code>main.gold.customers</code> (CONTINUOUS, PK=<code>customer_id</code>)</div>
+            <div class="t-pt">Create synced table <code>orders_synced</code> from <code>main.gold.orders</code> (CONTINUOUS, PK=<code>order_id</code>, timeseries=<code>placed_at</code>)</div>
+            <div class="t-pt">Verify a write to source Delta appears in Lakebase within seconds</div>
+            <div class="t-pt">Add B-tree index on <code>orders_synced(customer_id)</code> and BRIN on <code>placed_at</code></div>
+            <div class="t-pt">Test row-level latency: SELECT for one customer's last 10 orders should return in &lt;30ms</div>
+          </div>
+          <div class="note-box">Exercises Module 4 — Sync, Federation &amp; UC.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">8.4</span>
+            <span class="t-title">Phase 3 — Build the Knowledge Base / RAG (~60 min)</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-C">Capstone</span></div>
+          </div>
+          <p class="t-desc">Load company support docs (returns policy, shipping FAQ, warranty terms) into the KB with embeddings.</p>
+          <div class="t-points">
+            <div class="t-pt">Chunk source docs into ~500-token segments with 50-token overlap</div>
+            <div class="t-pt">Generate embeddings with <code>databricks-bge-large-en</code> via Foundation Models API</div>
+            <div class="t-pt">Bulk-load <code>kb_documents</code> in transactions of 1000 rows</div>
+            <div class="t-pt">Create HNSW index <code>(m=16, ef_construction=64)</code> + GIN index on tsvector</div>
+            <div class="t-pt">Implement <code>retrieve(query, k=5)</code> using Reciprocal Rank Fusion</div>
+            <div class="t-pt">Smoke test: <em>"What's the return window for opened electronics?"</em> retrieves the right policy</div>
+          </div>
+          <div class="note-box">Exercises Module 5 — Vector Store.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">8.5</span>
+            <span class="t-title">Phase 4 — The Agent with Memory (~60 min)</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-C">Capstone</span></div>
+          </div>
+          <p class="t-desc">Wire the four-layer memory model into a working agent loop with three tools.</p>
+          <div class="t-points">
+            <div class="t-pt">Implement <code>AgentMemory</code> against the project schema (Module 6 class)</div>
+            <div class="t-pt">Define tool functions with explicit JSON schemas: <code>retrieve</code>, <code>get_orders</code>, <code>recall</code></div>
+            <div class="t-pt">Build the agent loop: system prompt → recall episodes → retrieve docs → LLM → tool calls → response → log message</div>
+            <div class="t-pt">On <code>end_session</code>: ask LLM for 3-sentence summary, embed, write as episode</div>
+            <div class="t-pt">Cross-session memory test: set "I prefer email replies" in session 1 → verify recall in session 2</div>
+          </div>
+          <div class="code-block"><span class="kw">def</span> <span class="fn">run_turn</span>(engine, embed_fn, llm, sid, user_id, user_msg):
+    mem = <span class="fn">AgentMemory</span>(engine, embed_fn)
+
+    <span class="cm"># 1. Recall long-term episodes</span>
+    episodes = mem.<span class="fn">recall</span>(user_id, user_msg, k=<span class="nu">3</span>)
+    epi = <span class="st">"\n"</span>.<span class="fn">join</span>(<span class="st">f"- </span><span class="nm">{e.summary}</span><span class="st">"</span> <span class="kw">for</span> e <span class="kw">in</span> episodes)
+
+    <span class="cm"># 2. Build messages from history + system prompt</span>
+    history = mem.<span class="fn">recent_messages</span>(sid, n=<span class="nu">10</span>)
+    messages = [
+      {<span class="st">"role"</span>:<span class="st">"system"</span>,
+       <span class="st">"content"</span>: <span class="st">f"You are a Northwind support assistant.\nKnown:\n</span><span class="nm">{epi}</span><span class="st">"</span>},
+      *[{<span class="st">"role"</span>:m.role,<span class="st">"content"</span>:m.content} <span class="kw">for</span> m <span class="kw">in</span> history],
+      {<span class="st">"role"</span>:<span class="st">"user"</span>,<span class="st">"content"</span>:user_msg}]
+    mem.<span class="fn">add_message</span>(sid, <span class="st">"user"</span>, user_msg)
+
+    <span class="cm"># 3. Tool-using loop (max 4 iterations)</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">4</span>):
+        out = llm.chat.completions.<span class="fn">create</span>(
+            model=<span class="st">"databricks-meta-llama-3-3-70b-instruct"</span>,
+            messages=messages, tools=TOOLS, temperature=<span class="nu">0.1</span>)
+        msg = out.choices[<span class="nu">0</span>].message
+        <span class="kw">if not</span> msg.tool_calls:
+            mem.<span class="fn">add_message</span>(sid, <span class="st">"assistant"</span>, msg.content)
+            <span class="kw">return</span> msg.content
+        <span class="cm"># ... handle tool calls, log, append to messages ...</span></div>
+          <div class="note-box">Exercises Module 6 — Agent Memory + Module 5 retrieval composed together.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">8.6</span>
+            <span class="t-title">Phase 5 — Ship as App + Close the Loop (~45 min)</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span><span class="tag tag-C">Capstone</span></div>
+          </div>
+          <p class="t-desc">Wrap the agent in a Streamlit UI, deploy as a Databricks App, configure Lakehouse Sync for analytics.</p>
+          <div class="t-points">
+            <div class="t-pt">Streamlit UI: chat panel (left) + customer context panel (right, live from synced tables)</div>
+            <div class="t-pt">Use the per-request OBO engine pattern from Module 7</div>
+            <div class="t-pt">"Save resolution" form writes to <code>resolutions</code> table</div>
+            <div class="t-pt"><code>app.yaml</code> binds the <code>askmyorders</code> Lakebase project</div>
+            <div class="t-pt">Deploy: <code>databricks apps deploy</code> — verify identity flow with two different users</div>
+            <div class="t-pt">Configure Lakehouse Sync: <code>resolutions</code> → <code>main.silver.support_resolutions</code></div>
+            <div class="t-pt">Build a DBSQL dashboard: count by day, top resolution categories, average resolution time</div>
+          </div>
+          <div class="note-box">Exercises Module 7 — Databricks Apps + reverse Module 4 — Lakehouse Sync.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">8.7</span>
+            <span class="t-title">Definition of Done — The 9 Checkpoints</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-C">Capstone</span></div>
+          </div>
+          <p class="t-desc">You have completed the capstone when all of these are true:</p>
+          <div class="t-points">
+            <div class="t-pt">✓ Project provisioned with both <code>main</code> and at least one feature branch demonstrated</div>
+            <div class="t-pt">✓ UC catalog registered — Lakebase tables visible from DBSQL and Catalog Explorer</div>
+            <div class="t-pt">✓ Two synced tables live — writing to Delta source propagates within ~10s</div>
+            <div class="t-pt">✓ Knowledge base loaded — at least 200 chunks indexed; hybrid retrieval works on 3 test queries</div>
+            <div class="t-pt">✓ Agent demonstrates cross-session memory — preference set in session 1 recalled in session 2</div>
+            <div class="t-pt">✓ Agent uses both tools — at least one turn invokes <code>retrieve</code> AND <code>get_orders</code></div>
+            <div class="t-pt">✓ App deployed — accessible via App URL; two different users see different data via OBO</div>
+            <div class="t-pt">✓ Lakehouse Sync running — resolutions appear in <code>main.silver.support_resolutions</code></div>
+            <div class="t-pt">✓ DBSQL dashboard built with at least three tiles on the Delta resolutions table</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">8.8</span>
+            <span class="t-title">Stretch Goals for the Truly Committed</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-C">Capstone</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">Add HA on the production primary; simulate a failover and confirm app reconnects transparently</div>
+            <div class="t-pt">Add a read replica and route customer-context panel reads to it (writes stay on primary)</div>
+            <div class="t-pt">Use point-in-time restore: corrupt a row deliberately, branch from 5 min ago, verify recovery</div>
+            <div class="t-pt">Add Inbound Private Link if your workspace is in a VPC — measure latency vs. public endpoint</div>
+            <div class="t-pt">Wire MLflow Tracing around <code>run_turn</code> to capture every agent trajectory for offline evaluation</div>
+            <div class="t-pt">Add row-level security on <code>orders_synced</code> so agents only see customers in their assigned region</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mod-outcome">
+      <div class="outcome-icon">🏆</div>
+      <div class="outcome-text"><strong>Capstone Outcome:</strong> You have a working AI-powered support app, deployed on Databricks Apps, backed by Lakebase as the operational + memory + vector store, with Delta sources and analytics targets. You have personally exercised every capability — branching, sync, RAG, memory, OBO, Lakehouse Sync. You can now lead a customer through the same architecture with full conviction.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ MODULE 9 — RSA TOOLKIT -->
+<div class="module" id="m9">
+  <div class="mod-header" onclick="toggle('m9')">
+    <div class="mod-num-col">Module 09</div>
+    <div class="mod-main">
+      <div class="mod-level lv4">Expert · ~3h</div>
+      <div class="mod-title">RSA Toolkit — Comparison, Best Practices &amp; Limitations</div>
+      <div class="mod-subtitle">The conversations customers actually have. Lakebase vs. RDS / Aurora / Neon / Supabase. Limits to flag in design reviews. The decision tree, the anti-patterns, and the one-sentence pitch you'll give 100 times.</div>
+    </div>
+    <div class="mod-toggle-col"><div class="toggle-btn" id="tb-m9">▶</div></div>
+  </div>
+  <div class="mod-body" id="body-m9">
+    <div class="topics-list">
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">9.1</span>
+            <span class="t-title">Lakebase vs. The PostgreSQL Competitive Set</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt"><strong>vs. AWS Aurora PG:</strong> Aurora has Aurora Serverless v2 + cloning, but no UC integration, no OBO, no Databricks Apps. Aurora wins on raw OLTP scale.</div>
+            <div class="t-pt"><strong>vs. Neon:</strong> Both have branching and scale-to-zero. Neon wins on pure-Postgres dev workflow; Lakebase wins on lakehouse integration and governance.</div>
+            <div class="t-pt"><strong>vs. Supabase:</strong> Supabase has a richer mobile/JAMstack story (Auth, Edge Functions, Realtime). Lakebase wins for analytical/AI-heavy workloads on Databricks.</div>
+            <div class="t-pt"><strong>vs. RDS / Cloud SQL:</strong> Legacy lift-and-shift. Manual scaling, no branching, no UC. Choose for migration simplicity, not capability.</div>
+            <div class="t-pt"><strong>Honest framing:</strong> Lakebase is a different product class — a Postgres governed and synchronized as part of a lakehouse. If those properties don't matter to the customer, recommend the alternative without hesitation.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">9.2</span>
+            <span class="t-title">Best Practices — Schema, Indexing, Connections</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt"><strong>Use BIGSERIAL / BIGINT</strong> primary keys, not UUIDs. Index locality matters more on remote-paged storage.</div>
+            <div class="t-pt"><strong>Prefer BRIN over B-tree</strong> for monotonically-increasing columns (timestamps, sequences). 100× smaller, equivalent range plans.</div>
+            <div class="t-pt"><strong>Avoid SELECT *</strong> from synced tables — page server fetches whole rows; project columns you need.</div>
+            <div class="t-pt"><strong>Batch writes</strong> in transactions of 1k–10k rows; tiny commits inflate WAL.</div>
+            <div class="t-pt"><strong>HNSW over IVFFlat</strong> for vectors; partial indexes on hot predicates; GIN only where you query.</div>
+            <div class="t-pt"><strong>Always use connection pooling</strong> — Lakebase pgbouncer caps ~1k connections per branch.</div>
+            <div class="t-pt"><strong>Refresh OAuth tokens proactively</strong> at 50 min; the Databricks driver does this; raw clients do not.</div>
+            <div class="t-pt"><strong>Disable scale-to-zero on prod primary</strong> — cold starts ruin p99 SLAs.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">9.3</span>
+            <span class="t-title">Best Practices — Branching, Cost, Governance</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt"><strong>One branch per PR</strong> for schema changes. Merge = run migration on main.</div>
+            <div class="t-pt"><strong>Ephemeral branches in CI</strong> auto-deleted on PR close.</div>
+            <div class="t-pt"><strong>Never run perf tests on main.</strong> Branch, test, drop.</div>
+            <div class="t-pt"><strong>Tag everything</strong> with cost center, env, owner — UC tags + Lakebase tags drive chargeback.</div>
+            <div class="t-pt"><strong>Set retention to the minimum business-acceptable window</strong> (default 7d). Storage cost is per page-version × time.</div>
+            <div class="t-pt"><strong>Aggregate cold tables into Delta</strong> via Lakehouse Sync, then drop in Postgres.</div>
+            <div class="t-pt"><strong>Always register in UC</strong> — without UC, you lose governance, federation, AI/BI access.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">9.4</span>
+            <span class="t-title">Limitations to Flag in Every Design Review</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span><span class="tag tag-N">New</span></div>
+          </div>
+          <p class="t-desc">The list customers will hit and blame you for not surfacing earlier.</p>
+          <div class="t-points">
+            <div class="t-pt"><strong>Postgres extensions are a curated allowlist</strong> — no <code>pg_cron</code>, no custom builds; use Databricks Workflows for scheduling</div>
+            <div class="t-pt"><strong>No superuser</strong> — some ORM defaults fail (e.g., Hibernate auto-DDL); create roles with required GRANTs</div>
+            <div class="t-pt"><strong>Logical replication slots: limited</strong> — external CDC tools need careful slot accounting; use Lakehouse Sync where possible</div>
+            <div class="t-pt"><strong>OAuth token TTL ≈ 1 hour</strong> — long batch jobs / app pools need refresh logic; chunk batches under 1h</div>
+            <div class="t-pt"><strong>Region availability is not universal</strong> — verify before the design call; offer Provisioned where Autoscaling isn't yet GA</div>
+            <div class="t-pt"><strong>Cold starts on scale-to-zero (~3–8s)</strong> — disable on prod primary; enable on dev/preview only</div>
+            <div class="t-pt"><strong>Synced table latency seconds–minutes</strong> — not "instant" UC → Lakebase consistency; for write-once-read-fast use direct writes</div>
+            <div class="t-pt"><strong>Lakehouse Sync (reverse) is Beta on AWS</strong> — for mission-critical CDC, validate region GA status; have fallback</div>
+            <div class="t-pt"><strong>Not a billion-row vector store</strong> — switch to Mosaic AI Vector Search above ~10M vectors</div>
+            <div class="t-pt"><strong>No cross-region active-active</strong> — global apps need additional architecture; HA across AZs only</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">9.5</span>
+            <span class="t-title">When To Use Lakebase — The Decision Tree</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt"><strong>Strong YES:</strong> Customer is on Databricks, building app or agent needing operational state / vector retrieval / low-latency feature serving. Wants single bill, single governance, single auth. Vector corpus &lt; 10M. Postgres acceptable.</div>
+            <div class="t-pt"><strong>Mixed:</strong> Customer has 100M-row OLTP on Aurora today. Migration cost is real; Lakebase doesn't make existing app faster. Recommend Lakebase for <em>new</em> apps in same workspace — coexist, don't migrate-for-migration's-sake.</div>
+            <div class="t-pt"><strong>Honest NO:</strong> Customer needs MySQL / SQL Server / Oracle compatibility. Workload exceeds limits (TB hot working set, 50k+ QPS, billion-vector index, unsupported region). Don't force-fit; recommend the right tool, retain the trust.</div>
+            <div class="t-pt">Run every Lakebase customer conversation through this filter before pitching</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">9.6</span>
+            <span class="t-title">The 30-Second Customer Answer</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <p class="t-desc">When a customer asks: "Why Lakebase instead of Aurora?" — five reasons, in order:</p>
+          <div class="t-points">
+            <div class="t-pt"><strong>Governance.</strong> Lakebase tables register in Unity Catalog. Same RBAC, same tags, same audit.</div>
+            <div class="t-pt"><strong>Zero ETL.</strong> Synced tables eliminate reverse-ETL pipelines from Delta to your app DB.</div>
+            <div class="t-pt"><strong>Identity.</strong> Apps connect on behalf of the end user — RLS works against workspace identity for free.</div>
+            <div class="t-pt"><strong>Branching.</strong> Schema changes get tested on copy-on-write branches in seconds, not staging RDS that was last refreshed 6 weeks ago.</div>
+            <div class="t-pt"><strong>One bill, one platform.</strong> Compute, storage, vectors, models, apps — all on Databricks.</div>
+            <div class="t-pt">If none of those five matter to the customer, Aurora is the right answer. <em>Tell them so.</em></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">9.7</span>
+            <span class="t-title">Anti-Patterns to Refuse Politely</span>
+            <div class="t-tags"><span class="tag tag-T">Theory</span></div>
+          </div>
+          <div class="t-points">
+            <div class="t-pt">❌ "Use Lakebase as our 50TB Aurora replacement next quarter" — too aggressive. Pilot a single new app first.</div>
+            <div class="t-pt">❌ "Run analytics dashboards directly off Lakebase to skip Delta" — Postgres is OLTP. Push aggregations to Delta + DBSQL; serve hot reads from Lakebase.</div>
+            <div class="t-pt">❌ "Store 1 billion document vectors here" — use Mosaic AI Vector Search. Lakebase + pgvector is for &lt;10M.</div>
+            <div class="t-pt">❌ "Avoid UC registration to keep things simple" — without UC, you lose governance, federation, AI/BI access. Always register.</div>
+            <div class="t-pt">❌ "Hardcode the Postgres password in our app config" — tokens expire. Use the SDK's credential provider every time.</div>
+            <div class="t-pt">❌ "One global SQLAlchemy engine for the whole App" — breaks OBO; rows of user A appear for user B. Per-request engine factory.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-inner">
+          <div class="topic-header">
+            <span class="t-num">9.8</span>
+            <span class="t-title">Lab: Build Your Own Design Review Template</span>
+            <div class="t-tags"><span class="tag tag-H">Hands-On</span></div>
+          </div>
+          <p class="t-desc">A 1-page template you'll use on every Lakebase customer conversation.</p>
+          <div class="t-points">
+            <div class="t-pt">Customer scenario in 3 sentences (workload, scale, latency requirement)</div>
+            <div class="t-pt">Fit score (1–5) on each of: governance, zero-ETL, identity, branching, single-platform</div>
+            <div class="t-pt">Limit checklist — flag every relevant item from 9.4 with "discussed" / "blocker" / "NA"</div>
+            <div class="t-pt">Recommendation: strong-yes / mixed / honest-no with one-paragraph rationale</div>
+            <div class="t-pt">Migration timeline if applicable (start with one new app, 90 days, expand from there)</div>
+            <div class="t-pt">Save it to your Confluence / Notion as a reusable artifact for the team</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mod-outcome">
+      <div class="outcome-icon">🎯</div>
+      <div class="outcome-text"><strong>Final Outcome:</strong> You can confidently run any Lakebase customer conversation — comparison, limits, decision tree, design review. You will close more deals and prevent more failures than any feature pitch alone.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SUMMARY TABLE -->
+<div style="margin-top:60px; padding:32px; background:var(--surface); border:1px solid var(--border); border-radius:12px;">
+  <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:20px;">Complete Module Summary</div>
+  <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border2);">
+          <th style="text-align:left; padding:10px 12px; color:var(--text-muted); font-weight:500; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase;">Module</th>
+          <th style="text-align:left; padding:10px 12px; color:var(--text-muted); font-weight:500; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase;">Focus</th>
+          <th style="text-align:center; padding:10px 12px; color:var(--text-muted); font-weight:500; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase;">Level</th>
+          <th style="text-align:center; padding:10px 12px; color:var(--text-muted); font-weight:500; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase;">Time</th>
+          <th style="text-align:center; padding:10px 12px; color:var(--text-muted); font-weight:500; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase;">Tag</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; color:var(--accent-orange);">01</td>
+          <td style="padding:10px 12px; color:var(--text);">Foundations &amp; the Lakebase Mental Model</td>
+          <td style="padding:10px 12px; text-align:center;"><span style="color:var(--l0); font-size:11px;">Beginner</span></td>
+          <td style="padding:10px 12px; text-align:center; color:var(--text-dim);">2h</td>
+          <td style="padding:10px 12px; text-align:center; color:var(--accent-teal); font-size:16px;">✦</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; color:var(--accent-orange);">02</td>
+          <td style="padding:10px 12px; color:var(--text);">Architecture — Compute, Storage, Branches</td>
+          <td style="padding:10px 12px; text-align:center;"><span style="color:var(--l1); font-size:11px;">Beg–Int</span></td>
+          <td style="padding:10px 12px; text-align:center; color:var(--text-dim);">2.5h</td>
+          <td style="padding:10px 12px; text-align:center; color:var(--accent-orange); font-size:16px;">★</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; color:var(--accent-orange);">03</td>
+          <td style="padding:10px 12px; color:var(--text);">Hands-On — Your First Lakebase Project</td>
+          <td style="padding:10px 12px; text-align:center;"><span style="color:var(--l1); font-size:11px;">Beg–Int</span></td>
+          <td style="padding:10px 12px; text-align:center; color:var(--text-dim);">3h</td>
+          <td style="padding:10px 12px; text-align:center; color:var(--accent-purple); font-size:16px;">●</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; color:var(--accent-orange);">04</td>
+          <td style="padding:10px 12px; color:var(--text);">Sync, Federate &amp; Unify with Unity Catalog</td>
+          <td style="padding:10px 12px; text-align:center;"><span style="color:var(--l2); font-size:11px;">Intermediate</span></td>
+          <td style="padding:10px 12px; text-align:center; color:var(--text-dim);">3h</td>
+          <td style="padding:10px 12px; text-align:center; color:var(--accent-orange); font-size:16px;">★</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; color:var(--accent-orange);">05</td>
+          <td style="padding:10px 12px; color:var(--text);">Lakebase as a Vector Store — pgvector RAG</td>
+          <td style="padding:10px 12px; text-align:center;"><span style="color:var(--l2); font-size:11px;">Intermediate</span></td>
+          <td style="padding:10px 12px; text-align:center; color:var(--text-dim);">3.5h</td>
+          <td style="padding:10px 12px; text-align:center; color:var(--accent-orange); font-size:16px;">★</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; color:var(--accent-orange);">06</td>
+          <td style="padding:10px 12px; color:var(--text);">Lakebase as Memory Store for AI Agents</td>
+          <td style="padding:10px 12px; text-align:center;"><span style="color:var(--l2); font-size:11px;">Intermediate</span></td>
+          <td style="padding:10px 12px; text-align:center; color:var(--text-dim);">3h</td>
+          <td style="padding:10px 12px; text-align:center; color:var(--accent-orange); font-size:16px;">★</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; color:var(--accent-orange);">07</td>
+          <td style="padding:10px 12px; color:var(--text);">Powering Databricks Apps with Lakebase</td>
+          <td style="padding:10px 12px; text-align:center;"><span style="color:var(--l3); font-size:11px;">Advanced</span></td>
+          <td style="padding:10px 12px; text-align:center; color:var(--text-dim);">3.5h</td>
+          <td style="padding:10px 12px; text-align:center; color:var(--accent-orange); font-size:16px;">★</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; color:var(--accent-orange);">08</td>
+          <td style="padding:10px 12px; color:var(--text);">CAPSTONE — Build "AskMyOrders" End-to-End</td>
+          <td style="padding:10px 12px; text-align:center;"><span style="color:var(--l3); font-size:11px;">Advanced</span></td>
+          <td style="padding:10px 12px; text-align:center; color:var(--text-dim);">4h</td>
+          <td style="padding:10px 12px; text-align:center; color:var(--accent-yellow); font-size:16px;">◆</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; color:var(--accent-orange);">09</td>
+          <td style="padding:10px 12px; color:var(--text);">RSA Toolkit — Comparison &amp; Field Manual</td>
+          <td style="padding:10px 12px; text-align:center;"><span style="color:var(--l4); font-size:11px;">Expert</span></td>
+          <td style="padding:10px 12px; text-align:center; color:var(--text-dim);">3h</td>
+          <td style="padding:10px 12px; text-align:center; color:var(--accent-orange); font-size:16px;">★</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px; display:flex; gap:20px; font-size:11px; color:var(--text-muted); flex-wrap:wrap;">
+      <span><span style="color:var(--accent-orange);">★</span> = Entirely new module</span>
+      <span><span style="color:var(--accent-teal);">✦</span> = Foundational</span>
+      <span><span style="color:var(--accent-purple);">●</span> = Hands-On lab-heavy</span>
+      <span><span style="color:var(--accent-yellow);">◆</span> = Capstone project</span>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+function toggle(id) {
+  const body = document.getElementById('body-' + id);
+  const btn = document.getElementById('tb-' + id);
+  const open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  btn.textContent = open ? '▶' : '▼';
+}
+</script>
+</body>
+</html>
