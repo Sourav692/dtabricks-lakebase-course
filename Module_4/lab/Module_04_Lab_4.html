@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 04 · Lab 4 — Sync, Federate &amp; Unify, End-to-End</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  --code-bg: #020509;
+  --code-text: #e8dcc4;
+  /* Module 4 Lab accent — cyan (theory used cyan; lab keeps it for continuity) */
+  --m4: #06b6d4;
+  --m4-soft: rgba(6,182,212,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 56px 48px 48px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 70% at 90% 30%, rgba(6,182,212,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 80%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.crumb .tag {
+  color: var(--m4);
+  padding: 4px 12px;
+  border: 1px solid rgba(6,182,212,0.3);
+  background: var(--m4-soft);
+  border-radius: 2px;
+}
+.crumb .tag.lab {
+  color: var(--accent-orange);
+  border-color: rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--m4); }
+
+.lede {
+  font-size: 16.5px; color: var(--text-dim);
+  max-width: 740px; line-height: 1.75;
+  margin-bottom: 28px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 17px; font-weight: 500;
+  color: var(--m4);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── PROGRESS TRACKER (sticky) ─── */
+.tracker {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,8,15,0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 48px;
+}
+.tracker-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
+}
+.tracker-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.steps {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.step-pill::before {
+  content: '○';
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.step-pill:hover {
+  border-color: var(--m4);
+  color: var(--text);
+}
+.step-pill.done {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.4);
+  color: var(--accent-green);
+}
+.step-pill.done::before {
+  content: '✓';
+  color: var(--accent-green);
+}
+.step-pill.active {
+  background: rgba(6,182,212,0.1);
+  border-color: var(--m4);
+  color: var(--text);
+}
+.tracker-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--m4);
+  white-space: nowrap;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 48px 100px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 12px 0 18px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 5px 0 5px 22px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  color: var(--m4);
+  font-size: 16px;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  margin: 0 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  margin: 28px 0 12px;
+  color: var(--text);
+}
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 22px 0 10px;
+}
+
+/* ─── INTRO BLOCK ─── */
+.intro-block { margin-bottom: 56px; }
+
+/* ─── PREREQ BOX ─── */
+.prereq {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0 40px;
+}
+.prereq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 22px;
+}
+.prereq-card.need { border-left: 3px solid var(--accent-green); }
+.prereq-card.skip { border-left: 3px solid var(--text-muted); opacity: 0.85; }
+.prereq-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.prereq-card.need .prereq-title { color: var(--accent-green); }
+.prereq-card.skip .prereq-title { color: var(--text-muted); }
+.prereq-card ul { margin: 0; }
+.prereq-card li { padding: 4px 0 4px 20px; font-size: 13.5px; }
+.prereq-card.need li::before { content: '✓'; color: var(--accent-green); }
+.prereq-card.skip li::before { content: '×'; color: var(--text-muted); }
+
+/* ─── STEP CARD ─── */
+.step {
+  margin: 0 0 56px;
+  scroll-margin-top: 90px;
+}
+.step-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.step-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--m4);
+  padding: 4px 10px;
+  border: 1px solid rgba(6,182,212,0.3);
+  background: var(--m4-soft);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  letter-spacing: -0.005em;
+  flex: 1;
+}
+.step-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.step-mark:hover { border-color: var(--accent-green); color: var(--text); }
+.step-mark.done {
+  background: rgba(34,197,94,0.08);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+/* ─── CODE CELL ─── */
+.cell {
+  margin: 16px 0 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.cell-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.cell-label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.cell-label::before { content: '▸'; color: var(--m4); }
+.cell-lang {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--m4);
+  margin-left: 8px;
+}
+.cell-actions { display: flex; gap: 6px; }
+.copy-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 5px 11px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: var(--m4);
+  color: #fff;
+  border-color: var(--m4);
+}
+.copy-btn.copied {
+  background: var(--accent-green);
+  color: #fff;
+  border-color: var(--accent-green);
+}
+.cell pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--code-text);
+  white-space: pre;
+}
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.st { color: #c3e88d; }
+.cm { color: var(--text-muted); font-style: italic; }
+.nm { color: var(--m4); }
+.nu { color: #f78c6c; }
+
+/* ─── EXPECTED OUTPUT BLOCK ─── */
+.expect {
+  margin: 0 0 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-teal);
+  background: var(--surface);
+}
+.expect-header {
+  padding: 8px 16px;
+  background: rgba(0,191,165,0.05);
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+}
+.expect pre {
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  overflow-x: auto;
+  white-space: pre;
+}
+.expect pre .ok-line { color: var(--accent-green); }
+.expect pre .warn-line { color: var(--accent-yellow); }
+
+/* ─── PROVE/IF-FAILS ─── */
+.proves {
+  margin: 12px 0 0;
+  padding: 12px 16px;
+  background: rgba(0,191,165,0.04);
+  border-left: 2px solid var(--accent-teal);
+  border-radius: 0 4px 4px 0;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.proves strong { color: var(--accent-teal); }
+
+/* ─── TROUBLESHOOTING TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 20px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 11px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.55;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+td code {
+  font-size: 11.5px;
+  padding: 0 5px;
+  background: var(--code-bg);
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.callout strong { color: var(--text); }
+.callout-note { background: rgba(74,158,255,0.05); border-left-color: var(--accent-blue); }
+.callout-warn { background: rgba(251,191,36,0.05); border-left-color: var(--accent-yellow); }
+.callout-success { background: rgba(34,197,94,0.05); border-left-color: var(--accent-green); }
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+.callout-note .callout-label { color: var(--accent-blue); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-success .callout-label { color: var(--accent-green); }
+
+/* ─── INTERACTIVE CHECKLIST ─── */
+.checklist-section {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 30px;
+  margin: 40px 0;
+}
+.checklist-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.checklist-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--text);
+}
+.checklist-title em { color: var(--m4); }
+.checklist-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+.checklist-status.complete {
+  background: rgba(34,197,94,0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 200px 28px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.check-row:last-child { border-bottom: none; }
+.check-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.check-name { font-size: 14.5px; color: var(--text); }
+.check-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.check-detail {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: right;
+  padding-right: 8px;
+}
+.check-toggle {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  padding: 0;
+}
+.check-toggle:hover { border-color: var(--accent-green); color: var(--accent-green); }
+.check-toggle.checked {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #fff;
+}
+
+.checklist-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reset-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+
+/* ─── COMPLETION BANNER ─── */
+.done-banner {
+  margin-top: 56px;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(6,182,212,0.04) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.done-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.done-banner h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 24px;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+.done-banner h3 em { color: var(--m4); }
+
+/* ─── SUB-STEP HEADER ─── */
+.substep {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  font-style: italic;
+  color: var(--text);
+  margin: 28px 0 8px;
+  padding: 6px 0 6px 14px;
+  border-left: 2px solid var(--m4);
+}
+.substep span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-style: normal;
+  color: var(--m4);
+  margin-right: 10px;
+  letter-spacing: 0.1em;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main, .tracker { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 28px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+  .prereq { grid-template-columns: 1fr; }
+  .check-row {
+    grid-template-columns: 1fr 28px;
+    grid-template-rows: auto auto;
+  }
+  .check-num, .check-detail { grid-column: 1; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 04</span>
+      <span class="sep">·</span>
+      <span class="tag lab">Lab 4</span>
+      <span class="sep">/</span>
+      <span>Lakebase Mastery</span>
+      <span class="sep">/</span>
+      <span>Hands-On</span>
+    </div>
+    <h1>Sync, Federate &amp; Unify<br><em>End-to-End Lab</em></h1>
+    <p class="lede">Build all three Lakebase ↔ Lakehouse integration patterns against the project from Module 3 — synced table (UC Delta → Lakebase), federation (DBSQL → Lakebase, live), and Lakehouse Sync (Lakebase → UC Delta). Run them, measure them, compare them.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">7</span><span class="meta-lbl">Steps</span></div>
+      <div class="meta-item"><span class="meta-val">~75 min</span><span class="meta-lbl">Duration</span></div>
+      <div class="meta-item"><span class="meta-val">6</span><span class="meta-lbl">Final Checks</span></div>
+      <div class="meta-item"><span class="meta-val">100%</span><span class="meta-lbl">Hands-On</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── STICKY PROGRESS TRACKER ── -->
+<div class="tracker" id="tracker">
+  <div class="tracker-inner">
+    <span class="tracker-label">Progress →</span>
+    <div class="steps">
+      <a href="#step1" class="step-pill" data-step="1">Step 1 · Verify M3</a>
+      <a href="#step2" class="step-pill" data-step="2">Step 2 · Delta Source</a>
+      <a href="#step3" class="step-pill" data-step="3">Step 3 · Synced Table</a>
+      <a href="#step4" class="step-pill" data-step="4">Step 4 · Federation</a>
+      <a href="#step5" class="step-pill" data-step="5">Step 5 · Lakehouse Sync</a>
+      <a href="#step6" class="step-pill" data-step="6">Step 6 · Measure</a>
+      <a href="#step7" class="step-pill" data-step="7">Step 7 · Verify &amp; Cleanup</a>
+    </div>
+    <span class="tracker-count" id="trackerCount">0 / 7</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- ─── INTRO ─── -->
+  <section class="intro-block">
+    <h2>Why this lab exists</h2>
+    <p>Module 3 gave you a live Lakebase project, registered in Unity Catalog. <strong>Module 4 is where that registration starts to pay off.</strong> Until you wire up the integration patterns, your Lakebase is just managed Postgres. After this lab, your Lakebase is a <em>lakehouse-native</em> OLTP store — talking to Delta in both directions and answering federated queries from DBSQL.</p>
+    <p>Every later lab in the roadmap assumes a working synced-table pattern. <strong>Module 5</strong> lands embeddings into Lakebase via a synced table. <strong>Module 6</strong> uses Lakehouse Sync to capture agent traces. <strong>Module 7</strong> ties all three together inside a Databricks App.</p>
+    <p>This lab walks five core steps — verify the project, build a Delta source, create a synced table, run a federated join, build a Lakehouse Sync — followed by Step 6 (measure) and Step 7 (verify + cleanup). Total runtime ~75 minutes, of which ~5 minutes is your hands on the keyboard and ~70 is Databricks' managed pipelines doing the work.</p>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Run mode</span>
+      <p>Do this lab in a <strong>Databricks notebook</strong> attached to a serverless cluster (or DBR 14+). All cells are Python except where SQL is explicitly called out via <code>%sql</code>. Re-running individual cells is generally safe — Steps 1, 2, 3, and 5 are written to be idempotent.</p>
+    </div>
+
+    <h3>Prerequisites before you start</h3>
+    <div class="prereq">
+      <div class="prereq-card need">
+        <div class="prereq-title">▸ You need</div>
+        <ul>
+          <li><strong>Module 3 Lab 3 passed</strong> with all 6 ✅ checks green</li>
+          <li>The <code>lakebase-tutorial</code> project + <code>lakebase_tutorial</code> UC catalog still alive</li>
+          <li>An attached compute cluster (serverless recommended)</li>
+          <li>Write access to a UC catalog (default <code>main</code>) for the Delta source</li>
+        </ul>
+      </div>
+      <div class="prereq-card skip">
+        <div class="prereq-title">▸ You don't need</div>
+        <ul>
+          <li>A new Lakebase project — we reuse Module 3's</li>
+          <li>An existing Delta source — Step 2 creates one</li>
+          <li>Lakehouse Sync entitlement upfront — auto-skipped if Beta unavailable</li>
+          <li>Module 5 / 6 / 7 setup — those build on this lab's outputs</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">⚠ Billing note</span>
+      <p>This lab adds incremental cost on top of the Lakebase project from Module 3: a synced-table CDC pipeline (CONTINUOUS) and, optionally, a Lakehouse Sync pipeline. <strong>Step 7b drops both pipelines without deleting the project itself</strong> — Module 5 reuses the project for pgvector.</p>
+    </div>
+  </section>
+  <!-- ═══════════════════════════════════════════════ STEP 1 -->
+  <section class="step" id="step1">
+    <div class="step-banner">
+      <span class="step-num">STEP 01</span>
+      <h2 class="step-title">Verify the Module 3 project is still up</h2>
+      <button class="step-mark" data-step="1" onclick="markStep(1)">Mark done</button>
+    </div>
+    <p>Idempotent: if the <code>lakebase-tutorial</code> project from Module 3 is still around (default <code>CLEANUP=False</code>), Cell 2 reuses it. Otherwise it provisions a fresh one. Either way, you start Step 2 with a healthy, UC-registered Lakebase project.</p>
+
+    <div class="cell" id="cell-1">
+      <div class="cell-header">
+        <span class="cell-label">Cell 1 · install dependencies<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-1')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 1 — install dependencies (re-run if kernel restarted since Lab 3)</span>
+%pip install --quiet <span class="st">"databricks-sdk&gt;=0.30.0"</span> <span class="st">"psycopg[binary]"</span> sqlalchemy pgvector
+dbutils.library.<span class="fn">restartPython</span>()</pre>
+    </div>
+
+    <div class="cell" id="cell-2">
+      <div class="cell-header">
+        <span class="cell-label">Cell 2 · config + verify/reuse Lakebase project<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-2')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 2 — config + verify/reuse Lakebase project from Module 3</span>
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+<span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> DatabaseProject
+<span class="kw">import</span> time, uuid
+
+w = <span class="fn">WorkspaceClient</span>()
+
+TUTORIAL = {
+    <span class="st">"catalog"</span>:      <span class="st">"main"</span>,
+    <span class="st">"schema"</span>:       <span class="st">"lakebase_tutorial"</span>,
+    <span class="st">"project_name"</span>: <span class="st">"lakebase-tutorial"</span>,
+    <span class="st">"user"</span>:         w.current_user.<span class="fn">me</span>().user_name,
+    <span class="st">"host"</span>:         w.config.host,
+    <span class="cm"># Module 4 additions</span>
+    <span class="st">"demo_catalog"</span>: <span class="st">"main"</span>,                      <span class="cm"># where the Delta source lives</span>
+    <span class="st">"demo_schema"</span>:  <span class="st">"lakebase_demo"</span>,             <span class="cm"># schema inside that catalog</span>
+    <span class="st">"synced_table"</span>: <span class="st">"user_profile_synced"</span>,       <span class="cm"># destination in Lakebase UC catalog</span>
+    <span class="st">"lhs_table"</span>:    <span class="st">"orders_history"</span>,            <span class="cm"># destination Delta for Lakehouse Sync</span>
+}
+
+<span class="cm"># Reuse the project from Module 3, or create it if missing</span>
+existing = {p.name: p <span class="kw">for</span> p <span class="kw">in</span> w.database.<span class="fn">list_database_projects</span>()}
+<span class="kw">if</span> TUTORIAL[<span class="st">"project_name"</span>] <span class="kw">in</span> existing:
+    <span class="fn">print</span>(<span class="st">f"✅ Project '</span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">' from Module 3 — reusing."</span>)
+    project = existing[TUTORIAL[<span class="st">"project_name"</span>]]
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">f"Project not found — provisioning fresh (Module 3 cleanup ran)."</span>)
+    project = w.database.<span class="fn">create_database_project</span>(
+        project=<span class="fn">DatabaseProject</span>(
+            name=TUTORIAL[<span class="st">"project_name"</span>],
+            capacity=<span class="st">"CU_1"</span>,
+            retention_window_in_days=<span class="nu">7</span>,
+        )
+    )
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">40</span>):
+        p = w.database.<span class="fn">get_database_project</span>(TUTORIAL[<span class="st">"project_name"</span>])
+        <span class="kw">if</span> p.state == <span class="st">"READY"</span>:
+            project = p; <span class="kw">break</span>
+        time.<span class="fn">sleep</span>(<span class="nu">5</span>)
+
+<span class="cm"># Confirm UC catalog from Module 3 is still registered</span>
+catalogs = spark.<span class="fn">sql</span>(<span class="st">"SHOW CATALOGS"</span>).<span class="fn">toPandas</span>()[<span class="st">"catalog"</span>].values
+<span class="kw">if</span> <span class="st">"lakebase_tutorial"</span> <span class="kw">not in</span> catalogs:
+    <span class="fn">print</span>(<span class="st">"⚠ UC catalog 'lakebase_tutorial' missing — re-creating from Module 3.4"</span>)
+    spark.<span class="fn">sql</span>(<span class="st">f"""
+      CREATE CATALOG IF NOT EXISTS lakebase_tutorial
+      USING DATABASE `</span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">.databricks_postgres`
+      OPTIONS (description = 'OLTP catalog for the Lakebase tutorial')
+    """</span>)
+
+<span class="fn">print</span>()
+<span class="fn">print</span>(<span class="st">f"   Project state:  </span><span class="nm">{project.state}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"   Endpoint:       </span><span class="nm">{project.read_write_dns}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"   UC catalog:     lakebase_tutorial"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Project 'lakebase-tutorial' from Module 3 — reusing.</span>
+
+   Project state:  READY
+   Endpoint:       instance-a3f9e1c4-rw.cloud.databricks.com
+   UC catalog:     lakebase_tutorial</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the project from Module 3 is intact, healthy, and still registered in UC. We can build integration pipelines on top of it without re-provisioning.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Project not found and provision starts</td><td>Module 3 cleanup ran</td><td>Wait ~90s for the fresh project to be <code>READY</code> — Cell 2 polls automatically</td></tr>
+          <tr><td>UC catalog missing message persists</td><td>UC permissions revoked since Module 3</td><td>Re-run Module 3 Step 4 (Cell 6) — the <code>CREATE CATALOG</code> command</td></tr>
+          <tr><td><code>state=FAILED</code> on retry</td><td>Region issue</td><td>Read <code>project.state_message</code>; switch region or contact admin</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 2 -->
+  <section class="step" id="step2">
+    <div class="step-banner">
+      <span class="step-num">STEP 02</span>
+      <h2 class="step-title">Build a Delta source for the synced table</h2>
+      <button class="step-mark" data-step="2" onclick="markStep(2)">Mark done</button>
+    </div>
+    <p>The synced-table pattern needs an upstream Delta table with a primary key. We create a small <code>user_profile</code> table in <code>main.lakebase_demo</code> that simulates a curated lakehouse output — the kind of table a daily ML pipeline or feature store would produce.</p>
+
+    <div class="substep"><span>STEP 2A</span>Create schema and Delta table</div>
+
+    <div class="cell" id="cell-3">
+      <div class="cell-header">
+        <span class="cell-label">Cell 3 · Delta source DDL with CDF + PK<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-3')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 3 — create the demo Delta source with CDF enabled</span>
+spark.<span class="fn">sql</span>(<span class="st">f"""
+  CREATE SCHEMA IF NOT EXISTS </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">
+"""</span>)
+
+spark.<span class="fn">sql</span>(<span class="st">f"""
+  CREATE TABLE IF NOT EXISTS </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile (
+    user_id     BIGINT,
+    email       STRING,
+    plan        STRING,
+    last_login  TIMESTAMP,
+    score       DOUBLE,
+    updated_at  TIMESTAMP
+  )
+  USING DELTA
+  TBLPROPERTIES (
+    delta.enableChangeDataFeed = true,
+    delta.constraints.user_id_pk = 'user_id IS NOT NULL'
+  )
+"""</span>)
+
+<span class="cm"># Add a primary key constraint (required for synced tables)</span>
+<span class="kw">try</span>:
+    spark.<span class="fn">sql</span>(<span class="st">f"""
+      ALTER TABLE </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile
+      ADD CONSTRAINT user_profile_pk PRIMARY KEY (user_id)
+    """</span>)
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    <span class="kw">if</span> <span class="st">"already exists"</span> <span class="kw">in</span> <span class="fn">str</span>(e).<span class="fn">lower</span>():
+        <span class="fn">print</span>(<span class="st">"(constraint already exists — skipping)"</span>)
+    <span class="kw">else</span>:
+        <span class="kw">raise</span>
+
+<span class="fn">print</span>(<span class="st">"✅ Delta source created with CDF enabled and PK constraint"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Delta source created with CDF enabled and PK constraint</span></pre>
+    </div>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ On re-runs</span>
+      If you've run this lab before, <code>ADD CONSTRAINT</code> may error with "constraint already exists". The <code>try/except</code> above handles that — it's idempotent on re-runs.
+    </div>
+
+    <div class="substep"><span>STEP 2B</span>Seed the Delta source with realistic data</div>
+
+    <div class="cell" id="cell-4">
+      <div class="cell-header">
+        <span class="cell-label">Cell 4 · seed 5 user_profile rows<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-4')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 4 — seed the source with 5 user_profile rows</span>
+spark.<span class="fn">sql</span>(<span class="st">f"""
+  MERGE INTO </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile t
+  USING (
+    SELECT * FROM VALUES
+      (1, 'alice@example.com',  'pro',     timestamp'2026-04-30 09:14:00', 0.87, current_timestamp()),
+      (2, 'bob@example.com',    'free',    timestamp'2026-05-01 18:02:00', 0.42, current_timestamp()),
+      (3, 'carla@example.com',  'pro',     timestamp'2026-05-02 06:33:00', 0.91, current_timestamp()),
+      (4, 'dave@example.com',   'free',    timestamp'2026-04-29 22:11:00', 0.38, current_timestamp()),
+      (5, 'eve@example.com',    'enterprise', timestamp'2026-05-02 11:48:00', 0.95, current_timestamp())
+    AS v(user_id, email, plan, last_login, score, updated_at)
+  ) s
+  ON t.user_id = s.user_id
+  WHEN MATCHED THEN UPDATE SET *
+  WHEN NOT MATCHED THEN INSERT *
+"""</span>)
+
+n = spark.<span class="fn">sql</span>(<span class="st">f"""
+  SELECT count(*) AS n FROM </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile
+"""</span>).<span class="fn">collect</span>()[<span class="nu">0</span>][<span class="st">"n"</span>]
+<span class="fn">print</span>(<span class="st">f"✅ Delta source has </span><span class="nm">{n}</span><span class="st"> rows"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Delta source has 5 rows</span></pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> you have a real, CDF-enabled Delta table with a primary key — exactly what the synced-table pipeline requires upstream. Re-runnable via <code>MERGE</code> without duplicating rows.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>ALTER TABLE ... ADD CONSTRAINT</code> errors with "feature not enabled"</td><td>DBR runtime predates PK constraints</td><td>Use DBR 14.0+ or serverless</td></tr>
+          <tr><td><code>permission denied</code> on <code>CREATE SCHEMA</code></td><td>No write access to <code>main</code> catalog</td><td>Change <code>demo_catalog</code> in Cell 2 to a catalog you can write to</td></tr>
+          <tr><td>Existing rows but <code>n=0</code></td><td>Wrong catalog / schema name</td><td>Verify <code>TUTORIAL["demo_catalog"]</code> matches what you created</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <!-- ═══════════════════════════════════════════════ STEP 3 -->
+  <section class="step" id="step3">
+    <div class="step-banner">
+      <span class="step-num">STEP 03</span>
+      <h2 class="step-title">Create the synced table (UC Delta → Lakebase)</h2>
+      <button class="step-mark" data-step="3" onclick="markStep(3)">Mark done</button>
+    </div>
+    <p>The whole point of Module 4. One SDK call sets up a managed CDC pipeline that keeps Lakebase fresh from Delta — and your app gets to query Lakebase like any Postgres table.</p>
+
+    <div class="substep"><span>STEP 3A</span>Create the synced table with CONTINUOUS scheduling</div>
+
+    <div class="cell" id="cell-5">
+      <div class="cell-header">
+        <span class="cell-label">Cell 5 · create_synced_database_table<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-5')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 5 — create the synced table with CONTINUOUS scheduling</span>
+<span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> (
+    SyncedDatabaseTable, SyncedTableSpec, SyncedTableSchedulingPolicy
+)
+
+source_fqn = (
+    <span class="st">f"</span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile"</span>
+)
+target_fqn = <span class="st">f"lakebase_tutorial.public.</span><span class="nm">{TUTORIAL['synced_table']}</span><span class="st">"</span>
+
+<span class="fn">print</span>(<span class="st">f"Creating synced table:"</span>)
+<span class="fn">print</span>(<span class="st">f"   source : </span><span class="nm">{source_fqn}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"   target : </span><span class="nm">{target_fqn}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"   schedule: CONTINUOUS  (use SNAPSHOT in prod unless realtime is proven needed)"</span>)
+
+<span class="cm"># Idempotent: if it already exists, just fetch</span>
+existing_synced = []
+<span class="kw">try</span>:
+    existing_synced = <span class="fn">list</span>(w.database.<span class="fn">list_synced_database_tables</span>(
+        database_instance_name=TUTORIAL[<span class="st">"project_name"</span>]
+    ))
+<span class="kw">except</span> <span class="fn">Exception</span>:
+    <span class="kw">pass</span>
+
+<span class="kw">if</span> <span class="fn">any</span>(s.name == target_fqn <span class="kw">for</span> s <span class="kw">in</span> existing_synced):
+    <span class="fn">print</span>(<span class="st">"\n⚠ Synced table already exists — reusing."</span>)
+    st = <span class="fn">next</span>(s <span class="kw">for</span> s <span class="kw">in</span> existing_synced <span class="kw">if</span> s.name == target_fqn)
+<span class="kw">else</span>:
+    st = w.database.<span class="fn">create_synced_database_table</span>(
+        synced_table=<span class="fn">SyncedDatabaseTable</span>(
+            name=target_fqn,
+            spec=<span class="fn">SyncedTableSpec</span>(
+                source_table_full_name=source_fqn,
+                primary_key_columns=[<span class="st">"user_id"</span>],
+                scheduling_policy=SyncedTableSchedulingPolicy.CONTINUOUS,
+                timeseries_key=<span class="st">"updated_at"</span>,
+            ),
+            database_instance_name=TUTORIAL[<span class="st">"project_name"</span>],
+        )
+    )
+
+<span class="cm"># Poll until pipeline is RUNNING / first sync done</span>
+<span class="fn">print</span>(<span class="st">"\nWaiting for first sync to complete (~30–90s)..."</span>)
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">40</span>):
+    s = w.database.<span class="fn">get_synced_database_table</span>(name=target_fqn)
+    pipeline_state = <span class="fn">getattr</span>(s, <span class="st">"pipeline_state"</span>, <span class="kw">None</span>) <span class="kw">or</span> <span class="st">"UNKNOWN"</span>
+    <span class="kw">if</span> pipeline_state <span class="kw">in</span> (<span class="st">"RUNNING"</span>, <span class="st">"ACTIVE"</span>, <span class="st">"READY"</span>):
+        <span class="fn">print</span>(<span class="st">f"   [</span><span class="nm">{i*5:3d}</span><span class="st">s] pipeline=</span><span class="nm">{pipeline_state}</span><span class="st"> — ready"</span>)
+        <span class="kw">break</span>
+    <span class="fn">print</span>(<span class="st">f"   [</span><span class="nm">{i*5:3d}</span><span class="st">s] pipeline=</span><span class="nm">{pipeline_state}</span><span class="st">"</span>)
+    time.<span class="fn">sleep</span>(<span class="nu">5</span>)
+
+<span class="fn">print</span>(<span class="st">f"\n✅ Synced table is live: </span><span class="nm">{target_fqn}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>Creating synced table:
+   source : main.lakebase_demo.user_profile
+   target : lakebase_tutorial.public.user_profile_synced
+   schedule: CONTINUOUS  (use SNAPSHOT in prod unless realtime is proven needed)
+
+Waiting for first sync to complete (~30–90s)...
+   [  0s] pipeline=PROVISIONING
+   [  5s] pipeline=PROVISIONING
+   ...
+   [ 60s] pipeline=RUNNING — ready
+
+<span class="ok-line">✅ Synced table is live: lakebase_tutorial.public.user_profile_synced</span></pre>
+    </div>
+
+    <div class="substep"><span>STEP 3B</span>Read the synced table from Postgres (the app path)</div>
+    <p>This is the moment that "Lakebase as lakehouse-native OLTP" becomes concrete. The synced table is just a Postgres table — your app driver connects, runs <code>SELECT</code>, gets results in milliseconds.</p>
+
+    <div class="cell" id="cell-6">
+      <div class="cell-header">
+        <span class="cell-label">Cell 6 · open Postgres engine + read synced table<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-6')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 6 — open a Postgres engine on the project (same pattern as Module 3.2)</span>
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+
+cred = w.database.<span class="fn">generate_database_credential</span>(
+    request_id=<span class="fn">str</span>(uuid.<span class="fn">uuid4</span>()),
+    instance_names=[project.name],
+)
+url = (
+    <span class="st">f"postgresql+psycopg://</span><span class="nm">{TUTORIAL['user']}</span><span class="st">:</span><span class="nm">{cred.token}</span><span class="st">"</span>
+    <span class="st">f"@</span><span class="nm">{project.read_write_dns}</span><span class="st">:5432/databricks_postgres?sslmode=require"</span>
+)
+engine = <span class="fn">create_engine</span>(url, pool_pre_ping=<span class="kw">True</span>, pool_recycle=<span class="nu">1800</span>)
+
+<span class="cm"># Query the synced table from Postgres</span>
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+    rows = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">f"""
+        SELECT user_id, email, plan, score
+        FROM </span><span class="nm">{TUTORIAL['synced_table']}</span><span class="st">
+        ORDER BY user_id
+    """</span>)).<span class="fn">fetchall</span>()
+
+<span class="fn">print</span>(<span class="st">f"✅ Read </span><span class="nm">{len(rows)}</span><span class="st"> rows from synced table (via Postgres driver):"</span>)
+<span class="kw">for</span> r <span class="kw">in</span> rows:
+    <span class="fn">print</span>(<span class="st">f"   user_id=</span><span class="nm">{r.user_id}</span><span class="st">  email=</span><span class="nm">{r.email:25s}</span><span class="st">  plan=</span><span class="nm">{r.plan:10s}</span><span class="st">  score=</span><span class="nm">{r.score}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Read 5 rows from synced table (via Postgres driver):</span>
+   user_id=1  email=alice@example.com         plan=pro         score=0.87
+   user_id=2  email=bob@example.com           plan=free        score=0.42
+   user_id=3  email=carla@example.com         plan=pro         score=0.91
+   user_id=4  email=dave@example.com          plan=free        score=0.38
+   user_id=5  email=eve@example.com           plan=enterprise  score=0.95</pre>
+    </div>
+
+    <div class="substep"><span>STEP 3C</span>Prove freshness — write to Delta, see it in Postgres</div>
+
+    <div class="cell" id="cell-7">
+      <div class="cell-header">
+        <span class="cell-label">Cell 7 · UPDATE Delta, poll Postgres until visible<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-7')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 7 — UPDATE in Delta, then SELECT from Postgres until we see the change</span>
+<span class="kw">import</span> time <span class="kw">as</span> _t
+
+<span class="cm"># Update alice's score in Delta</span>
+spark.<span class="fn">sql</span>(<span class="st">f"""
+  UPDATE </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile
+  SET score = 0.99, updated_at = current_timestamp()
+  WHERE user_id = 1
+"""</span>)
+write_time = _t.<span class="fn">time</span>()
+<span class="fn">print</span>(<span class="st">"⏱ Wrote update to Delta (alice score → 0.99)"</span>)
+
+<span class="cm"># Poll Postgres until the synced table reflects the change</span>
+<span class="fn">print</span>(<span class="st">"Polling Postgres for the new value..."</span>)
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">30</span>):  <span class="cm"># 30 * 2s = 60s max</span>
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        v = c.<span class="fn">execute</span>(<span class="fn">text</span>(
+            <span class="st">f"SELECT score FROM </span><span class="nm">{TUTORIAL['synced_table']}</span><span class="st"> WHERE user_id = 1"</span>
+        )).<span class="fn">scalar</span>()
+    <span class="kw">if</span> v == <span class="nu">0.99</span>:
+        elapsed = _t.<span class="fn">time</span>() - write_time
+        <span class="fn">print</span>(<span class="st">f"✅ Synced in </span><span class="nm">{elapsed:.1f}</span><span class="st">s — Postgres now shows score=0.99"</span>)
+        <span class="kw">break</span>
+    _t.<span class="fn">sleep</span>(<span class="nu">2</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">f"⚠ After 60s, Postgres still shows score=</span><span class="nm">{v}</span><span class="st">. CONTINUOUS pipeline may not yet be running."</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>⏱ Wrote update to Delta (alice score → 0.99)
+Polling Postgres for the new value...
+<span class="ok-line">✅ Synced in 8.4s — Postgres now shows score=0.99</span></pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the entire pipeline is working — Delta CDF → managed pipeline → Lakebase upsert → app sees the new value in seconds. You just replaced reverse-ETL.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>create_synced_database_table</code> fails: "no PK on source"</td><td>Cell 3 PK constraint didn't apply</td><td>Re-run Cell 3 — the constraint is required</td></tr>
+          <tr><td>Pipeline state stuck on <code>PROVISIONING</code> for &gt;5 min</td><td>Region issue / capacity</td><td>Check the pipeline in the UC catalog UI; contact support if stuck</td></tr>
+          <tr><td>Cell 7 polling never sees <code>0.99</code></td><td><code>CONTINUOUS</code> not actually running</td><td>Switch to <code>SNAPSHOT</code> and call <code>w.database.refresh_synced_database_table(...)</code> manually</td></tr>
+          <tr><td><code>permission denied for table user_profile_synced</code></td><td>UC GRANT missing on the catalog</td><td><code>GRANT SELECT ON CATALOG lakebase_tutorial TO</code> your user/group</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 4 -->
+  <section class="step" id="step4">
+    <div class="step-banner">
+      <span class="step-num">STEP 04</span>
+      <h2 class="step-title">Federated query — live join across stores</h2>
+      <button class="step-mark" data-step="4" onclick="markStep(4)">Mark done</button>
+    </div>
+    <p>UC registration from Module 3.4 already enabled this. <strong>No new pipeline, no replication</strong> — DBSQL queries Lakebase live across the network. We join Postgres rows with Delta rows in a single query.</p>
+
+    <div class="substep"><span>STEP 4A</span>Run a cross-store join</div>
+
+    <div class="cell" id="cell-8">
+      <div class="cell-header">
+        <span class="cell-label">Cell 8 · federated join — Postgres ⨝ Delta<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-8')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 8 — a federated query: Lakebase orders JOIN Delta user_profile</span>
+<span class="cm"># (Recall: Module 3 created `lakebase_tutorial.public.users` and `.orders` —</span>
+<span class="cm">#  we join those Postgres rows with the Delta source we built in Step 2.)</span>
+
+federated_sql = <span class="st">f"""
+  SELECT
+    o.id              AS order_id,
+    o.sku,
+    o.qty,
+    o.total_cents,
+    p.email,
+    p.plan,
+    p.score
+  FROM lakebase_tutorial.public.orders o     -- Postgres (live federation)
+  JOIN </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile p
+       ON o.user_id = p.user_id              -- Delta
+  ORDER BY o.id
+"""</span>
+df = spark.<span class="fn">sql</span>(federated_sql)
+df.<span class="fn">show</span>(truncate=<span class="kw">False</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>+--------+--------+---+-----------+--------------------+----+-----+
+|order_id|sku     |qty|total_cents|email               |plan|score|
++--------+--------+---+-----------+--------------------+----+-----+
+|1       |SKU-101 |2  |4998       |alice@example.com   |pro |0.99 |
+|2       |SKU-205 |1  |1299       |alice@example.com   |pro |0.99 |
+|3       |SKU-101 |5  |12495      |bob@example.com     |free|0.42 |
+|4       |SKU-309 |3  |8997       |carla@example.com   |pro |0.91 |
++--------+--------+---+-----------+--------------------+----+-----+</pre>
+    </div>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Why alice's score is 0.99</span>
+      Step 3c updated it. The federation read pulls <strong>current</strong> Postgres rows — not a snapshot. That's the defining property of federation: every query is live.
+    </div>
+
+    <div class="substep"><span>STEP 4B</span>Inspect the query plan to see pushdown</div>
+
+    <div class="cell" id="cell-9">
+      <div class="cell-header">
+        <span class="cell-label">Cell 9 · EXPLAIN to see what pushes down<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-9')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 9 — EXPLAIN to see which predicates push down</span>
+<span class="fn">print</span>(spark.<span class="fn">sql</span>(<span class="st">f"EXPLAIN </span><span class="nm">{federated_sql}</span><span class="st">"</span>).<span class="fn">collect</span>()[<span class="nu">0</span>][<span class="nu">0</span>])</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (abbreviated)</div>
+<pre>== Physical Plan ==
+*(2) Project [...]
++- *(2) BroadcastHashJoin [user_id], [user_id], Inner, BuildRight
+   :- *(2) Filter isnotnull(user_id)
+   :  +- BatchScan ... lakebase_tutorial.public.orders
+   :       <span class="ok-line">PushedFilters: [IsNotNull(user_id)]    ← pushed to Postgres</span>
+   +- BroadcastExchange ...
+      +- *(1) Filter isnotnull(user_id)
+         +- *(1) ColumnarToRow
+            +- FileScan parquet ... user_profile  ← Delta side</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the <code>IsNotNull(user_id)</code> predicate is pushed down to Postgres — only matching rows travel the wire. The Delta side is read normally as Parquet. The join itself happens in DBSQL. This is the federation pattern from Topic 4.4 working live.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>Table or view not found: lakebase_tutorial.public.orders</code></td><td>UC catalog missing or stale</td><td>Re-run Cell 2 — it re-creates the catalog on demand</td></tr>
+          <tr><td>Slow query (&gt;10s) on small tables</td><td>Predicate didn't push down</td><td>Inspect <code>EXPLAIN</code>; rewrite the predicate to use simple <code>=</code> / <code>IN</code></td></tr>
+          <tr><td><code>connection refused</code> mid-query</td><td>Project went idle and is cold-starting</td><td>Wait 10s, retry — first query post-idle has cold-start latency</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <!-- ═══════════════════════════════════════════════ STEP 5 -->
+  <section class="step" id="step5">
+    <div class="step-banner">
+      <span class="step-num">STEP 05</span>
+      <h2 class="step-title">Lakehouse Sync — Lakebase changes → UC Delta</h2>
+      <button class="step-mark" data-step="5" onclick="markStep(5)">Mark done</button>
+    </div>
+    <p>The reverse direction. Lakehouse Sync streams every change in a Lakebase table to Delta, continuously. We capture writes to <code>lakebase_tutorial.public.orders</code> (the table from Module 3) into a Delta history table.</p>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">⚠ Beta on AWS as of 2026.04</span>
+      Cell 10 detects availability automatically. If unavailable in your region, the lab logs a clear "skipped" status and Step 6 still passes — you can come back when Lakehouse Sync is GA in your region.
+    </div>
+
+    <div class="substep"><span>STEP 5A</span>Detect availability and create the sync</div>
+
+    <div class="cell" id="cell-10">
+      <div class="cell-header">
+        <span class="cell-label">Cell 10 · CREATE LAKEHOUSE_SYNC (or skip cleanly)<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-10')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 10 — try to create a Lakehouse Sync; catch and report cleanly if unavailable</span>
+LHS_TARGET = (
+    <span class="st">f"</span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.</span><span class="nm">{TUTORIAL['lhs_table']}</span><span class="st">"</span>
+)
+LHS_AVAILABLE = <span class="kw">False</span>
+
+<span class="kw">try</span>:
+    spark.<span class="fn">sql</span>(<span class="st">f"""
+      CREATE LAKEHOUSE_SYNC IF NOT EXISTS </span><span class="nm">{LHS_TARGET}</span><span class="st">
+      FROM DATABASE_INSTANCE '</span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">'
+      SOURCE 'public.orders'
+      WITH (continuous = true)
+    """</span>)
+    LHS_AVAILABLE = <span class="kw">True</span>
+    <span class="fn">print</span>(<span class="st">f"✅ Lakehouse Sync created: </span><span class="nm">{LHS_TARGET}</span><span class="st">"</span>)
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    msg = <span class="fn">str</span>(e)[:<span class="nu">200</span>]
+    <span class="kw">if</span> <span class="st">"not enabled"</span> <span class="kw">in</span> msg.<span class="fn">lower</span>() <span class="kw">or</span> <span class="st">"not available"</span> <span class="kw">in</span> msg.<span class="fn">lower</span>() <span class="kw">or</span> <span class="st">"preview"</span> <span class="kw">in</span> msg.<span class="fn">lower</span>():
+        <span class="fn">print</span>(<span class="st">f"⚠ Lakehouse Sync is not enabled in this workspace/region."</span>)
+        <span class="fn">print</span>(<span class="st">f"   (</span><span class="nm">{msg}</span><span class="st">)"</span>)
+        <span class="fn">print</span>(<span class="st">f"   Step 5 will be skipped. Steps 1-4 + Step 6 still verify the lab."</span>)
+    <span class="kw">else</span>:
+        <span class="fn">print</span>(<span class="st">f"❌ Unexpected error creating Lakehouse Sync:"</span>)
+        <span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{msg}</span><span class="st">"</span>)
+        <span class="kw">raise</span></pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (when Beta is enabled)</div>
+<pre><span class="ok-line">✅ Lakehouse Sync created: main.lakebase_demo.orders_history</span></pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (when Beta is not enabled)</div>
+<pre><span class="warn-line">⚠ Lakehouse Sync is not enabled in this workspace/region.</span>
+   (Lakehouse Sync is in Beta and is not enabled for this region...)
+   Step 5 will be skipped. Steps 1-4 + Step 6 still verify the lab.</pre>
+    </div>
+
+    <div class="substep"><span>STEP 5B</span>Generate change traffic, then read the Delta history</div>
+
+    <div class="cell" id="cell-11">
+      <div class="cell-header">
+        <span class="cell-label">Cell 11 · INSERT in Postgres, watch Delta<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-11')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 11 — only runs if LHS_AVAILABLE; otherwise reports "skipped"</span>
+<span class="kw">if not</span> LHS_AVAILABLE:
+    <span class="fn">print</span>(<span class="st">"⏸ Step 5b skipped — Lakehouse Sync not available."</span>)
+<span class="kw">else</span>:
+    <span class="cm"># Insert one new order in Postgres</span>
+    <span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> c:
+        c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+            INSERT INTO orders (user_id, sku, qty, total_cents)
+            VALUES (
+              (SELECT id FROM users WHERE email='alice@example.com'),
+              'SKU-NEW', 1, 999
+            )
+        """</span>))
+    <span class="fn">print</span>(<span class="st">"⏱ Inserted one row in Lakebase.public.orders"</span>)
+
+    <span class="cm"># Wait for it to appear in Delta</span>
+    <span class="fn">print</span>(<span class="st">"Waiting for the change to flow back to Delta (~30s typical)..."</span>)
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">30</span>):
+        <span class="kw">try</span>:
+            n = spark.<span class="fn">sql</span>(<span class="st">f"""
+              SELECT count(*) AS n FROM </span><span class="nm">{LHS_TARGET}</span><span class="st">
+              WHERE sku = 'SKU-NEW'
+            """</span>).<span class="fn">collect</span>()[<span class="nu">0</span>][<span class="st">"n"</span>]
+        <span class="kw">except</span> <span class="fn">Exception</span>:
+            n = <span class="nu">0</span>
+        <span class="kw">if</span> n &gt;= <span class="nu">1</span>:
+            <span class="fn">print</span>(<span class="st">f"✅ Reverse CDC working — Delta saw the change after ~</span><span class="nm">{(i+1)*2}</span><span class="st">s"</span>)
+            <span class="kw">break</span>
+        time.<span class="fn">sleep</span>(<span class="nu">2</span>)
+    <span class="kw">else</span>:
+        <span class="fn">print</span>(<span class="st">"⚠ Change hasn't arrived in Delta yet. Pipeline may still be initializing."</span>)
+
+    <span class="cm"># Show the change feed</span>
+    <span class="fn">print</span>(<span class="st">"\nDelta history rows for SKU-NEW:"</span>)
+    spark.<span class="fn">sql</span>(<span class="st">f"""
+      SELECT _change_type, _commit_timestamp, sku, qty, total_cents
+      FROM </span><span class="nm">{LHS_TARGET}</span><span class="st">
+      WHERE sku = 'SKU-NEW'
+      ORDER BY _commit_timestamp
+    """</span>).<span class="fn">show</span>(truncate=<span class="kw">False</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (when LHS_AVAILABLE)</div>
+<pre>⏱ Inserted one row in Lakebase.public.orders
+Waiting for the change to flow back to Delta (~30s typical)...
+<span class="ok-line">✅ Reverse CDC working — Delta saw the change after ~14s</span>
+
+Delta history rows for SKU-NEW:
++------------+--------------------------+---------+---+-----------+
+|_change_type|_commit_timestamp         |sku      |qty|total_cents|
++------------+--------------------------+---------+---+-----------+
+|insert      |2026-05-02 14:42:18.231+00|SKU-NEW  |1  |999        |
++------------+--------------------------+---------+---+-----------+</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> writes to your OLTP store flow into Delta automatically. No Debezium, no Kafka, no Spark Structured Streaming pipeline you maintain — the lakehouse picks them up via the storage layer's existing change stream.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>CREATE LAKEHOUSE_SYNC</code> parse error</td><td>DBR runtime predates the syntax</td><td>Use serverless DBSQL or DBR 14.3+</td></tr>
+          <tr><td><code>feature not enabled</code></td><td>Beta not on for this region</td><td>Skip Step 5; everything else still validates</td></tr>
+          <tr><td>Insert succeeds but Delta empty after 60s</td><td>Pipeline still warming up</td><td>Sleep 30s more and re-check; first event is slowest</td></tr>
+          <tr><td><code>_change_type</code> column missing</td><td>Pipeline created in non-CDF mode</td><td>Drop and re-create with <code>WITH (continuous = true)</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 6 -->
+  <section class="step" id="step6">
+    <div class="step-banner">
+      <span class="step-num">STEP 06</span>
+      <h2 class="step-title">Cost &amp; latency — measure all three patterns</h2>
+      <button class="step-mark" data-step="6" onclick="markStep(6)">Mark done</button>
+    </div>
+    <p>A reality-check before claiming numbers to a customer. <strong>Your numbers, not slide numbers.</strong> We time five runs of each pattern and report mean + p95.</p>
+
+    <div class="cell" id="cell-12">
+      <div class="cell-header">
+        <span class="cell-label">Cell 12 · measured comparison<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-12')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 12 — measured comparison</span>
+<span class="kw">def</span> <span class="fn">time_query</span>(label, fn, n=<span class="nu">5</span>):
+    <span class="st">"""Run fn n times and report mean / p95 wall-clock."""</span>
+    times = []
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n):
+        s = _t.<span class="fn">perf_counter</span>()
+        <span class="fn">fn</span>()
+        times.<span class="fn">append</span>((_t.<span class="fn">perf_counter</span>() - s) * <span class="nu">1000</span>)
+    times.<span class="fn">sort</span>()
+    mean = <span class="fn">sum</span>(times) / n
+    p95 = times[<span class="fn">min</span>(<span class="fn">int</span>(n*<span class="nu">0.95</span>), n-<span class="nu">1</span>)]
+    <span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{label:30s}</span><span class="st">  mean=</span><span class="nm">{mean:6.1f}</span><span class="st">ms   p95=</span><span class="nm">{p95:6.1f}</span><span class="st">ms"</span>)
+    <span class="kw">return</span> mean
+
+<span class="fn">print</span>(<span class="st">"Measuring read latency (5 runs each):\n"</span>)
+
+<span class="cm"># Pattern 1: Synced table read via Postgres driver (the "app path")</span>
+<span class="kw">def</span> <span class="fn">q_synced</span>():
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        c.<span class="fn">execute</span>(<span class="fn">text</span>(
+            <span class="st">f"SELECT * FROM </span><span class="nm">{TUTORIAL['synced_table']}</span><span class="st"> WHERE user_id = 1"</span>
+        )).<span class="fn">fetchone</span>()
+
+<span class="cm"># Pattern 2: Federation (DBSQL queries Postgres live)</span>
+<span class="kw">def</span> <span class="fn">q_fed</span>():
+    spark.<span class="fn">sql</span>(
+        <span class="st">"SELECT * FROM lakebase_tutorial.public.users WHERE id = 1"</span>
+    ).<span class="fn">collect</span>()
+
+<span class="cm"># Pattern 3: Direct Delta read (the "non-app" path)</span>
+<span class="kw">def</span> <span class="fn">q_delta</span>():
+    spark.<span class="fn">sql</span>(
+        <span class="st">f"SELECT * FROM </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile WHERE user_id = 1"</span>
+    ).<span class="fn">collect</span>()
+
+m_sync  = <span class="fn">time_query</span>(<span class="st">"synced table (Postgres)"</span>, q_synced)
+m_fed   = <span class="fn">time_query</span>(<span class="st">"federation (DBSQL→PG)"</span>,   q_fed)
+m_delta = <span class="fn">time_query</span>(<span class="st">"Delta direct (DBSQL)"</span>,    q_delta)
+
+<span class="fn">print</span>()
+<span class="fn">print</span>(<span class="st">f"   ◉ synced table read is ~</span><span class="nm">{m_fed/m_sync:.0f}</span><span class="st">× faster than federation"</span>)
+<span class="fn">print</span>(<span class="st">f"   ◉ federation is fine for rare reads, brutal at app scale"</span>)
+<span class="fn">print</span>(<span class="st">f"   ◉ Delta direct is the analytics path — neither sync nor fed"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (illustrative)</div>
+<pre>Measuring read latency (5 runs each):
+
+   synced table (Postgres)         mean=   3.2ms   p95=   5.8ms
+   federation (DBSQL→PG)           mean= 412.7ms   p95= 587.3ms
+   Delta direct (DBSQL)            mean= 235.4ms   p95= 298.1ms
+
+   ◉ synced table read is ~129× faster than federation
+   ◉ federation is fine for rare reads, brutal at app scale
+   ◉ Delta direct is the analytics path — neither sync nor fed</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the latency claim from Module 4.5 is real. Synced tables read at Postgres speed (~ms). Federation pays a network round-trip + DBSQL planning cost on every query. Use synced tables for app reads, federation for rare reads, and choose the right pattern <em>with measured numbers</em> — not guesses.
+    </div>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ First-run warmup</span>
+      The first DBSQL query of a session always pays warmup cost. The numbers above stabilize after the first run. If <code>m_fed</code> looks unreasonably high, run Cell 12 a second time.
+    </div>
+  </section>
+  <!-- ─── STEP 7 ─── -->
+  <section class="step" id="step7">
+    <div class="step-banner">
+      <span class="step-num">Step 07</span>
+      <span class="step-title">Final verification &amp; cleanup</span>
+      <button class="step-mark" data-step="7" onclick="markStep(7)">Mark done</button>
+    </div>
+
+    <p>A pass/fail summary for everything Module 4 built. Then an optional cleanup that drops the synced table and Lakehouse Sync without touching the Lakebase project itself — Module 5 still needs it.</p>
+
+    <div class="substep"><span>7a</span>The summary checklist</div>
+
+    <div class="cell" id="cell-13">
+      <div class="cell-header">
+        <span class="cell-label">Cell 13 · final checklist<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-13')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 13 — final checklist</span>
+checks = []
+
+<span class="cm"># 1. Project still healthy</span>
+<span class="kw">try</span>:
+    p = w.database.<span class="fn">get_database_project</span>(TUTORIAL[<span class="st">"project_name"</span>])
+    checks.<span class="fn">append</span>((<span class="st">"Project from M3 reusable"</span>, <span class="st">f"state=</span><span class="nm">{p.state}</span><span class="st">"</span>, p.state == <span class="st">"READY"</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Project from M3 reusable"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 2. Delta source exists with rows</span>
+<span class="kw">try</span>:
+    n = spark.<span class="fn">sql</span>(
+      <span class="st">f"SELECT count(*) AS n FROM </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile"</span>
+    ).<span class="fn">collect</span>()[<span class="nu">0</span>][<span class="st">"n"</span>]
+    checks.<span class="fn">append</span>((<span class="st">"Delta source built"</span>, <span class="st">f"rows=</span><span class="nm">{n}</span><span class="st">"</span>, n &gt;= <span class="nu">5</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Delta source built"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 3. Synced table exists in Postgres</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        n = c.<span class="fn">execute</span>(<span class="fn">text</span>(
+          <span class="st">f"SELECT count(*) FROM </span><span class="nm">{TUTORIAL['synced_table']}</span><span class="st">"</span>
+        )).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"Synced table reads"</span>, <span class="st">f"rows=</span><span class="nm">{n}</span><span class="st">"</span>, n &gt;= <span class="nu">5</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Synced table reads"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 4. Synced table reflects an upstream UPDATE</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        score = c.<span class="fn">execute</span>(<span class="fn">text</span>(
+          <span class="st">f"SELECT score FROM </span><span class="nm">{TUTORIAL['synced_table']}</span><span class="st"> WHERE user_id=1"</span>
+        )).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"Synced freshness works"</span>, <span class="st">f"score=</span><span class="nm">{score}</span><span class="st">"</span>, score == <span class="nu">0.99</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Synced freshness works"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 5. Federation join works</span>
+<span class="kw">try</span>:
+    n = spark.<span class="fn">sql</span>(<span class="st">f"""
+      SELECT count(*) AS n
+      FROM lakebase_tutorial.public.orders o
+      JOIN </span><span class="nm">{TUTORIAL['demo_catalog']}</span><span class="st">.</span><span class="nm">{TUTORIAL['demo_schema']}</span><span class="st">.user_profile p
+        ON o.user_id = p.user_id
+    """</span>).<span class="fn">collect</span>()[<span class="nu">0</span>][<span class="st">"n"</span>]
+    checks.<span class="fn">append</span>((<span class="st">"Federated join works"</span>, <span class="st">f"rows=</span><span class="nm">{n}</span><span class="st">"</span>, n &gt;= <span class="nu">1</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Federated join works"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 6. Lakehouse Sync (skip-friendly: passes if unavailable in region)</span>
+<span class="kw">if</span> LHS_AVAILABLE:
+    <span class="kw">try</span>:
+        n = spark.<span class="fn">sql</span>(<span class="st">f"""
+          SELECT count(*) AS n FROM </span><span class="nm">{LHS_TARGET}</span><span class="st"> WHERE sku = 'SKU-NEW'
+        """</span>).<span class="fn">collect</span>()[<span class="nu">0</span>][<span class="st">"n"</span>]
+        checks.<span class="fn">append</span>((<span class="st">"Lakehouse Sync (Beta)"</span>, <span class="st">f"history rows=</span><span class="nm">{n}</span><span class="st">"</span>, n &gt;= <span class="nu">1</span>))
+    <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+        checks.<span class="fn">append</span>((<span class="st">"Lakehouse Sync (Beta)"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+<span class="kw">else</span>:
+    checks.<span class="fn">append</span>((<span class="st">"Lakehouse Sync (Beta)"</span>, <span class="st">"skipped (region)"</span>, <span class="kw">True</span>))
+
+<span class="cm"># Print summary</span>
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+<span class="fn">print</span>(<span class="st">f"</span><span class="nm">{'CHECK':&lt;28}</span><span class="st"> </span><span class="nm">{'DETAIL':&lt;28}</span><span class="st"> STATUS"</span>)
+<span class="fn">print</span>(<span class="st">"-"</span> * <span class="nu">70</span>)
+<span class="kw">for</span> name, detail, ok <span class="kw">in</span> checks:
+    icon = <span class="st">"✅"</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="st">"❌"</span>
+    <span class="fn">print</span>(<span class="st">f"</span><span class="nm">{name:&lt;28}</span><span class="st"> </span><span class="nm">{str(detail)[:28]:&lt;28}</span><span class="st"> </span><span class="nm">{icon}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+passed = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> _, _, ok <span class="kw">in</span> checks <span class="kw">if</span> ok)
+total = <span class="fn">len</span>(checks)
+<span class="kw">if</span> passed == total:
+    <span class="fn">print</span>(<span class="st">f"\n🎯 ALL </span><span class="nm">{total}</span><span class="st"> CHECKS PASSED — Module 4 complete."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">f"\n⚠ </span><span class="nm">{passed}</span><span class="st">/</span><span class="nm">{total}</span><span class="st"> passed. Resolve the ❌ rows before Module 5."</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-label">Expected output (the success case)</div>
+<pre>======================================================================
+CHECK                        DETAIL                       STATUS
+----------------------------------------------------------------------
+Project from M3 reusable     state=READY                  ✅
+Delta source built           rows=5                       ✅
+Synced table reads           rows=5                       ✅
+Synced freshness works       score=0.99                   ✅
+Federated join works         rows=4                       ✅
+Lakehouse Sync (Beta)        history rows=1               ✅
+======================================================================
+
+🎯 ALL 6 CHECKS PASSED — Module 4 complete.</pre>
+    </div>
+
+    <!-- ─── INTERACTIVE CHECKLIST ─── -->
+    <div class="checklist-section">
+      <div class="checklist-header">
+        <span class="checklist-title">Tap each check as Cell 13 prints <em>✅</em></span>
+        <span class="checklist-status" id="clStatus">0 / 6 complete</span>
+      </div>
+      <div class="check-row">
+        <span class="check-num">01</span>
+        <div>
+          <div class="check-name">Project from M3 reusable</div>
+          <div class="check-desc">state=READY</div>
+        </div>
+        <span class="check-detail" id="d1">— pending —</span>
+        <button class="check-toggle" data-check="1" onclick="toggleCheck(1)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">02</span>
+        <div>
+          <div class="check-name">Delta source built</div>
+          <div class="check-desc">main.lakebase_demo.user_profile has 5 rows</div>
+        </div>
+        <span class="check-detail" id="d2">— pending —</span>
+        <button class="check-toggle" data-check="2" onclick="toggleCheck(2)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">03</span>
+        <div>
+          <div class="check-name">Synced table reads</div>
+          <div class="check-desc">user_profile_synced reachable from Postgres</div>
+        </div>
+        <span class="check-detail" id="d3">— pending —</span>
+        <button class="check-toggle" data-check="3" onclick="toggleCheck(3)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">04</span>
+        <div>
+          <div class="check-name">Synced freshness works</div>
+          <div class="check-desc">UC UPDATE reflected in synced table (score=0.99)</div>
+        </div>
+        <span class="check-detail" id="d4">— pending —</span>
+        <button class="check-toggle" data-check="4" onclick="toggleCheck(4)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">05</span>
+        <div>
+          <div class="check-name">Federated join works</div>
+          <div class="check-desc">DBSQL ⨝ Postgres returns rows</div>
+        </div>
+        <span class="check-detail" id="d5">— pending —</span>
+        <button class="check-toggle" data-check="5" onclick="toggleCheck(5)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">06</span>
+        <div>
+          <div class="check-name">Lakehouse Sync (Beta)</div>
+          <div class="check-desc">orders_history populated — or skipped if unavailable</div>
+        </div>
+        <span class="check-detail" id="d6">— pending —</span>
+        <button class="check-toggle" data-check="6" onclick="toggleCheck(6)">○</button>
+      </div>
+
+      <div class="checklist-footer">
+        <span id="clMessage">▸ Run Cell 13. Tap each ✅ above as it appears.</span>
+        <button class="reset-btn" onclick="resetChecks()">RESET</button>
+      </div>
+    </div>
+
+    <div class="substep"><span>7b</span>Cleanup (recommended — drops pipelines, keeps project)</div>
+
+    <div class="cell" id="cell-14">
+      <div class="cell-header">
+        <span class="cell-label">Cell 14 · cleanup<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-14')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 14 — cleanup</span>
+<span class="cm"># Set CLEANUP_PIPELINES=False if you want to keep the synced table &amp; LHS running.</span>
+<span class="cm"># Module 5 builds pgvector indexes INTO the same project, so we KEEP the project.</span>
+CLEANUP_PIPELINES = <span class="kw">True</span>
+
+<span class="kw">if</span> CLEANUP_PIPELINES:
+    target_fqn = <span class="st">f"lakebase_tutorial.public.</span><span class="nm">{TUTORIAL['synced_table']}</span><span class="st">"</span>
+
+    <span class="cm"># Drop the synced table (managed pipeline stops automatically)</span>
+    <span class="kw">try</span>:
+        w.database.<span class="fn">delete_synced_database_table</span>(name=target_fqn)
+        <span class="fn">print</span>(<span class="st">f"✅ Synced table dropped: </span><span class="nm">{target_fqn}</span><span class="st">"</span>)
+    <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="st">f"⚠ Could not drop synced table: </span><span class="nm">{str(e)[:80]}</span><span class="st">"</span>)
+
+    <span class="cm"># Drop the Lakehouse Sync (if created)</span>
+    <span class="kw">if</span> LHS_AVAILABLE:
+        <span class="kw">try</span>:
+            spark.<span class="fn">sql</span>(<span class="st">f"DROP LAKEHOUSE_SYNC IF EXISTS </span><span class="nm">{LHS_TARGET}</span><span class="st">"</span>)
+            <span class="fn">print</span>(<span class="st">f"✅ Lakehouse Sync dropped: </span><span class="nm">{LHS_TARGET}</span><span class="st">"</span>)
+        <span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+            <span class="fn">print</span>(<span class="st">f"⚠ Could not drop Lakehouse Sync: </span><span class="nm">{str(e)[:80]}</span><span class="st">"</span>)
+
+    <span class="fn">print</span>(<span class="st">"\n⏸ Lakebase project KEPT (needed for Module 5)."</span>)
+    <span class="fn">print</span>(<span class="st">f"   Project: </span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">"</span>)
+    <span class="fn">print</span>(<span class="st">f"   Endpoint: </span><span class="nm">{project.read_write_dns}</span><span class="st">"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"⏸ Pipeline cleanup skipped. Synced table + Lakehouse Sync still running."</span>)
+    <span class="fn">print</span>(<span class="st">"   (Both will incur ongoing cost until dropped.)"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-label">Expected output</div>
+<pre>✅ Synced table dropped: lakebase_tutorial.public.user_profile_synced
+✅ Lakehouse Sync dropped: main.lakebase_demo.orders_history
+
+⏸ Lakebase project KEPT (needed for Module 5).
+   Project: lakebase-tutorial
+   Endpoint: lakebase-tutorial.&lt;region&gt;.database.cloud.databricks.com</pre>
+    </div>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Why we keep the project</span>
+      Module 5 (<em>Lakebase as a Vector Store</em>) enables <code>pgvector</code> in this same project, ingests embeddings via the synced-table pattern you just built, and runs RAG retrieval against it. Module 6 layers agent memory into the same schema. Cleaning up the project now means re-provisioning twice. Keep it; it stays cheap when idle on Autoscaling.
+    </div>
+  </section>
+
+  <!-- ─── DONE BANNER ─── -->
+  <section class="done-banner">
+    <h3>What you've <em>accomplished</em></h3>
+    <p>If your final cell printed <code>🎯 ALL 6 CHECKS PASSED</code>, you have done — for real, not in slides:</p>
+    <ul>
+      <li>✅ Built a Delta source with CDF + a primary key — the prerequisite for any sync</li>
+      <li>✅ Created a synced table (UC Delta → Lakebase) and proved freshness with a live UPDATE</li>
+      <li>✅ Ran a federated join (DBSQL ⨝ Postgres) and read the EXPLAIN plan to confirm pushdown</li>
+      <li>✅ Set up Lakehouse Sync (Lakebase → UC Delta) — or correctly skipped it if Beta isn't in your region</li>
+      <li>✅ Measured your own latency numbers — synced reads are ~100×+ faster than federation at app scale</li>
+      <li>✅ Internalized the decision rule: <em>app reads → synced</em>, <em>history → Lakehouse Sync</em>, <em>rare lookups → federation</em></li>
+    </ul>
+    <p>You now have hands-on with all three integration patterns from Module 4.5 and a working synced-table demo you can show a customer in under two minutes. Most prospects only ever see the slide; you've measured the numbers.</p>
+
+    <div class="callout callout-success" style="margin-top: 24px;">
+      <span class="callout-label">▸ Module 4 complete</span>
+      <p>You finished five theory topics (4.1–4.5) and the hands-on lab. <strong>Next up: Module 5</strong> — <em>Lakebase as a Vector Store.</em> You'll enable <code>pgvector</code> in your project, ingest embeddings via the exact synced-table pattern you just built, and stand up a low-latency RAG retrieval path — no third-party vector DB.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ COPY BUTTONS ═══════════════
+function copyCell(cellId) {
+  const cell = document.getElementById(cellId);
+  const pre = cell.querySelector('pre');
+  const text = pre.innerText;
+  const btn = cell.querySelector('.copy-btn');
+
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.textContent = 'COPIED ✓';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = 'COPY';
+    }, 1800);
+  }).catch(() => {
+    btn.textContent = 'PRESS ⌘+C';
+    const range = document.createRange();
+    range.selectNode(pre);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    setTimeout(() => { btn.textContent = 'COPY'; }, 2200);
+  });
+}
+
+// ═══════════════ STEP TRACKER ═══════════════
+const STEP_KEY  = 'lakebase_lab4_steps';
+const CHECK_KEY = 'lakebase_lab4_checks';
+
+function loadSteps() {
+  try { return JSON.parse(localStorage.getItem(STEP_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveSteps(s) {
+  try { localStorage.setItem(STEP_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+function markStep(n) {
+  const steps = loadSteps();
+  steps[n] = !steps[n];
+  saveSteps(steps);
+  renderSteps();
+}
+
+function renderSteps() {
+  const steps = loadSteps();
+  const total = 7;
+  let done = 0;
+  for (let i = 1; i <= total; i++) {
+    const pill = document.querySelector(`.step-pill[data-step="${i}"]`);
+    const btn = document.querySelector(`.step-mark[data-step="${i}"]`);
+    if (steps[i]) {
+      done++;
+      if (pill) pill.classList.add('done');
+      if (btn) {
+        btn.classList.add('done');
+        btn.textContent = '✓ Done';
+      }
+    } else {
+      if (pill) pill.classList.remove('done');
+      if (btn) {
+        btn.classList.remove('done');
+        btn.textContent = 'Mark done';
+      }
+    }
+  }
+  const counter = document.getElementById('trackerCount');
+  if (counter) {
+    counter.textContent = `${done} / ${total}`;
+    counter.style.color = (done === total) ? 'var(--accent-green)' : 'var(--m4)';
+  }
+}
+
+// Highlight active step on scroll
+function highlightActive() {
+  const sections = document.querySelectorAll('section.step');
+  const scrollY = window.scrollY + 200;
+  let active = null;
+  sections.forEach(s => {
+    if (s.offsetTop <= scrollY) active = s.id;
+  });
+  document.querySelectorAll('.step-pill').forEach(p => p.classList.remove('active'));
+  if (active) {
+    const n = active.replace('step', '');
+    const pill = document.querySelector(`.step-pill[data-step="${n}"]`);
+    if (pill && !pill.classList.contains('done')) pill.classList.add('active');
+  }
+}
+window.addEventListener('scroll', highlightActive);
+
+// ═══════════════ INTERACTIVE CHECKLIST ═══════════════
+const CHECK_DETAILS = {
+  1: 'state=READY',
+  2: 'rows=5',
+  3: 'rows=5',
+  4: 'score=0.99',
+  5: 'rows=4',
+  6: 'history rows=1'
+};
+
+function loadChecks() {
+  try { return JSON.parse(localStorage.getItem(CHECK_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveChecks(c) {
+  try { localStorage.setItem(CHECK_KEY, JSON.stringify(c)); } catch (e) {}
+}
+
+function toggleCheck(n) {
+  const checks = loadChecks();
+  checks[n] = !checks[n];
+  saveChecks(checks);
+  renderChecks();
+}
+
+function resetChecks() {
+  if (!confirm('Reset all checks?')) return;
+  saveChecks({});
+  renderChecks();
+}
+
+function renderChecks() {
+  const checks = loadChecks();
+  const total = 6;
+  let done = 0;
+  for (let i = 1; i <= total; i++) {
+    const btn = document.querySelector(`.check-toggle[data-check="${i}"]`);
+    const detail = document.getElementById('d' + i);
+    if (checks[i]) {
+      done++;
+      if (btn) {
+        btn.classList.add('checked');
+        btn.textContent = '✓';
+      }
+      if (detail) {
+        detail.textContent = CHECK_DETAILS[i];
+        detail.style.color = 'var(--accent-green)';
+      }
+    } else {
+      if (btn) {
+        btn.classList.remove('checked');
+        btn.textContent = '○';
+      }
+      if (detail) {
+        detail.textContent = '— pending —';
+        detail.style.color = 'var(--text-muted)';
+      }
+    }
+  }
+  const status = document.getElementById('clStatus');
+  const msg = document.getElementById('clMessage');
+  if (status) {
+    status.textContent = `${done} / ${total} complete`;
+    if (done === total) status.classList.add('complete');
+    else status.classList.remove('complete');
+  }
+  if (msg) {
+    if (done === 0) {
+      msg.textContent = '▸ Run Cell 13. Tap each ✅ above as it appears.';
+      msg.style.color = '';
+    } else if (done < total) {
+      msg.textContent = `▸ ${total - done} check${total - done === 1 ? '' : 's'} remaining. Keep going.`;
+      msg.style.color = '';
+    } else {
+      msg.textContent = '🎯 All checks complete — Module 4 done. Move on to Module 5.';
+      msg.style.color = 'var(--accent-green)';
+    }
+  }
+}
+
+// initial render
+renderSteps();
+renderChecks();
+highlightActive();
+</script>
+
+</body>
+</html>

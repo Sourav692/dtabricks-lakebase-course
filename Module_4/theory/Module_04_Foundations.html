@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 04 — Sync, Federate &amp; Unify: Concepts Behind the Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --accent-cyan: #06b6d4;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  /* Module 4 primary accent — cyan/teal (integration/flow) */
+  --m4: #06b6d4;
+  --m4-soft: rgba(6,182,212,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 64px 48px 56px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(6,182,212,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.crumb .tag {
+  color: var(--m4);
+  padding: 4px 12px;
+  border: 1px solid rgba(6,182,212,0.3);
+  background: var(--m4-soft);
+  border-radius: 2px;
+}
+.crumb .sep { color: var(--text-muted); }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--m4); }
+
+.lede {
+  font-size: 17px; color: var(--text-dim);
+  max-width: 760px; line-height: 1.75;
+  margin-bottom: 32px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px; font-weight: 500;
+  color: var(--accent-teal);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 48px 100px;
+}
+
+/* ─── TOC ─── */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--m4);
+  border-radius: 6px;
+  padding: 22px 26px;
+  margin-bottom: 56px;
+}
+.toc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--m4);
+  margin-bottom: 14px;
+}
+.toc ol { list-style: none; counter-reset: tc; }
+.toc li {
+  counter-increment: tc;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; align-items: baseline; gap: 16px;
+  font-size: 14px;
+}
+.toc li:last-child { border-bottom: none; }
+.toc li::before {
+  content: counter(tc, decimal-leading-zero);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  min-width: 24px;
+}
+.toc a { color: var(--text); text-decoration: none; transition: color 0.2s; }
+.toc a:hover { color: var(--m4); }
+.toc .dur {
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ─── SECTION ─── */
+section.topic {
+  margin-bottom: 72px;
+  scroll-margin-top: 32px;
+}
+
+.topic-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px;
+}
+.topic-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--m4);
+  padding: 4px 10px;
+  border: 1px solid rgba(6,182,212,0.3);
+  background: var(--m4-soft);
+  border-radius: 2px;
+}
+.topic-banner .line { flex: 1; height: 1px; background: var(--border); }
+.topic-banner .type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.5vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+h2 em { font-style: italic; color: var(--m4); }
+
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin: 36px 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 28px 0 10px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 16px 0 20px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 6px 0 6px 24px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  color: var(--m4);
+  font-size: 16px;
+}
+ol { counter-reset: ol; }
+ol li::before {
+  content: counter(ol, decimal-leading-zero);
+  counter-increment: ol;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--m4);
+  top: 9px;
+  left: 0;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+pre.code-snip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--m4);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 18px 0 24px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+pre.code-snip .kw { color: var(--accent-purple); }
+pre.code-snip .st { color: var(--accent-green); }
+pre.code-snip .nu { color: var(--accent-yellow); }
+pre.code-snip .cm { color: var(--text-muted); font-style: italic; }
+pre.code-snip .fn { color: var(--accent-blue); }
+
+/* ─── TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 24px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.5;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+.yes { color: var(--accent-green); font-weight: 600; }
+.no  { color: var(--accent-red); }
+.warn { color: var(--accent-yellow); }
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 28px 0;
+  padding: 20px 24px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.callout strong { color: var(--text); }
+.callout-checkpoint {
+  background: rgba(0,191,165,0.05);
+  border-left-color: var(--accent-teal);
+}
+.callout-warn {
+  background: rgba(251,191,36,0.05);
+  border-left-color: var(--accent-yellow);
+}
+.callout-trap {
+  background: rgba(239,68,68,0.05);
+  border-left-color: var(--accent-red);
+}
+.callout-note {
+  background: rgba(74,158,255,0.05);
+  border-left-color: var(--accent-blue);
+}
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+.callout-checkpoint .callout-label { color: var(--accent-teal); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-trap .callout-label { color: var(--accent-red); }
+.callout-note .callout-label { color: var(--accent-blue); }
+
+/* ─── INTERACTIVE DIAGRAM SHELL ─── */
+.diagram {
+  margin: 32px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.diagram-header {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.diagram-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--m4);
+}
+.diagram-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+.diagram-hint::before { content: '◉ '; color: var(--accent-teal); }
+
+.diagram-stage {
+  padding: 24px;
+  position: relative;
+  min-height: 360px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.diagram-info {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: rgba(6,182,212,0.04);
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  min-height: 70px;
+}
+.diagram-info-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin-bottom: 6px;
+}
+
+/* ─── DIAGRAM SVG common ─── */
+.flow-svg, .timeline-svg, .pattern-svg, .sync-svg, .lhs-svg, .fed-svg, .cost-svg {
+  width: 100%; max-width: 920px; height: auto;
+}
+.diag-node {
+  cursor: pointer;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.diag-node:hover { filter: brightness(1.18); }
+.diag-node.dimmed { opacity: 0.3; }
+.diag-node text { pointer-events: none; }
+
+/* ─── STEPPER ─── */
+.stepper {
+  display: flex; gap: 0;
+  background: var(--surface3);
+  border-radius: 4px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+.stepper button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.stepper button.active {
+  background: var(--m4);
+  color: #fff;
+}
+.stepper button:hover:not(.active) { color: var(--text); }
+
+/* ─── WRAP-UP ─── */
+.wrap-up {
+  margin-top: 80px;
+  padding: 36px 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.wrap-up::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wrap-up h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 26px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.wrap-up h3 em { color: var(--m4); }
+
+/* ─── PROGRESS BAR ─── */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--m4);
+  z-index: 1000;
+  transition: width 0.1s;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 30px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 04</span>
+      <span class="sep">/</span>
+      <span>Lakebase Mastery</span>
+      <span class="sep">/</span>
+      <span>Concepts Behind the Lab</span>
+    </div>
+    <h1>Sync, Federate &amp; Unify<br><em>The Three Integration Patterns</em></h1>
+    <p class="lede">Module 1 gave you the vocabulary. Module 2 gave you the architecture. Module 3 made it real. Module 4 is where Lakebase stops being "managed Postgres" and starts being a lakehouse-native OLTP store — five conceptual jumps explained before you open the notebook.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">5</span><span class="meta-lbl">Concept Topics</span></div>
+      <div class="meta-item"><span class="meta-val">~75m</span><span class="meta-lbl">Theory</span></div>
+      <div class="meta-item"><span class="meta-val">Intermediate</span><span class="meta-lbl">Level</span></div>
+      <div class="meta-item"><span class="meta-val">5</span><span class="meta-lbl">Interactive Diagrams</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ───── TABLE OF CONTENTS ───── -->
+  <div class="toc">
+    <div class="toc-label">▸ On this page</div>
+    <ol>
+      <li><a href="#t41">The Three Integration Patterns — When To Use Each</a><span class="dur">~14 min</span></li>
+      <li><a href="#t42">Synced Tables — UC Delta → Lakebase via Managed CDC</a><span class="dur">~16 min</span></li>
+      <li><a href="#t43">Lakehouse Sync — Lakebase → UC Delta (Reverse CDC)</a><span class="dur">~14 min</span></li>
+      <li><a href="#t44">Federation — Live Reads From DBSQL</a><span class="dur">~12 min</span></li>
+      <li><a href="#t45">Cost &amp; Latency — The Decision Rule</a><span class="dur">~12 min</span></li>
+      <li><a href="#wrap">Module 4 Wrap-Up &amp; Common Pitfalls</a><span class="dur">~7 min</span></li>
+    </ol>
+  </div>
+
+  <!-- ────────── INTRO ────────── -->
+  <section class="topic">
+    <h3 style="margin-top:0">What this module gives you</h3>
+    <p>Module 1 gave you the vocabulary. Module 2 gave you the architecture. Module 3 made it real — you have a live Lakebase project, registered in Unity Catalog, with a working OAuth pattern. <strong>Module 4 is where Lakebase stops being "managed Postgres" and starts being a <em>lakehouse-native</em> OLTP store.</strong> The single capability that separates Lakebase from RDS is its three-way conversation with Delta and Unity Catalog.</p>
+    <p>This module covers the theory behind each of the three integration patterns. The Module 4 lab notebook walks you through running them.</p>
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Prerequisite Check</span>
+      You should have completed the <strong>Module 3 lab</strong> with all 6 ✅ checks. If you set <code>CLEANUP=False</code> at the end (the default), your <code>lakebase-tutorial</code> project and <code>lakebase_tutorial</code> UC catalog are still live and ready. If you cleaned up, re-run Module 3 Steps 1–4 before continuing.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 4.1 -->
+  <section class="topic" id="t41">
+    <div class="topic-banner">
+      <span class="topic-id">4.1</span>
+      <span class="line"></span>
+      <span class="type">Theory · Decision Rule</span>
+    </div>
+    <h2>The three integration patterns — <em>when to use each</em></h2>
+
+    <h3>The deceptively simple question</h3>
+    <p>A customer asks: <em>"How do I get my user profile data — currently sitting in a Delta table — into my application?"</em></p>
+    <p>There are three valid answers. Each one corresponds to a different data direction, freshness need, and cost profile. <strong>Picking the wrong one is the most common Lakebase design mistake an RSA can make.</strong></p>
+
+    <h3>The three patterns at a glance</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Pattern</th><th>Direction</th><th>Latency</th><th>Typical Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Synced tables</strong></td><td>UC Delta → Lakebase</td><td>Seconds to minutes</td><td>Serve features, profiles, catalog data to apps</td></tr>
+          <tr><td><strong>Lakehouse Sync</strong></td><td>Lakebase → UC Delta</td><td>Continuous CDC (~tens of seconds)</td><td>Analytics on operational data, history</td></tr>
+          <tr><td><strong>Federation</strong></td><td>Live read from DBSQL</td><td>Per-query (network RTT)</td><td>Ad-hoc joins, low-volume reads, exploration</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The integration map</h3>
+    <p>Hover or click on a pattern below to see what flows where, when to reach for it, and the latency profile.</p>
+
+    <!-- DIAGRAM 4.1: Three Patterns Map -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 4.1 · Three Integration Patterns</span>
+        <span class="diagram-hint">Hover any flow to inspect</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" class="pattern-svg" id="patternSvg">
+          <defs>
+            <marker id="arrM4Sync" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#06b6d4"/>
+            </marker>
+            <marker id="arrM4Lhs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e"/>
+            </marker>
+            <marker id="arrM4Fed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24"/>
+            </marker>
+          </defs>
+
+          <!-- LAKEHOUSE side -->
+          <g class="diag-node" data-info="LAKEHOUSE — Unity Catalog + Delta tables. Source of truth for analytics, ML training data, curated dimensions. Data is columnar, optimized for scans, not row lookups.">
+            <rect x="40" y="40" width="220" height="300" rx="10" fill="#0b0f1a" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="150" y="68" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a9eff" letter-spacing="2">LAKEHOUSE</text>
+            <rect x="70" y="100" width="160" height="50" rx="4" fill="#1a2235" stroke="#4a9eff" stroke-width="1.2"/>
+            <text x="150" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#4a9eff">Delta · UC</text>
+            <text x="150" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">user_profile</text>
+
+            <rect x="70" y="170" width="160" height="50" rx="4" fill="#1a2235" stroke="#4a9eff" stroke-width="1.2"/>
+            <text x="150" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#4a9eff">Delta · UC</text>
+            <text x="150" y="208" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">products</text>
+
+            <rect x="70" y="240" width="160" height="50" rx="4" fill="#1a2235" stroke="#4a9eff" stroke-width="1.2"/>
+            <text x="150" y="262" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#4a9eff">DBSQL</text>
+            <text x="150" y="278" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">query engine</text>
+          </g>
+
+          <!-- LAKEBASE side -->
+          <g class="diag-node" data-info="LAKEBASE — Postgres-compatible OLTP store. Row-oriented, indexed, app-latency reads/writes. Same governance plane as the lakehouse via Unity Catalog.">
+            <rect x="620" y="40" width="220" height="300" rx="10" fill="#0b0f1a" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="730" y="68" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#06b6d4" letter-spacing="2">LAKEBASE</text>
+
+            <rect x="650" y="100" width="160" height="50" rx="4" fill="#1a2235" stroke="#06b6d4" stroke-width="1.2"/>
+            <text x="730" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#06b6d4">synced</text>
+            <text x="730" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">user_profile</text>
+
+            <rect x="650" y="170" width="160" height="50" rx="4" fill="#1a2235" stroke="#22c55e" stroke-width="1.2"/>
+            <text x="730" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">native</text>
+            <text x="730" y="208" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">orders</text>
+
+            <rect x="650" y="240" width="160" height="50" rx="4" fill="#1a2235" stroke="#06b6d4" stroke-width="1.2"/>
+            <text x="730" y="262" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#06b6d4">app driver</text>
+            <text x="730" y="278" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">&lt;10ms reads</text>
+          </g>
+
+          <!-- ARROW 1: Synced tables (LH → LB) -->
+          <g class="diag-node" data-info="SYNCED TABLES — UC Delta → Lakebase. Managed CDC pipeline keeps a Lakebase mirror within seconds of the source. Replaces reverse-ETL tools. App reads Lakebase like any Postgres table.">
+            <path d="M 240 125 Q 430 80 640 125" stroke="#06b6d4" stroke-width="2.5" fill="none" marker-end="url(#arrM4Sync)"/>
+            <rect x="370" y="60" width="140" height="34" rx="4" fill="#0b0f1a" stroke="#06b6d4" stroke-width="1.2"/>
+            <text x="440" y="80" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#06b6d4">SYNCED TABLE</text>
+          </g>
+
+          <!-- ARROW 2: Lakehouse Sync (LB → LH) -->
+          <g class="diag-node" data-info="LAKEHOUSE SYNC — Lakebase → UC Delta. Continuous CDC pipeline captures Lakebase changes and writes them to a Delta table for analytics. Replaces hand-rolled Debezium / Kafka pipelines.">
+            <path d="M 640 195 Q 430 240 240 195" stroke="#22c55e" stroke-width="2.5" fill="none" marker-end="url(#arrM4Lhs)"/>
+            <rect x="370" y="220" width="140" height="34" rx="4" fill="#0b0f1a" stroke="#22c55e" stroke-width="1.2"/>
+            <text x="440" y="240" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">LAKEHOUSE SYNC</text>
+          </g>
+
+          <!-- ARROW 3: Federation (LB → DBSQL live) -->
+          <g class="diag-node" data-info="FEDERATION — DBSQL queries Lakebase live, no replication. Best for ad-hoc joins, audits, one-off reports. Anti-pattern for high-volume reads (taxes the OLTP primary).">
+            <path d="M 640 265 Q 430 310 240 265" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="6 3" fill="none" marker-end="url(#arrM4Fed)"/>
+            <rect x="370" y="298" width="140" height="34" rx="4" fill="#0b0f1a" stroke="#fbbf24" stroke-width="1.2"/>
+            <text x="440" y="318" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">FEDERATION</text>
+          </g>
+
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Hover any flow above</div>
+        <p id="patternInfo">Three flows, three directions. <strong>Synced</strong> is for getting Delta data <em>into</em> Lakebase. <strong>Lakehouse Sync</strong> is for getting Lakebase changes <em>back to</em> Delta. <strong>Federation</strong> is for live cross-store reads from DBSQL — no replication, no copy.</p>
+      </div>
+    </div>
+
+    <h3>The decision rule, in three questions</h3>
+    <ol>
+      <li><strong>What direction does the data flow?</strong> Lakehouse → app: synced tables. App → lakehouse: Lakehouse Sync. Live cross-store query from analyst: federation.</li>
+      <li><strong>How fresh does it need to be at the destination?</strong> Sub-second: synced tables with <code>CONTINUOUS</code>. Few minutes is fine: synced tables with <code>SNAPSHOT</code> (cheaper). Few seconds, append-only history: Lakehouse Sync.</li>
+      <li><strong>How often will the query run?</strong> Many times per second from an app: synced tables (never federation). A few times a day from a dashboard: federation is fine. Continuously, for analytics: Lakehouse Sync.</li>
+    </ol>
+
+    <h3>The anti-pattern to memorize</h3>
+    <p><strong>Federation for high-volume reads.</strong> Every federated query travels across the network and pushes load onto your OLTP primary. Use it once a week and you'll never notice. Use it from an app endpoint and you'll degrade both your dashboards and your app — <em>at the same time</em>. The cost is paid in p99 latency.</p>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 4.1</span>
+      <p>Three customer scenarios — pick the pattern for each, with no peeking:</p>
+      <ol>
+        <li><em>"Our recommendation model writes to Delta hourly. The app needs profiles in &lt;10ms."</em></li>
+        <li><em>"Our orders table in Lakebase needs to be analyzed for fraud trends in our daily Delta pipeline."</em></li>
+        <li><em>"The auditor wants a one-off join between our Postgres customers and our Delta marketing events."</em></li>
+      </ol>
+      <p style="margin-top:8px"><strong>Answers:</strong> synced tables (likely <code>SNAPSHOT</code>), Lakehouse Sync, federation.</p>
+    </div>
+  </section>
+  <!-- ═══════════════════════════════════════════════ TOPIC 4.2 -->
+  <section class="topic" id="t42">
+    <div class="topic-banner">
+      <span class="topic-id">4.2</span>
+      <span class="line"></span>
+      <span class="type">Theory · Synced Tables</span>
+    </div>
+    <h2>Synced tables — UC Delta <em>into</em> Lakebase via managed CDC</h2>
+
+    <h3>The reverse-ETL replacement</h3>
+    <p>For a decade, "reverse-ETL" tools (Hightouch, Census, in-house pipelines) have existed for one reason: to push curated lakehouse data into operational stores so apps can read it at app latency. <strong>Synced tables make those tools obsolete</strong> for any Lakebase customer.</p>
+    <p>The promise is concrete: declare a Delta table as a source, declare a primary key, declare a refresh policy. Databricks runs a managed CDC pipeline that keeps a Lakebase mirror within seconds-to-minutes of the source. Your app queries Lakebase like any Postgres table — with indexes, joins, and 1ms latency.</p>
+
+    <h3>The SDK call</h3>
+<pre class="code-snip"><span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> (
+    SyncedDatabaseTable, SyncedTableSpec, SyncedTableSchedulingPolicy
+)
+
+st = w.database.<span class="fn">create_synced_database_table</span>(
+    synced_table=<span class="fn">SyncedDatabaseTable</span>(
+        name=<span class="st">"lakebase_tutorial.public.user_profile_synced"</span>,
+        spec=<span class="fn">SyncedTableSpec</span>(
+            source_table_full_name=<span class="st">"main.features.user_profile"</span>,
+            primary_key_columns=[<span class="st">"user_id"</span>],
+            scheduling_policy=SyncedTableSchedulingPolicy.CONTINUOUS,
+            timeseries_key=<span class="st">"updated_at"</span>,
+        ),
+        database_instance_name=<span class="st">"lakebase-tutorial"</span>,
+    )
+)</pre>
+
+    <p>Five fields, each consequential:</p>
+    <ul>
+      <li><strong><code>name</code></strong> — the <em>destination</em> fully-qualified UC name. The catalog must be your Lakebase UC registration from Module 3.4.</li>
+      <li><strong><code>source_table_full_name</code></strong> — the <em>source</em> Delta table in UC. Must already exist.</li>
+      <li><strong><code>primary_key_columns</code></strong> — required. The CDC pipeline uses this to upsert correctly. No PK = no synced table.</li>
+      <li><strong><code>scheduling_policy</code></strong> — <code>CONTINUOUS</code> or <code>SNAPSHOT</code>. Covered next.</li>
+      <li><strong><code>timeseries_key</code></strong> — optional but recommended. A monotonic timestamp lets the pipeline detect ordering and avoid out-of-order writes.</li>
+    </ul>
+
+    <h3>The CDC pipeline you don't see</h3>
+    <p>Step through the pipeline below. Click each stage to see what's happening behind the scenes.</p>
+
+    <!-- DIAGRAM 4.2: Synced Table Pipeline Stepper -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 4.2 · Synced Table CDC Pipeline</span>
+        <div class="stepper" id="syncStepper">
+          <button class="active" data-step="1" onclick="setSync(1)">1 · Source</button>
+          <button data-step="2" onclick="setSync(2)">2 · CDF</button>
+          <button data-step="3" onclick="setSync(3)">3 · Pipeline</button>
+          <button data-step="4" onclick="setSync(4)">4 · Upsert</button>
+          <button data-step="5" onclick="setSync(5)">5 · App</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" class="sync-svg" id="syncSvg">
+          <defs>
+            <marker id="arrSync" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#06b6d4"/>
+            </marker>
+            <marker id="arrSyncDim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#243550"/>
+            </marker>
+          </defs>
+
+          <!-- Stage 1: Delta source -->
+          <g class="diag-node" id="sync-1" data-info="STAGE 1 · DELTA SOURCE — Your Delta table in UC, e.g. main.features.user_profile. The Delta engine writes change data feed (CDF) automatically when the table is created with delta.enableChangeDataFeed=true.">
+            <rect x="20" y="100" width="140" height="120" rx="6" fill="#1a2235" stroke="#06b6d4" stroke-width="2"/>
+            <text x="90" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#06b6d4" letter-spacing="1.5">STAGE 1</text>
+            <text x="90" y="152" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Delta source</text>
+            <text x="90" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">UC table</text>
+            <text x="90" y="190" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">w/ PK</text>
+            <text x="90" y="208" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">writes →</text>
+          </g>
+
+          <!-- Arrow 1→2 -->
+          <line x1="160" y1="160" x2="195" y2="160" stroke="#06b6d4" stroke-width="2" marker-end="url(#arrSync)" id="syncA1"/>
+
+          <!-- Stage 2: CDF -->
+          <g class="diag-node" id="sync-2" data-info="STAGE 2 · CHANGE DATA FEED — Delta CDF emits row-level changes (insert, update, delete) with _change_type and _commit_timestamp metadata. This is the stream the pipeline consumes — it does NOT re-scan the full table on every refresh.">
+            <rect x="200" y="100" width="140" height="120" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
+            <text x="270" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 2</text>
+            <text x="270" y="152" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#8899bb" font-style="italic">CDF stream</text>
+            <text x="270" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">_change_type</text>
+            <text x="270" y="190" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">_commit_ts</text>
+            <text x="270" y="208" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">row-level</text>
+          </g>
+
+          <!-- Arrow 2→3 -->
+          <line x1="340" y1="160" x2="375" y2="160" stroke="#243550" stroke-width="2" marker-end="url(#arrSyncDim)" id="syncA2"/>
+
+          <!-- Stage 3: Managed pipeline -->
+          <g class="diag-node" id="sync-3" data-info="STAGE 3 · MANAGED CDC PIPELINE — Databricks runs a pipeline (you don't see it directly) that consumes the CDF, transforms changes into upsert/delete operations, and respects ordering via the timeseries_key. Pipeline state is tracked so failures resume rather than restart.">
+            <rect x="380" y="100" width="140" height="120" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
+            <text x="450" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 3</text>
+            <text x="450" y="152" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#8899bb" font-style="italic">Pipeline</text>
+            <text x="450" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">managed CDC</text>
+            <text x="450" y="190" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">PK upsert</text>
+            <text x="450" y="208" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">stateful</text>
+          </g>
+
+          <!-- Arrow 3→4 -->
+          <line x1="520" y1="160" x2="555" y2="160" stroke="#243550" stroke-width="2" marker-end="url(#arrSyncDim)" id="syncA3"/>
+
+          <!-- Stage 4: Lakebase target -->
+          <g class="diag-node" id="sync-4" data-info="STAGE 4 · LAKEBASE TABLE — A real Postgres table, owned by the platform. SELECT freely. CREATE INDEX freely. JOIN with native Postgres tables freely. INSERT/UPDATE/DELETE — REJECTED. Writes belong upstream in Delta.">
+            <rect x="560" y="100" width="140" height="120" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
+            <text x="630" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 4</text>
+            <text x="630" y="152" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#8899bb" font-style="italic">Lakebase</text>
+            <text x="630" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">Postgres tbl</text>
+            <text x="630" y="190" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">read-only</text>
+            <text x="630" y="208" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">add indexes</text>
+          </g>
+
+          <!-- Arrow 4→5 -->
+          <line x1="700" y1="160" x2="735" y2="160" stroke="#243550" stroke-width="2" marker-end="url(#arrSyncDim)" id="syncA4"/>
+
+          <!-- Stage 5: App -->
+          <g class="diag-node" id="sync-5" data-info="STAGE 5 · APPLICATION — Your app connects via psycopg, JDBC, etc. SELECT runs in &lt;10ms. The freshness lag (Delta commit → Lakebase visible) is the latency you tune via scheduling_policy. The app's read latency is just Postgres.">
+            <rect x="740" y="100" width="120" height="120" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
+            <text x="800" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 5</text>
+            <text x="800" y="152" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#8899bb" font-style="italic">App</text>
+            <text x="800" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">SELECT</text>
+            <text x="800" y="190" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">&lt;10ms</text>
+            <text x="800" y="208" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">indexed</text>
+          </g>
+
+          <!-- Bottom labels -->
+          <text x="90"  y="260" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">Lakehouse</text>
+          <text x="800" y="260" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">App</text>
+          <line x1="60" y1="290" x2="820" y2="290" stroke="#243550" stroke-width="1"/>
+          <text x="430" y="312" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">freshness lag: seconds (CONTINUOUS) · minutes (SNAPSHOT)</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Click a stage above</div>
+        <p id="syncInfo">Five stages, one direction. Delta source → CDF → managed pipeline → Lakebase table → app. The pipeline you don't see is the whole point — Databricks owns it, you declare the source and PK.</p>
+      </div>
+    </div>
+
+    <h3>CONTINUOUS vs SNAPSHOT — the trade-off</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Scheduling</th><th>Latency</th><th>Cost</th><th>When to use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong><code>CONTINUOUS</code></strong></td><td>Seconds (streaming)</td><td>Higher (pipeline always-on)</td><td>Real-time features, fraud signals, live dashboards</td></tr>
+          <tr><td><strong><code>SNAPSHOT</code></strong></td><td>Minutes (scheduled)</td><td>Lower (compute only at refresh)</td><td>Daily user profiles, slowly-changing dimensions</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ RSA heuristic</span>
+      Start with <code>SNAPSHOT</code>. Only upgrade to <code>CONTINUOUS</code> when latency requirements are proven by a real workload. <em>"We might need it real-time someday"</em> is not proof — it's a budget killer.
+    </div>
+
+    <h3>What the synced table looks like in Postgres</h3>
+    <p>After creation, <code>lakebase_tutorial.public.user_profile_synced</code> exists as a real Postgres table. You can:</p>
+    <ul>
+      <li><code>SELECT</code> from it like any table</li>
+      <li><code>CREATE INDEX</code> on any column the app needs</li>
+      <li><code>JOIN</code> it with native Postgres tables in the same database</li>
+      <li>Read it from your app driver in &lt;10ms</li>
+    </ul>
+    <p>You <strong>cannot</strong> write to it. The platform owns the table — direct <code>INSERT/UPDATE/DELETE</code> from Postgres will be rejected. Writes belong upstream in Delta.</p>
+
+    <div class="callout callout-trap">
+      <span class="callout-label">▸ Common pitfall</span>
+      <strong>"My synced table query is slower than expected."</strong> Synced tables ship with the PK index only. If your app filters on <code>email</code> or <code>last_login</code>, you must <code>CREATE INDEX</code> on the Postgres side after sync. The synced table is a read-mirror, but it's still indexed like any other Postgres table.
+    </div>
+  </section>
+  <!-- ═══════════════════════════════════════════════ TOPIC 4.3 -->
+  <section class="topic" id="t43">
+    <div class="topic-banner">
+      <span class="topic-id">4.3</span>
+      <span class="line"></span>
+      <span class="type">Theory · Reverse CDC</span>
+    </div>
+    <h2>Lakehouse Sync — Lakebase changes <em>back to</em> UC Delta</h2>
+
+    <h3>The reverse direction</h3>
+    <p>Synced tables push data <em>into</em> Lakebase. Lakehouse Sync does the opposite: it captures every change in a Lakebase database and replicates it as a Delta table in UC, <strong>continuously</strong>. This is the pattern you reach for when:</p>
+    <ul>
+      <li>The app writes operational events (orders, sessions, signups) into Lakebase</li>
+      <li>Your data team wants those events available in Delta for analytics, ML training, downstream pipelines</li>
+      <li>You don't want to write your own Debezium / Kafka / Spark Structured Streaming pipeline</li>
+    </ul>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ Beta status (2026.04)</span>
+      Lakehouse Sync is currently <strong>Beta on AWS</strong> and being progressively rolled out. Always confirm regional availability before designing for production.
+    </div>
+
+    <h3>How it works under the hood</h3>
+    <p>Lakebase's storage layer already keeps every page version (that's how branching and PIT restore work — see Module 2 and Module 3.6). Lakehouse Sync taps into the same versioned-page stream, decodes it into row-level CDC events, and writes them to a managed Delta table in UC.</p>
+
+    <!-- DIAGRAM 4.3: Lakehouse Sync flow -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 4.3 · Lakehouse Sync — Reverse CDC Flow</span>
+        <div class="stepper" id="lhsStepper">
+          <button class="active" data-mode="raw" onclick="setLhs('raw')">Raw History</button>
+          <button data-mode="merged" onclick="setLhs('merged')">Materialized</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" class="lhs-svg" id="lhsSvg">
+          <defs>
+            <marker id="arrLhs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e"/>
+            </marker>
+            <marker id="arrLhsB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#a855f7"/>
+            </marker>
+          </defs>
+
+          <!-- Source: Lakebase -->
+          <g class="diag-node" data-info="LAKEBASE SOURCE — public.orders. App writes inserts, updates, deletes here. Storage layer keeps every page version (same mechanism that powers branching).">
+            <rect x="30" y="100" width="160" height="80" rx="6" fill="#1a2235" stroke="#06b6d4" stroke-width="1.8"/>
+            <text x="110" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#06b6d4" letter-spacing="1.5">LAKEBASE</text>
+            <text x="110" y="146" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">public.orders</text>
+            <text x="110" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">app writes here</text>
+          </g>
+
+          <!-- Arrow Source → CDC -->
+          <line x1="190" y1="140" x2="225" y2="140" stroke="#22c55e" stroke-width="2" marker-end="url(#arrLhs)"/>
+
+          <!-- CDC capture -->
+          <g class="diag-node" data-info="CDC CAPTURE — Lakehouse Sync reads the page-version stream, decodes it into row-level events with _change_type (insert/update/delete) and _commit_timestamp metadata. No new infrastructure — uses the storage layer's existing version log.">
+            <rect x="230" y="100" width="160" height="80" rx="6" fill="#1a2235" stroke="#22c55e" stroke-width="1.8"/>
+            <text x="310" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1.5">CDC CAPTURE</text>
+            <text x="310" y="146" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">decode pages</text>
+            <text x="310" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">row events</text>
+          </g>
+
+          <!-- Arrow CDC → Delta -->
+          <line x1="390" y1="140" x2="425" y2="140" stroke="#22c55e" stroke-width="2" marker-end="url(#arrLhs)"/>
+
+          <!-- Raw Delta history -->
+          <g class="diag-node" data-info="DELTA HISTORY (raw) — main.operational.orders_history. Append-only Delta table. Every insert/update/delete in Lakebase becomes a new row, with _change_type and _commit_timestamp columns. Time-travel analytics work directly on this.">
+            <rect x="430" y="100" width="180" height="80" rx="6" fill="#1a2235" stroke="#22c55e" stroke-width="1.8" id="lhsRawBox"/>
+            <text x="520" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1.5">DELTA · UC</text>
+            <text x="520" y="146" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">orders_history</text>
+            <text x="520" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">append-only · raw</text>
+          </g>
+
+          <!-- Arrow to materialized (only in merged mode) -->
+          <g id="lhsMergeArrow" style="display:none">
+            <line x1="610" y1="140" x2="645" y2="140" stroke="#a855f7" stroke-width="2" marker-end="url(#arrLhsB)"/>
+            <text x="627" y="125" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7">MERGE</text>
+          </g>
+
+          <!-- Materialized current-state (only in merged mode) -->
+          <g id="lhsMergedBox" class="diag-node" style="display:none" data-info="MATERIALIZED CURRENT STATE — main.gold.orders_current. A periodic MERGE folds the change feed into a 'current state' table. Standard CDC pattern. Use this when downstream consumers want 'what is the row right now' instead of 'how did it change over time'.">
+            <rect x="650" y="100" width="180" height="80" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="1.8"/>
+            <text x="740" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="1.5">DELTA · GOLD</text>
+            <text x="740" y="146" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">orders_current</text>
+            <text x="740" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">merged · current</text>
+          </g>
+
+          <!-- Bottom: example rows -->
+          <text x="430" y="220" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a5878" letter-spacing="1">▸ EXAMPLE ROWS IN orders_history</text>
+          <rect x="430" y="232" width="400" height="100" rx="4" fill="#0b0f1a" stroke="#243550" stroke-width="1"/>
+          <text x="445" y="252" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e">order_id  type    amount  _commit_ts</text>
+          <text x="445" y="272" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb">1042      insert  $39.99  10:14:02</text>
+          <text x="445" y="289" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb">1042      update  $34.99  10:14:48</text>
+          <text x="445" y="306" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb">1043      insert  $12.50  10:15:11</text>
+          <text x="445" y="323" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ef4444">1042      delete  -       10:16:30</text>
+
+          <!-- Time/latency hint -->
+          <text x="110" y="270" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24">latency: ~10–60s</text>
+          <text x="110" y="290" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">(continuous = true)</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Toggle between modes</div>
+        <p id="lhsInfo">RAW HISTORY — change feed lives in Delta as append-only events. Best for fraud, audit, time-travel analyses. Switch to MATERIALIZED to see the downstream MERGE pattern that produces a current-state table for "what is the row right now" queries.</p>
+      </div>
+    </div>
+
+    <h3>The SQL call</h3>
+<pre class="code-snip"><span class="kw">CREATE LAKEHOUSE_SYNC</span> main.operational.orders_history
+<span class="kw">FROM DATABASE_INSTANCE</span> <span class="st">'lakebase-tutorial'</span>
+<span class="kw">SOURCE</span> <span class="st">'public.orders'</span>
+<span class="kw">WITH</span> (continuous = <span class="kw">true</span>);</pre>
+
+    <p>Three things to notice:</p>
+    <ul>
+      <li>The destination is a <strong>fully-qualified UC table</strong> — created and managed by the platform.</li>
+      <li>The source is <code>database_instance.schema.table</code>, not a UC name. Lakehouse Sync reads from the Lakebase storage layer directly.</li>
+      <li><code>continuous = true</code> makes this a streaming pipeline. Set <code>false</code> for periodic snapshot mode.</li>
+    </ul>
+
+    <h3>What you do with the output — the MERGE pattern</h3>
+    <p>The output Delta table is append-only by default. Two patterns dominate:</p>
+    <p><strong>Pattern A — Time-travel analytics (no MERGE).</strong> Query the change feed directly. Useful for fraud, audit, "what did this row look like at 3:42 yesterday?" analyses.</p>
+    <p><strong>Pattern B — Materialized current state (MERGE downstream).</strong> Run a periodic MERGE that folds the change feed into a current-state table:</p>
+
+<pre class="code-snip"><span class="kw">MERGE INTO</span> main.gold.orders_current t
+<span class="kw">USING</span> main.operational.orders_history c
+<span class="kw">ON</span> t.order_id = c.order_id
+<span class="kw">WHEN MATCHED AND</span> c._change_type = <span class="st">'delete'</span> <span class="kw">THEN DELETE</span>
+<span class="kw">WHEN MATCHED AND</span> c._change_type <span class="kw">IN</span> (<span class="st">'update'</span>, <span class="st">'insert'</span>) <span class="kw">THEN UPDATE SET</span> *
+<span class="kw">WHEN NOT MATCHED AND</span> c._change_type &lt;&gt; <span class="st">'delete'</span> <span class="kw">THEN INSERT</span> *;</pre>
+
+    <h3>Cost &amp; latency profile</h3>
+    <ul>
+      <li><strong>Latency:</strong> typically tens of seconds end-to-end (Lakebase commit → Delta visible). Acceptable for nearly all analytics; <strong>not</strong> for real-time app reads.</li>
+      <li><strong>Cost:</strong> CDC pipeline + Delta storage. Cheap once steady-state — the source already produces the change stream, Lakehouse Sync is mostly forwarding it.</li>
+    </ul>
+
+    <h3>When Lakehouse Sync is the wrong answer</h3>
+    <ul>
+      <li><strong>You need sub-second analytics</strong> → query Lakebase directly (federation) or restructure the data flow.</li>
+      <li><strong>You only need a daily snapshot</strong> → a scheduled <code>INSERT INTO ... SELECT * FROM federated_table</code> is simpler and cheaper.</li>
+      <li><strong>The data leaves the lakehouse boundary</strong> → Lakehouse Sync targets UC; for external sinks, use a different tool.</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 4.4 -->
+  <section class="topic" id="t44">
+    <div class="topic-banner">
+      <span class="topic-id">4.4</span>
+      <span class="line"></span>
+      <span class="type">Theory · Federation</span>
+    </div>
+    <h2>Federation — live reads from <em>DBSQL</em></h2>
+
+    <h3>What gets unlocked by UC registration</h3>
+    <p>Recall Module 3.4: the moment you ran <code>CREATE CATALOG ... USING DATABASE_INSTANCE</code>, your Lakebase tables became visible to the Databricks SQL engine <strong>without copying data</strong>. That is federation — DBSQL queries Lakebase <em>live</em>, every time, over the network.</p>
+
+    <h3>What a federated query looks like</h3>
+<pre class="code-snip"><span class="cm">-- DBSQL, joining Postgres rows with Delta in one query</span>
+<span class="kw">SELECT</span>
+  o.order_id,
+  o.customer_id,
+  o.order_total,
+  p.product_name,
+  p.category
+<span class="kw">FROM</span> lakebase_tutorial.public.orders o      <span class="cm">-- Postgres, live</span>
+<span class="kw">JOIN</span> main.gold.products p                   <span class="cm">-- Delta</span>
+  <span class="kw">ON</span> o.product_id = p.product_id
+<span class="kw">WHERE</span> o.created_at &gt;= current_date - <span class="nu">7</span>;</pre>
+
+    <p>The query planner sees <code>lakebase_tutorial.public.orders</code> is a federated source. It pushes down what it can (predicates on <code>created_at</code>, projections of just the listed columns) and fetches matching rows over the wire. The Delta join happens in DBSQL.</p>
+
+    <h3>What pushes down, what doesn't</h3>
+    <p>Click any operation below to see how DBSQL handles it.</p>
+
+    <!-- DIAGRAM 4.4: Pushdown analyzer -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 4.4 · Federation Pushdown Analyzer</span>
+        <span class="diagram-hint">Hover any operation</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" class="fed-svg" id="fedSvg">
+          <defs>
+            <marker id="arrFedDown" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e"/>
+            </marker>
+            <marker id="arrFedUp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+            </marker>
+          </defs>
+
+          <!-- DBSQL header -->
+          <rect x="40" y="30" width="800" height="44" rx="6" fill="#0b0f1a" stroke="#4a9eff" stroke-width="1.5"/>
+          <text x="440" y="58" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#4a9eff" letter-spacing="2">DBSQL · QUERY PLANNER</text>
+
+          <!-- Postgres bottom -->
+          <rect x="40" y="290" width="800" height="44" rx="6" fill="#0b0f1a" stroke="#06b6d4" stroke-width="1.5"/>
+          <text x="440" y="318" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#06b6d4" letter-spacing="2">LAKEBASE · POSTGRES PRIMARY</text>
+
+          <!-- Operations -->
+          <!-- Op 1: WHERE = -->
+          <g class="diag-node" data-info="WHERE = / &lt; / IN — pushed to Postgres. Native planner uses indexes. WHERE customer_id = 42 returns one row over the wire, not one million.">
+            <rect x="60" y="100" width="120" height="60" rx="4" fill="#1a2235" stroke="#22c55e" stroke-width="1.5"/>
+            <text x="120" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e">WHERE = / &lt; / IN</text>
+            <text x="120" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">simple predicate</text>
+            <text x="120" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">PUSHED ✓</text>
+            <line x1="120" y1="160" x2="120" y2="290" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrFedDown)"/>
+          </g>
+
+          <!-- Op 2: Projection -->
+          <g class="diag-node" data-info="COLUMN PROJECTION — pushed. SELECT only requested columns. If your table has 50 columns and you SELECT 3, only 3 travel the wire. Big win for wide tables.">
+            <rect x="200" y="100" width="120" height="60" rx="4" fill="#1a2235" stroke="#22c55e" stroke-width="1.5"/>
+            <text x="260" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e">PROJECTION</text>
+            <text x="260" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">SELECT cols</text>
+            <text x="260" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">PUSHED ✓</text>
+            <line x1="260" y1="160" x2="260" y2="290" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrFedDown)"/>
+          </g>
+
+          <!-- Op 3: LIMIT -->
+          <g class="diag-node" data-info="LIMIT — often pushed. Postgres can return early. SELECT * FROM big_table LIMIT 100 doesn't drag the whole table. The exception is queries with downstream joins where LIMIT can't be safely pushed.">
+            <rect x="340" y="100" width="120" height="60" rx="4" fill="#1a2235" stroke="#fbbf24" stroke-width="1.5"/>
+            <text x="400" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24">LIMIT (small)</text>
+            <text x="400" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">often early</text>
+            <text x="400" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">USUALLY ↓</text>
+            <line x1="400" y1="160" x2="400" y2="290" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrFedDown)"/>
+          </g>
+
+          <!-- Op 4: Aggregations -->
+          <g class="diag-node" data-info="AGGREGATIONS (SUM/COUNT) — sometimes pushed. Simple aggregations on a single table push to Postgres. Aggregations after a join across stores cannot.">
+            <rect x="480" y="100" width="120" height="60" rx="4" fill="#1a2235" stroke="#fbbf24" stroke-width="1.5"/>
+            <text x="540" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24">AGGREGATIONS</text>
+            <text x="540" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">SUM / COUNT</text>
+            <text x="540" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">SOMETIMES</text>
+            <line x1="540" y1="160" x2="540" y2="290" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrFedDown)"/>
+          </g>
+
+          <!-- Op 5: Window functions -->
+          <g class="diag-node" data-info="WINDOW FUNCTIONS — NOT pushed. ROW_NUMBER(), LAG(), LEAD() execute in DBSQL. All matching rows come up the wire first, then the function runs. Avoid on large tables.">
+            <rect x="620" y="100" width="120" height="60" rx="4" fill="#1a2235" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="680" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ef4444">WINDOW FNs</text>
+            <text x="680" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">ROW_NUMBER…</text>
+            <text x="680" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444">PULLED ↑</text>
+            <line x1="680" y1="160" x2="680" y2="74" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrFedUp)"/>
+          </g>
+
+          <!-- Op 6: Cross-store join -->
+          <g class="diag-node" data-info="JOIN PG ↔ DELTA — NOT pushed. DBSQL pulls matching Postgres rows, then joins them with Delta in DBSQL memory. Selectivity of the WHERE clause is what determines cost.">
+            <rect x="760" y="100" width="80" height="60" rx="4" fill="#1a2235" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="800" y="124" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ef4444">JOIN</text>
+            <text x="800" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">pg ↔ delta</text>
+            <text x="800" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444">PULLED ↑</text>
+            <line x1="800" y1="160" x2="800" y2="74" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrFedUp)"/>
+          </g>
+
+          <!-- Legend -->
+          <text x="60" y="200" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">▼ PUSHED — work happens in Postgres, only result rows travel the wire</text>
+          <text x="60" y="218" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">▼ SOMETIMES — depends on query shape; check EXPLAIN</text>
+          <text x="60" y="236" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444">▲ PULLED — rows travel up to DBSQL first, then the op runs</text>
+
+          <!-- The takeaway -->
+          <text x="440" y="270" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Selectivity wins. A WHERE that returns 10 rows is fast. 10 million rows kills the wire.</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Hover an operation</div>
+        <p id="fedInfo">Pushdown is what makes federation viable. Selective WHERE clauses + projections push to Postgres and only matching rows travel the wire. Window functions and cross-store joins pull rows up first — the wire becomes the bottleneck on large tables.</p>
+      </div>
+    </div>
+
+    <h3>When federation is the right answer</h3>
+    <ul>
+      <li><strong>One-off auditor reports</strong> — quarterly, run once, no ongoing cost</li>
+      <li><strong>Ad-hoc data science exploration</strong> — analyst wants to peek at app data</li>
+      <li><strong>Low-volume reference joins</strong> — a daily dashboard with a small filter</li>
+      <li><strong>Sanity checks</strong> — comparing Lakebase row counts with synced table outputs</li>
+    </ul>
+
+    <h3>When federation is the wrong answer</h3>
+    <ul>
+      <li><strong>App-facing reads</strong> — federation cannot beat in-Postgres latency</li>
+      <li><strong>High-volume scheduled jobs</strong> — every run hammers the OLTP primary</li>
+      <li><strong>Anything more than weekly</strong> — build a synced table or Lakehouse Sync instead</li>
+    </ul>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ RSA heuristic</span>
+      If you'd run the query <strong>more than once a week</strong>, don't federate it — replicate it. Federation is for queries that exist <em>because they're rare</em>.
+    </div>
+  </section>
+  <!-- ═══════════════════════════════════════════════ TOPIC 4.5 -->
+  <section class="topic" id="t45">
+    <div class="topic-banner">
+      <span class="topic-id">4.5</span>
+      <span class="line"></span>
+      <span class="type">Theory · Trade-offs</span>
+    </div>
+    <h2>Cost &amp; latency — the <em>decision rule</em></h2>
+
+    <h3>The three patterns priced</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Pattern</th><th>Recurring cost</th><th>Per-query cost</th><th>Latency tier</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Synced (CONTINUOUS)</strong></td><td>Sync compute always-on + LB storage</td><td>None</td><td>Seconds (lag)</td></tr>
+          <tr><td><strong>Synced (SNAPSHOT)</strong></td><td>Sync compute at refresh + LB storage</td><td>None</td><td>Minutes (lag)</td></tr>
+          <tr><td><strong>Lakehouse Sync</strong></td><td>CDC pipeline + Delta storage</td><td>None</td><td>Tens of seconds (lag)</td></tr>
+          <tr><td><strong>Federation</strong></td><td>Zero</td><td>Network RTT + Postgres CPU</td><td>Per-query</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Cost &amp; latency intuition — the visual map</h3>
+    <p>Hover any pattern to see the cost driver and where the latency comes from.</p>
+
+    <!-- DIAGRAM 4.5: Cost / Latency Map -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 4.5 · Cost vs Latency Map</span>
+        <span class="diagram-hint">Hover any pattern</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" class="cost-svg" id="costSvg">
+          <!-- Axes -->
+          <line x1="80" y1="320" x2="820" y2="320" stroke="#243550" stroke-width="1.5"/>
+          <line x1="80" y1="60"  x2="80"  y2="320" stroke="#243550" stroke-width="1.5"/>
+
+          <!-- X-axis label (latency) -->
+          <text x="450" y="355" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8899bb" letter-spacing="2">FRESHNESS LAG (per write at destination)</text>
+
+          <!-- X-axis ticks -->
+          <text x="160" y="338" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">~seconds</text>
+          <text x="320" y="338" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">~10s of sec</text>
+          <text x="500" y="338" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">~minutes</text>
+          <text x="680" y="338" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">per-query</text>
+
+          <!-- Y-axis label (cost) -->
+          <text x="40" y="190" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8899bb" letter-spacing="2" transform="rotate(-90 40 190)">RECURRING COST</text>
+
+          <!-- Y-axis ticks -->
+          <text x="70" y="100" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">$$$</text>
+          <text x="70" y="180" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">$$</text>
+          <text x="70" y="260" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">$</text>
+          <text x="70" y="320" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">0</text>
+
+          <!-- Grid lines -->
+          <line x1="80" y1="100" x2="820" y2="100" stroke="#1e2d45" stroke-width="0.5" stroke-dasharray="2 4"/>
+          <line x1="80" y1="180" x2="820" y2="180" stroke="#1e2d45" stroke-width="0.5" stroke-dasharray="2 4"/>
+          <line x1="80" y1="260" x2="820" y2="260" stroke="#1e2d45" stroke-width="0.5" stroke-dasharray="2 4"/>
+
+          <!-- Bubble: Synced CONTINUOUS (high cost, low latency) -->
+          <g class="diag-node" data-info="SYNCED CONTINUOUS — Highest recurring cost (always-on streaming pipeline + Lakebase storage). Lowest freshness lag (~seconds). Best for real-time features. Don't enable until a real workload proves you need it.">
+            <circle cx="160" cy="120" r="42" fill="#06b6d4" opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="160" y="118" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#06b6d4" font-style="italic">Synced</text>
+            <text x="160" y="134" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#06b6d4">CONTINUOUS</text>
+          </g>
+
+          <!-- Bubble: Lakehouse Sync (medium cost, medium latency) -->
+          <g class="diag-node" data-info="LAKEHOUSE SYNC — Medium recurring cost (CDC pipeline + Delta storage). Tens-of-seconds lag. Best for streaming Lakebase events into Delta for analytics. Cheap once steady-state — change stream already exists at the storage layer.">
+            <circle cx="320" cy="180" r="40" fill="#22c55e" opacity="0.15" stroke="#22c55e" stroke-width="2"/>
+            <text x="320" y="178" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#22c55e" font-style="italic">Lakehouse</text>
+            <text x="320" y="194" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">Sync</text>
+          </g>
+
+          <!-- Bubble: Synced SNAPSHOT (low cost, minutes latency) -->
+          <g class="diag-node" data-info="SYNCED SNAPSHOT — Lower recurring cost (compute only at refresh time). Minutes-level lag. Best for slowly-changing dimensions, daily user profiles. Always start here; only upgrade to CONTINUOUS when a real workload demands it.">
+            <circle cx="500" cy="240" r="40" fill="#fbbf24" opacity="0.15" stroke="#fbbf24" stroke-width="2"/>
+            <text x="500" y="238" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#fbbf24" font-style="italic">Synced</text>
+            <text x="500" y="254" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">SNAPSHOT</text>
+          </g>
+
+          <!-- Bubble: Federation (zero recurring, per-query cost) -->
+          <g class="diag-node" data-info="FEDERATION — Zero recurring cost; you pay per query in network RTT + Postgres CPU. The hidden tax: every query runs on the OLTP primary, taking budget away from app reads. Rare reads = free; frequent reads = anti-pattern.">
+            <circle cx="680" cy="298" r="40" fill="#a855f7" opacity="0.15" stroke="#a855f7" stroke-width="2"/>
+            <text x="680" y="296" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#a855f7" font-style="italic">Federation</text>
+            <text x="680" y="312" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7">per-query</text>
+          </g>
+
+          <!-- Diagonal trade-off arrow -->
+          <line x1="170" y1="125" x2="660" y2="290" stroke="#243550" stroke-width="1" stroke-dasharray="3 4"/>
+          <text x="430" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a5878" font-style="italic">cost ↓  ·  latency ↑</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Hover any pattern</div>
+        <p id="costInfo">The trade-off is monotonic: lower cost = higher freshness lag. Synced CONTINUOUS pays the most to give you the freshest data. Federation pays nothing recurring but taxes you per query. Pick the position on this curve that matches your workload, not the one that sounds most impressive in a slide.</p>
+      </div>
+    </div>
+
+    <h3>The latency intuition</h3>
+<pre class="code-snip"><span class="cm">   &lt;10 ms  ────  Postgres native (synced table is "just a table" once landed)</span>
+<span class="cm">   ~1 sec  ────  Federation network RTT + Postgres scan</span>
+<span class="cm">   ~10s    ────  Synced CONTINUOUS lag (Delta commit → Lakebase visible)</span>
+<span class="cm">   ~mins   ────  Synced SNAPSHOT refresh interval</span>
+<span class="cm">   ~mins   ────  Lakehouse Sync end-to-end (Lakebase commit → Delta visible)</span></pre>
+
+    <p><strong>Critical distinction.</strong> Synced table <em>reads</em> are sub-10ms because by the time the app queries, the data already lives in Postgres. The "seconds-to-minutes" latency you sometimes hear about synced tables refers to <em>freshness lag</em>, not query latency. Don't confuse the two — RSAs who do quote the wrong number to customers and lose deals.</p>
+
+    <h3>The single most important sentence</h3>
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 The decision rule</span>
+      <p style="font-size:16px"><strong>Federation is for queries that run rarely. Synced tables are for queries that run often. Lakehouse Sync is for changes that flow back to analytics.</strong></p>
+      <p>Internalize this and you'll never pick the wrong pattern again.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ WRAP-UP -->
+  <section class="topic" id="wrap">
+    <div class="topic-banner">
+      <span class="topic-id">4·Σ</span>
+      <span class="line"></span>
+      <span class="type">Wrap-Up</span>
+    </div>
+    <h2>What the Module 4 lab actually <em>proves</em></h2>
+
+    <p>By the end of Lab 4 (the hands-on notebook), you will have:</p>
+    <ol>
+      <li><strong>Created a synced table</strong> from a Delta source into the Lakebase project from Module 3, with <code>CONTINUOUS</code> scheduling — proving sub-second-fresh app reads against the lakehouse.</li>
+      <li><strong>Built a Lakehouse Sync</strong> from a Lakebase table back into UC Delta — proving the reverse-ETL path that competing OLTP databases require third-party tooling for.</li>
+      <li><strong>Run a federated join</strong> in DBSQL between Postgres rows and Delta tables — proving the live cross-store path for ad-hoc work.</li>
+      <li><strong>Compared cost and latency</strong> of all three with measured numbers — not slides, not promises, your own numbers.</li>
+    </ol>
+
+    <p>These four capabilities are what every customer integration story rests on. <strong>Module 5</strong> layers <code>pgvector</code> on top of the synced-table pattern (vector embeddings landing from Delta into Lakebase). <strong>Module 6</strong> uses the Lakehouse Sync pattern to record agent traces. <strong>Module 7</strong> ties all three together inside a Databricks App.</p>
+
+    <h3>Common pitfalls — the things RSAs forget</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Pitfall</th><th>Why it happens</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Synced table create fails: "no PK on source"</td><td>Delta table has no enforced PK</td><td>Add a deterministic PK column + identifier in Delta</td></tr>
+          <tr><td>Synced table works but rows are "missing"</td><td>Source PK has duplicates</td><td>Ensure PK is truly unique on source side</td></tr>
+          <tr><td><code>CONTINUOUS</code> synced table costs more than expected</td><td>Always-on pipeline</td><td>Switch to <code>SNAPSHOT</code> if minute-level freshness is fine</td></tr>
+          <tr><td>Lakehouse Sync not available in target region</td><td>Beta region rollout in progress</td><td>Check feature availability before designing</td></tr>
+          <tr><td>Federated query slow on small Postgres table</td><td>DBSQL pulled all rows; predicate didn't push</td><td>Inspect <code>EXPLAIN</code>; add Postgres-side index; rewrite predicate</td></tr>
+          <tr><td>Federation on hourly job degrades app latency</td><td>Every run hits OLTP primary</td><td>Replace with synced table; federation is for rare reads</td></tr>
+          <tr><td>Synced table missing index, query slow</td><td>Only PK index ships by default</td><td><code>CREATE INDEX</code> on Postgres after sync — query like any table</td></tr>
+          <tr><td>Schema drift breaks synced table</td><td>Delta column added/removed</td><td>Re-create synced table with new schema</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="wrap-up">
+      <h3>Module 4 — what's <em>next</em></h3>
+      <p>Once you've completed the four labs (4.1 → 4.4) in the Module 4 hands-on notebook, you have working examples of every Lakebase-Lakehouse integration pattern, with measured cost and latency profiles. You can pick the right pattern for any customer data flow — and articulate the trade-offs.</p>
+      <p><strong>Up next: Module 5</strong> — <em>Lakebase as a Vector Store.</em> You'll enable <code>pgvector</code> in your project, ingest embeddings via a synced table, and build a low-latency RAG retrieval path — without bolting on a third-party vector DB.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ Progress bar ═══════════════
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+// ═══════════════ Diagram 4.1 — Patterns hover ═══════════════
+document.querySelectorAll('#patternSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('patternInfo').textContent = info;
+  });
+  n.addEventListener('click', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('patternInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 4.2 — Synced Table Pipeline Stepper ═══════════════
+const syncData = {
+  1: 'STAGE 1 · DELTA SOURCE — Your Delta table in UC, e.g. main.features.user_profile. The Delta engine writes a change data feed (CDF) automatically when the table is created with delta.enableChangeDataFeed=true. The source must have a primary key.',
+  2: 'STAGE 2 · CHANGE DATA FEED — Delta CDF emits row-level changes (insert, update, delete) with _change_type and _commit_timestamp metadata. This is the stream the pipeline consumes — it does NOT re-scan the full table on every refresh.',
+  3: 'STAGE 3 · MANAGED CDC PIPELINE — Databricks runs a pipeline that consumes the CDF, transforms changes into upsert/delete operations, and respects ordering via the timeseries_key. Pipeline state is tracked in UC so failures resume rather than restart.',
+  4: 'STAGE 4 · LAKEBASE TABLE — A real Postgres table, owned by the platform. SELECT freely. CREATE INDEX freely. JOIN with native Postgres tables freely. INSERT/UPDATE/DELETE — REJECTED. Writes belong upstream in Delta.',
+  5: 'STAGE 5 · APPLICATION — Your app connects via psycopg, JDBC, etc. SELECT runs in <10ms. The freshness lag (Delta commit → Lakebase visible) is the latency you tune via scheduling_policy. The app\'s read latency is just Postgres.'
+};
+function setSync(step) {
+  document.querySelectorAll('#syncStepper button').forEach(b => b.classList.toggle('active', +b.dataset.step === step));
+  for (let i = 1; i <= 5; i++) {
+    const node = document.getElementById('sync-' + i);
+    if (!node) continue;
+    const rect = node.querySelector('rect');
+    const stageLabel = node.querySelector('text:nth-of-type(1)');
+    const titleLabel = node.querySelector('text:nth-of-type(2)');
+    const isActive = i <= step;
+    rect.setAttribute('stroke', isActive ? '#06b6d4' : '#243550');
+    rect.setAttribute('stroke-width', isActive ? 2 : 1.5);
+    rect.setAttribute('fill', isActive ? '#1a2235' : '#0b0f1a');
+    if (stageLabel) stageLabel.setAttribute('fill', isActive ? '#06b6d4' : '#4a5878');
+    if (titleLabel) titleLabel.setAttribute('fill', isActive ? '#e8edf5' : '#8899bb');
+    node.querySelectorAll('text').forEach((t, idx) => {
+      if (idx >= 2) t.setAttribute('fill', isActive ? (idx === 5 ? '#fbbf24' : '#8899bb') : '#4a5878');
+    });
+  }
+  // arrow colors
+  for (let i = 1; i <= 4; i++) {
+    const arr = document.getElementById('syncA' + i);
+    if (arr) {
+      const isActive = i < step;
+      arr.setAttribute('stroke', isActive ? '#06b6d4' : '#243550');
+      arr.setAttribute('marker-end', isActive ? 'url(#arrSync)' : 'url(#arrSyncDim)');
+    }
+  }
+  document.getElementById('syncInfo').textContent = syncData[step];
+}
+document.querySelectorAll('#syncSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('syncInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 4.3 — Lakehouse Sync raw vs merged toggle ═══════════════
+function setLhs(mode) {
+  document.querySelectorAll('#lhsStepper button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('lhsMergeArrow').style.display = mode === 'merged' ? 'block' : 'none';
+  document.getElementById('lhsMergedBox').style.display  = mode === 'merged' ? 'block' : 'none';
+  document.getElementById('lhsInfo').textContent = mode === 'raw'
+    ? 'RAW HISTORY — change feed lives in Delta as append-only events with _change_type and _commit_timestamp. Best for fraud detection, audit trails, time-travel analyses ("what did this row look like at 3:42 yesterday?").'
+    : 'MATERIALIZED CURRENT STATE — a periodic MERGE folds the change feed into a current-state Delta table. Standard CDC pattern. Use this when downstream consumers want "what is the row right now" instead of "how did it change over time".';
+}
+document.querySelectorAll('#lhsSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('lhsInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 4.4 — Federation pushdown hover ═══════════════
+document.querySelectorAll('#fedSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('fedInfo').textContent = info;
+  });
+  n.addEventListener('click', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('fedInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 4.5 — Cost / Latency hover ═══════════════
+document.querySelectorAll('#costSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('costInfo').textContent = info;
+  });
+  n.addEventListener('click', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('costInfo').textContent = info;
+  });
+});
+
+// initialize all diagrams
+setSync(1);
+</script>
+</body>
+</html>
