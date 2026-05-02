@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 03 — Your First Lakebase Project: Concepts Behind the Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 64px 48px 56px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(255,107,53,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.crumb .tag {
+  color: var(--accent-orange);
+  padding: 4px 12px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.crumb .sep { color: var(--text-muted); }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-orange); }
+
+.lede {
+  font-size: 17px; color: var(--text-dim);
+  max-width: 760px; line-height: 1.75;
+  margin-bottom: 32px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px; font-weight: 500;
+  color: var(--accent-teal);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 48px 100px;
+}
+
+/* ─── TOC ─── */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-orange);
+  border-radius: 6px;
+  padding: 22px 26px;
+  margin-bottom: 56px;
+}
+.toc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  margin-bottom: 14px;
+}
+.toc ol { list-style: none; counter-reset: tc; }
+.toc li {
+  counter-increment: tc;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; align-items: baseline; gap: 16px;
+  font-size: 14px;
+}
+.toc li:last-child { border-bottom: none; }
+.toc li::before {
+  content: counter(tc, decimal-leading-zero);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  min-width: 24px;
+}
+.toc a { color: var(--text); text-decoration: none; transition: color 0.2s; }
+.toc a:hover { color: var(--accent-orange); }
+.toc .dur {
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ─── SECTION ─── */
+section.topic {
+  margin-bottom: 72px;
+  scroll-margin-top: 32px;
+}
+
+.topic-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px;
+}
+.topic-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-orange);
+  padding: 4px 10px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.topic-banner .line { flex: 1; height: 1px; background: var(--border); }
+.topic-banner .type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.5vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+h2 em { font-style: italic; color: var(--accent-orange); }
+
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin: 36px 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 28px 0 10px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 16px 0 20px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 6px 0 6px 24px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  color: var(--accent-orange);
+  font-size: 16px;
+}
+ol { counter-reset: ol; }
+ol li::before {
+  content: counter(ol, decimal-leading-zero);
+  counter-increment: ol;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--accent-orange);
+  top: 9px;
+  left: 0;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+pre.code-snip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-orange);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 18px 0 24px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+pre.code-snip .kw { color: var(--accent-purple); }
+pre.code-snip .st { color: var(--accent-green); }
+pre.code-snip .nu { color: var(--accent-yellow); }
+pre.code-snip .cm { color: var(--text-muted); font-style: italic; }
+pre.code-snip .fn { color: var(--accent-blue); }
+
+/* ─── TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 24px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.5;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+.yes { color: var(--accent-green); font-weight: 600; }
+.no  { color: var(--accent-red); }
+.warn { color: var(--accent-yellow); }
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 28px 0;
+  padding: 20px 24px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.callout strong { color: var(--text); }
+.callout-checkpoint {
+  background: rgba(0,191,165,0.05);
+  border-left-color: var(--accent-teal);
+}
+.callout-warn {
+  background: rgba(251,191,36,0.05);
+  border-left-color: var(--accent-yellow);
+}
+.callout-note {
+  background: rgba(74,158,255,0.05);
+  border-left-color: var(--accent-blue);
+}
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+.callout-checkpoint .callout-label { color: var(--accent-teal); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-note .callout-label { color: var(--accent-blue); }
+
+/* ─── INTERACTIVE DIAGRAM SHELL ─── */
+.diagram {
+  margin: 32px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.diagram-header {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.diagram-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+}
+.diagram-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+.diagram-hint::before { content: '◉ '; color: var(--accent-teal); }
+
+.diagram-stage {
+  padding: 24px;
+  position: relative;
+  min-height: 360px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.diagram-info {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,191,165,0.03);
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  min-height: 70px;
+}
+.diagram-info-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin-bottom: 6px;
+}
+
+/* ─── DIAGRAM SVG common ─── */
+.flow-svg, .timeline-svg, .schema-svg, .uc-svg, .branch-svg, .pit-svg {
+  width: 100%; max-width: 920px; height: auto;
+}
+.diag-node {
+  cursor: pointer;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.diag-node:hover { filter: brightness(1.18); }
+.diag-node.dimmed { opacity: 0.3; }
+.diag-node text { pointer-events: none; }
+
+/* ─── STEPPER ─── */
+.stepper {
+  display: flex; gap: 0;
+  background: var(--surface3);
+  border-radius: 4px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+.stepper button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.stepper button.active {
+  background: var(--accent-orange);
+  color: #fff;
+}
+.stepper button:hover:not(.active) { color: var(--text); }
+
+/* ─── WRAP-UP ─── */
+.wrap-up {
+  margin-top: 80px;
+  padding: 36px 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.wrap-up::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wrap-up h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 26px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.wrap-up h3 em { color: var(--accent-orange); }
+
+/* ─── PROGRESS BAR ─── */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--accent-orange);
+  z-index: 1000;
+  transition: width 0.1s;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 30px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 03</span>
+      <span class="sep">/</span>
+      <span>Lakebase Mastery</span>
+      <span class="sep">/</span>
+      <span>Concepts Behind the Lab</span>
+    </div>
+    <h1>Your First Lakebase Project<br><em>The Concepts Behind the Lab</em></h1>
+    <p class="lede">Module 1 gave you the vocabulary. Module 2 gave you the architecture. Module 3 is where you actually touch Lakebase. Six conceptual jumps — provisioning, OAuth auth, schema design, UC registration, branching, point-in-time restore — explained before you open the notebook.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">6</span><span class="meta-lbl">Concept Topics</span></div>
+      <div class="meta-item"><span class="meta-val">~75m</span><span class="meta-lbl">Theory</span></div>
+      <div class="meta-item"><span class="meta-val">Beg → Int</span><span class="meta-lbl">Level</span></div>
+      <div class="meta-item"><span class="meta-val">6</span><span class="meta-lbl">Interactive Diagrams</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ───── TABLE OF CONTENTS ───── -->
+  <div class="toc">
+    <div class="toc-label">▸ On this page</div>
+    <ol>
+      <li><a href="#t31">Provisioning — What Happens in Those 60 Seconds</a><span class="dur">~12 min</span></li>
+      <li><a href="#t32">Authentication — Your OAuth Token Is Your Password</a><span class="dur">~12 min</span></li>
+      <li><a href="#t33">Schema Design — It's Just Postgres (Really)</a><span class="dur">~12 min</span></li>
+      <li><a href="#t34">Unity Catalog Registration — The Single Most Important Step</a><span class="dur">~14 min</span></li>
+      <li><a href="#t35">Branching — Git for Your Database</a><span class="dur">~12 min</span></li>
+      <li><a href="#t36">Point-in-Time Restore — Branching Across Time</a><span class="dur">~10 min</span></li>
+      <li><a href="#wrap">Module 3 Wrap-Up &amp; Common Pitfalls</a><span class="dur">~5 min</span></li>
+    </ol>
+  </div>
+
+  <!-- ────────── INTRO ────────── -->
+  <section class="topic">
+    <h3 style="margin-top:0">What this module gives you</h3>
+    <p>Module 1 gave you the vocabulary. Module 2 gave you the architecture. <strong>Module 3 is where you actually touch Lakebase</strong> — provision it, connect to it, write SQL, register it in Unity Catalog, branch it, and recover from a mistake. Before you open the notebook, you need a clean mental model of the six conceptual jumps you're about to make.</p>
+    <p>This module covers the theory behind each lab step. The Module 3 lab notebook walks you through running it.</p>
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Prerequisite Check</span>
+      You should have completed <strong>Module 1 Lab 1.4</strong> with all 9 ✅ checks. If <code>DATABASE_CREATE &amp; region</code> failed there, this module's lab will fail at Step 1 — fix the entitlement first, then come back.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 3.1 -->
+  <section class="topic" id="t31">
+    <div class="topic-banner">
+      <span class="topic-id">3.1</span>
+      <span class="line"></span>
+      <span class="type">Theory · Concept</span>
+    </div>
+    <h2>Provisioning — what happens in those <em>60 seconds</em></h2>
+
+    <h3>The deceptively simple call</h3>
+    <p>The first cell of the lab is one SDK call:</p>
+<pre class="code-snip"><span class="kw">project</span> = w.database.<span class="fn">create_database_project</span>(
+    project=<span class="fn">DatabaseProject</span>(
+        name=<span class="st">"lakebase-tutorial"</span>,
+        capacity=<span class="st">"CU_1"</span>,
+        retention_window_in_days=<span class="nu">7</span>,
+    )
+)</pre>
+    <p>This single call kicks off <strong>five distinct things</strong> on the Databricks control plane. Understanding what they are makes the difference between <em>"the SDK is broken"</em> and <em>"I know exactly what's pending."</em></p>
+
+    <h3>The provisioning lifecycle</h3>
+    <p>Step through the lifecycle below. Click each stage to see what's happening behind the scenes.</p>
+
+    <!-- DIAGRAM 3.1: Provisioning Timeline -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 3.1 · Provisioning Lifecycle</span>
+        <div class="stepper" id="provStepper">
+          <button class="active" data-step="1" onclick="setProv(1)">1 · Accept</button>
+          <button data-step="2" onclick="setProv(2)">2 · Storage</button>
+          <button data-step="3" onclick="setProv(3)">3 · Compute</button>
+          <button data-step="4" onclick="setProv(4)">4 · Branch</button>
+          <button data-step="5" onclick="setProv(5)">5 · DNS</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" class="flow-svg" id="provSvg">
+          <defs>
+            <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8899bb"/>
+            </marker>
+            <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff6b35"/>
+            </marker>
+          </defs>
+
+          <!-- Time axis -->
+          <line x1="60" y1="290" x2="820" y2="290" stroke="#243550" stroke-width="1.5"/>
+          <text x="60" y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">t=0</text>
+          <text x="430" y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="middle">PROVISIONING (~60–90s)</text>
+          <text x="820" y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="end">READY</text>
+
+          <!-- Stage boxes -->
+          <g class="diag-node" id="prov-1" data-info="STAGE 1 · API ACCEPT — The control plane validates entitlement, capacity, and name uniqueness within the workspace. Returns a uid immediately. State: PROVISIONING. The SDK call returns in under a second.">
+            <rect x="40" y="80" width="140" height="160" rx="6" fill="#1a2235" stroke="#ff6b35" stroke-width="2"/>
+            <text x="110" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1.5">STAGE 1</text>
+            <text x="110" y="138" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">Accept</text>
+            <text x="110" y="162" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">validate</text>
+            <text x="110" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">entitlement</text>
+            <text x="110" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">return uid</text>
+            <text x="110" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">~&lt;1 sec</text>
+          </g>
+
+          <g class="diag-node" id="prov-2" data-info="STAGE 2 · STORAGE — A slice of the multi-tenant page server is reserved for your project. Page versions for the entire retention window will live here. This is NOT a per-customer S3 bucket; it is a logical tenant on a shared, hardened page server.">
+            <rect x="200" y="80" width="140" height="160" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
+            <text x="270" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 2</text>
+            <text x="270" y="138" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#8899bb" font-style="italic">Storage</text>
+            <text x="270" y="162" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">page server</text>
+            <text x="270" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">tenant slice</text>
+            <text x="270" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">reserved</text>
+            <text x="270" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">~5–10 sec</text>
+          </g>
+
+          <g class="diag-node" id="prov-3" data-info="STAGE 3 · COMPUTE — A Postgres process at your chosen capacity (CU_1 = 1 compute unit) is launched and attached to the storage tenant. This is the actual Postgres 17 process that will answer your queries.">
+            <rect x="360" y="80" width="140" height="160" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
+            <text x="430" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 3</text>
+            <text x="430" y="138" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#8899bb" font-style="italic">Compute</text>
+            <text x="430" y="162" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">PG 17 process</text>
+            <text x="430" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">spin up</text>
+            <text x="430" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">CU_1 size</text>
+            <text x="430" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">~30–40 sec</text>
+          </g>
+
+          <g class="diag-node" id="prov-4" data-info="STAGE 4 · MAIN BRANCH — Every new project gets a `main` branch automatically. The branch is just a pointer record into the storage layer; no data movement. From this branch, you will create dev, staging, recovery branches in seconds.">
+            <rect x="520" y="80" width="140" height="160" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
+            <text x="590" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 4</text>
+            <text x="590" y="138" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#8899bb" font-style="italic">Branch</text>
+            <text x="590" y="162" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">create main</text>
+            <text x="590" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">just a pointer</text>
+            <text x="590" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">no data move</text>
+            <text x="590" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">~2–5 sec</text>
+          </g>
+
+          <g class="diag-node" id="prov-5" data-info="STAGE 5 · DNS — The read_write_dns endpoint becomes resolvable and the connection accepts TLS handshakes. State transitions to READY. Until DNS publishes (~5–10s after compute is up), connection attempts will fail with name resolution errors.">
+            <rect x="680" y="80" width="140" height="160" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
+            <text x="750" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 5</text>
+            <text x="750" y="138" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#8899bb" font-style="italic">DNS</text>
+            <text x="750" y="162" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">publish DNS</text>
+            <text x="750" y="178" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">accept TLS</text>
+            <text x="750" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">state: READY</text>
+            <text x="750" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">~5–10 sec</text>
+          </g>
+
+          <!-- arrows between stages -->
+          <line x1="180" y1="160" x2="200" y2="160" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="340" y1="160" x2="360" y2="160" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="500" y1="160" x2="520" y2="160" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="660" y1="160" x2="680" y2="160" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+          <!-- Top label -->
+          <text x="430" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ create_database_project()</text>
+          <text x="430" y="58" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">control plane sequence</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Click a stage above</div>
+        <p id="provInfo">Five things happen between your SDK call and a usable database. Click each stage to see what's actually running on the control plane during those 60–90 seconds.</p>
+      </div>
+    </div>
+
+    <h3>Why <code>CU_1</code> is the right starting capacity</h3>
+    <p><code>CU_1</code> (one compute unit) is the smallest non-zero capacity. You should default to it for tutorials, demos, dev branches, and most internal apps. Lakebase Autoscaling's job is to scale you up when load demands it; <strong>starting small and scaling up is always cheaper than starting big and waiting for usage</strong>. The <code>capacity</code> parameter sets the <em>minimum</em> compute size for the <code>main</code> branch, not a fixed allocation.</p>
+
+    <h3>Why <code>retention_window_in_days</code> matters now (not later)</h3>
+    <p><code>retention_window_in_days=7</code> tells the storage layer: <em>"keep every page version produced by every transaction for 7 days."</em> That window is what makes <strong>Lab 3.6 (point-in-time restore)</strong> possible. If you set it to 0 — which is allowed — you cannot branch from a timestamp in the past, and Module 3.6 silently becomes Module 3-broken.</p>
+    <p>Production projects typically run with 14–30 day windows. The cost is roughly proportional to the window for active databases. For tutorials, 7 days is plenty.</p>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ When provisioning fails</span>
+      If the project transitions to <code>FAILED</code> instead of <code>READY</code>, the most common causes are: region not yet GA for Lakebase Autoscaling (Module 1 Lab 1.4 should have caught this), workspace at capacity quota for the region, or a control-plane incident. The SDK exposes a <code>state_message</code> field — read it before retrying.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 3.2 -->
+  <section class="topic" id="t32">
+    <div class="topic-banner">
+      <span class="topic-id">3.2</span>
+      <span class="line"></span>
+      <span class="type">Theory · Auth</span>
+    </div>
+    <h2>Authentication — your OAuth token <em>is</em> your password</h2>
+
+    <h3>The trap Module 2 warned you about</h3>
+    <p>In Module 2.5 we said: <em>Lakebase uses short-lived OAuth tokens (typically 1 hour). Long-running app pools must refresh tokens transparently — the Databricks Python / JDBC drivers do this; raw psycopg2 with a hardcoded password will silently fail after an hour.</em></p>
+    <p>Module 3.2 is where you build the muscle memory to never get bitten by it.</p>
+
+    <h3>How Lakebase auth actually works</h3>
+    <p>Lakebase speaks the standard Postgres wire protocol. There's nothing exotic in the handshake. What's different is <strong>what you put in the password slot</strong>:</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Slot</th><th>Standard Postgres</th><th>Lakebase</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Username</strong></td><td>static role (e.g. <code>app_user</code>)</td><td>workspace identity (e.g. <code>you@example.com</code>)</td></tr>
+          <tr><td><strong>Password</strong></td><td>static, from a secrets manager</td><td>short-lived OAuth token (regenerated on demand)</td></tr>
+          <tr><td><strong>TLS</strong></td><td>optional (often disabled)</td><td>required (<code>sslmode=require</code>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The Databricks SDK exposes <code>w.database.generate_database_credential(...)</code> which returns a fresh token. You hand that token to psycopg / SQLAlchemy as <code>PGPASSWORD</code>. The wire connection from there is identical to any Postgres.</p>
+
+    <h3>The token TTL trap, drawn out</h3>
+    <p>Toggle the timeline below to see what happens when a connection pool outlives a token.</p>
+
+    <!-- DIAGRAM 3.2: Token TTL Trap -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 3.2 · OAuth Token TTL Trap</span>
+        <div class="stepper" id="ttlStepper">
+          <button class="active" data-mode="trap" onclick="setTtl('trap')">The Trap</button>
+          <button data-mode="fix" onclick="setTtl('fix')">The Fix</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" class="timeline-svg" id="ttlSvg">
+          <defs>
+            <marker id="arrTtl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8899bb"/>
+            </marker>
+          </defs>
+
+          <!-- Time axis -->
+          <line x1="60" y1="240" x2="820" y2="240" stroke="#243550" stroke-width="1.5"/>
+          <line x1="60" y1="232" x2="60" y2="248" stroke="#243550" stroke-width="1.5"/>
+          <line x1="225" y1="232" x2="225" y2="248" stroke="#243550" stroke-width="1.5"/>
+          <line x1="430" y1="232" x2="430" y2="248" stroke="#243550" stroke-width="1.5"/>
+          <line x1="600" y1="232" x2="600" y2="248" stroke="#fbbf24" stroke-width="1.5"/>
+          <line x1="700" y1="232" x2="700" y2="248" stroke="#ef4444" stroke-width="1.5"/>
+          <line x1="820" y1="232" x2="820" y2="248" stroke="#243550" stroke-width="1.5"/>
+
+          <text x="60"  y="265" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="middle">t=0</text>
+          <text x="225" y="265" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="middle">t=15min</text>
+          <text x="430" y="265" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="middle">t=45min</text>
+          <text x="600" y="265" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" text-anchor="middle">t=58min</text>
+          <text x="700" y="265" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" text-anchor="middle">t=61min</text>
+          <text x="820" y="265" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="middle">t=75min</text>
+
+          <!-- TRAP scenario -->
+          <g id="ttlTrap">
+            <text x="430" y="50" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ef4444" letter-spacing="2">▸ HARDCODED TOKEN — THE TRAP</text>
+
+            <!-- token bar -->
+            <rect x="60" y="90" width="540" height="30" rx="3" fill="#22c55e" opacity="0.35"/>
+            <rect x="600" y="90" width="220" height="30" rx="3" fill="#ef4444" opacity="0.45"/>
+            <text x="330" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1">TOKEN VALID</text>
+            <text x="710" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ef4444" letter-spacing="1">TOKEN EXPIRED</text>
+
+            <!-- Connection events -->
+            <g class="diag-node" data-info="t=0 · Pool opens its first connection. Token authenticates the handshake. Connection enters the pool — alive and reusable.">
+              <circle cx="60" cy="170" r="13" fill="#22c55e"/>
+              <text x="60" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#05080f" font-weight="700">OK</text>
+              <text x="60" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">connect</text>
+            </g>
+            <g class="diag-node" data-info="t=15min · Pool checks out an existing connection. Pre-ping NOT enabled, so server is never asked. Handshake was 15 min ago — still inside token TTL. Query succeeds.">
+              <circle cx="225" cy="170" r="13" fill="#22c55e"/>
+              <text x="225" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#05080f" font-weight="700">OK</text>
+              <text x="225" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">query</text>
+            </g>
+            <g class="diag-node" data-info="t=45min · Same socket, same query. Token is still valid. Pool happily returns the existing connection. No problem yet.">
+              <circle cx="430" cy="170" r="13" fill="#22c55e"/>
+              <text x="430" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#05080f" font-weight="700">OK</text>
+              <text x="430" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">query</text>
+            </g>
+            <g class="diag-node" data-info="t=61min · Pool needs a NEW connection (concurrency spike, or first connection died on idle timeout). It dials Postgres with the SAME stale token. Server: 'password authentication failed.' Pool throws the error all the way up to the user.">
+              <circle cx="700" cy="170" r="13" fill="#ef4444"/>
+              <text x="700" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fff" font-weight="700">✗</text>
+              <text x="700" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444">FAIL</text>
+              <text x="700" y="216" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#ef4444">new conn</text>
+            </g>
+          </g>
+
+          <!-- FIX scenario -->
+          <g id="ttlFix" style="display:none">
+            <text x="430" y="50" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e" letter-spacing="2">▸ POOL_PRE_PING + REGENERATE — THE FIX</text>
+
+            <!-- token bar -->
+            <rect x="60" y="90" width="540" height="30" rx="3" fill="#22c55e" opacity="0.35"/>
+            <rect x="600" y="90" width="220" height="30" rx="3" fill="#fbbf24" opacity="0.20"/>
+            <text x="330" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1">TOKEN VALID</text>
+            <text x="710" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="1">REFRESHED &amp; ALIVE</text>
+
+            <!-- Connection events -->
+            <g class="diag-node" data-info="t=0 · Engine created with pool_pre_ping=True. First connection opens, token attached, handshake OK.">
+              <circle cx="60" cy="170" r="13" fill="#22c55e"/>
+              <text x="60" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#05080f" font-weight="700">OK</text>
+              <text x="60" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">connect</text>
+            </g>
+            <g class="diag-node" data-info="t=15min · Pre-ping sends a cheap SELECT 1 before handing the connection over. Server replies — connection good.">
+              <circle cx="225" cy="170" r="13" fill="#22c55e"/>
+              <text x="225" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#05080f" font-weight="700">OK</text>
+              <text x="225" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">pre-ping ✓</text>
+            </g>
+            <g class="diag-node" data-info="t=58min · Pre-ping detects a soon-to-expire connection. App code uses a fresh credential generator that called generate_database_credential() within the last few minutes — token is fresh.">
+              <circle cx="600" cy="170" r="13" fill="#fbbf24"/>
+              <text x="600" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#05080f" font-weight="700">↻</text>
+              <text x="600" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">refresh</text>
+            </g>
+            <g class="diag-node" data-info="t=61min · Pool opens a new connection with a freshly generated credential. Handshake succeeds. The pool absorbs the rotation invisibly to the application.">
+              <circle cx="700" cy="170" r="13" fill="#22c55e"/>
+              <text x="700" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#05080f" font-weight="700">OK</text>
+              <text x="700" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">new conn ✓</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Click a circle on the timeline</div>
+        <p id="ttlInfo">Toggle between the trap and the fix. The trap: a hardcoded token works for an hour, then every new connection fails. The fix: pool_pre_ping + fresh credentials makes rotation invisible.</p>
+      </div>
+    </div>
+
+    <h3>The correct pattern (and why the lab uses it)</h3>
+    <p>Two things to internalize when you see this pattern in the lab:</p>
+    <ul>
+      <li><strong><code>pool_pre_ping=True</code></strong> — before handing a pooled connection to your code, SQLAlchemy sends a cheap <code>SELECT 1</code>. If it fails, SQLAlchemy discards and reopens. Costs ~1ms per checkout, saves you from the trap.</li>
+      <li><strong>Generate fresh credentials per-engine, not per-process</strong> — when an engine is recreated (in long-running apps, on a TTL or after a failure), a fresh token is generated. Never bake a token into a config file.</li>
+    </ul>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Raw psycopg vs SQLAlchemy</span>
+      Raw <code>psycopg.connect(...)</code> with a token works for one-shot scripts. It does <em>not</em> work for anything that lives more than ~50 minutes. The lab uses SQLAlchemy because every later module's code (vector search, agent memory, app backend) needs pool management anyway.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 3.3 -->
+  <section class="topic" id="t33">
+    <div class="topic-banner">
+      <span class="topic-id">3.3</span>
+      <span class="line"></span>
+      <span class="type">Theory · Schema</span>
+    </div>
+    <h2>Schema design — it's <em>just Postgres</em> (really)</h2>
+
+    <h3>The most underappreciated sentence in the docs</h3>
+    <blockquote style="border-left:3px solid var(--accent-teal); padding-left:18px; margin:18px 0; font-style:italic; color:var(--text);">
+      "Lakebase is PostgreSQL 17. All standard Postgres features work."
+    </blockquote>
+    <p>Customers, especially ones coming from proprietary databases, hear "managed Postgres on Databricks" and assume there must be Databricks-flavored quirks. <strong>There aren't.</strong> Your existing schema-migration tools, ORMs, indexes, extensions (from a curated list), constraints, and triggers — they all work.</p>
+
+    <h3>The lab schema, anatomized</h3>
+    <p>Click any element below to see why it's the way it is. The schema isn't toy code — it's deliberately set up so Modules 4–8 can build on top of it without rework.</p>
+
+    <!-- DIAGRAM 3.3: Schema Anatomy -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 3.3 · Lab Schema Anatomy</span>
+        <span class="diagram-hint">click any field</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" class="schema-svg" id="schemaSvg">
+          <defs>
+            <marker id="arrFK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#a855f7"/>
+            </marker>
+          </defs>
+
+          <!-- USERS table -->
+          <g class="diag-node" data-info="USERS TABLE — the parent of the relationship. Standard pattern: surrogate primary key, unique business key (email), audit timestamp. This is exactly the schema you would build for any operational app.">
+            <rect x="50" y="60" width="300" height="220" rx="8" fill="#1a2235" stroke="#4a9eff" stroke-width="1.5"/>
+            <rect x="50" y="60" width="300" height="32" rx="8" fill="#243550"/>
+            <text x="200" y="80" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">users</text>
+          </g>
+
+          <g class="diag-node" data-info="id BIGSERIAL PK — Standard auto-incrementing 64-bit integer. Synced tables in Module 4 require a primary key; using BIGSERIAL from day one means no retrofit later. Picks up to 9.2 quintillion rows before wrapping.">
+            <rect x="50" y="100" width="300" height="34" fill="transparent"/>
+            <text x="65" y="122" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">id</text>
+            <text x="155" y="122" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">BIGSERIAL</text>
+            <text x="280" y="122" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" text-anchor="middle">PK</text>
+          </g>
+          <g class="diag-node" data-info="email TEXT UNIQUE NOT NULL — Business identity. UNIQUE creates an index for free, so login lookups are fast. NOT NULL catches bad inserts at the wire, before they pollute downstream synced tables.">
+            <rect x="50" y="140" width="300" height="34" fill="transparent"/>
+            <text x="65" y="162" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">email</text>
+            <text x="155" y="162" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">TEXT</text>
+            <text x="280" y="162" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" text-anchor="middle">UQ NN</text>
+          </g>
+          <g class="diag-node" data-info="full_name TEXT — Plain nullable text. Postgres TEXT has no length penalty vs VARCHAR(n). Use TEXT unless you have a real business rule (e.g., country code = CHAR(2)).">
+            <rect x="50" y="180" width="300" height="34" fill="transparent"/>
+            <text x="65" y="202" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">full_name</text>
+            <text x="155" y="202" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">TEXT</text>
+          </g>
+          <g class="diag-node" data-info="created_at TIMESTAMPTZ DEFAULT now() — ALWAYS use TIMESTAMPTZ in Lakebase. The page server's audit metadata is in UTC; mixing in naive TIMESTAMP columns leads to off-by-one debugging at 3am. DEFAULT now() means inserts don't have to mention this column.">
+            <rect x="50" y="220" width="300" height="34" fill="transparent"/>
+            <text x="65" y="242" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">created_at</text>
+            <text x="155" y="242" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">TIMESTAMPTZ</text>
+            <text x="280" y="242" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" text-anchor="middle">now()</text>
+          </g>
+
+          <!-- ORDERS table -->
+          <g class="diag-node" data-info="ORDERS TABLE — the child. References users via FK. Demonstrates referential integrity, CHECK constraints, and two indexes with different access patterns.">
+            <rect x="500" y="60" width="320" height="280" rx="8" fill="#1a2235" stroke="#a855f7" stroke-width="1.5"/>
+            <rect x="500" y="60" width="320" height="32" rx="8" fill="#243550"/>
+            <text x="660" y="80" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">orders</text>
+          </g>
+
+          <g class="diag-node" data-info="id BIGSERIAL PK — same logic as users.id. Uniform ID strategy across tables makes downstream synced tables and federation simpler.">
+            <rect x="500" y="100" width="320" height="32" fill="transparent"/>
+            <text x="515" y="122" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">id</text>
+            <text x="610" y="122" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">BIGSERIAL</text>
+            <text x="780" y="122" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" text-anchor="middle">PK</text>
+          </g>
+          <g class="diag-node" data-info="user_id BIGINT REFERENCES users(id) — Foreign key. Postgres enforces this on every INSERT and UPDATE; you cannot have a row pointing at a nonexistent user. The reference creates an implicit dependency that ON DELETE CASCADE / RESTRICT can leverage.">
+            <rect x="500" y="138" width="320" height="32" fill="transparent"/>
+            <text x="515" y="160" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">user_id</text>
+            <text x="610" y="160" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">BIGINT</text>
+            <text x="780" y="160" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" text-anchor="middle">FK</text>
+          </g>
+          <g class="diag-node" data-info="sku TEXT NOT NULL — Stock keeping unit, business string. Indexed by access pattern, not stored as a number — string SKUs are the norm in real catalogs.">
+            <rect x="500" y="172" width="320" height="32" fill="transparent"/>
+            <text x="515" y="194" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">sku</text>
+            <text x="610" y="194" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">TEXT</text>
+            <text x="780" y="194" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" text-anchor="middle">NN</text>
+          </g>
+          <g class="diag-node" data-info="qty INT CHECK (qty > 0) — INTEGER with a CHECK constraint. The constraint is enforced server-side; bad app code cannot insert qty=0 or qty=-5 by mistake. CHECK constraints are cheap and you should use them liberally.">
+            <rect x="500" y="206" width="320" height="32" fill="transparent"/>
+            <text x="515" y="228" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">qty</text>
+            <text x="610" y="228" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">INT</text>
+            <text x="780" y="228" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" text-anchor="middle">&gt; 0</text>
+          </g>
+          <g class="diag-node" data-info="total_cents BIGINT — Money in cents, never floats. Postgres NUMERIC also works but BIGINT cents avoids any rounding question entirely. Display formatting belongs in the app layer.">
+            <rect x="500" y="240" width="320" height="32" fill="transparent"/>
+            <text x="515" y="262" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">total_cents</text>
+            <text x="610" y="262" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">BIGINT</text>
+          </g>
+          <g class="diag-node" data-info="placed_at TIMESTAMPTZ DEFAULT now() — Time-of-event. Indexed with BRIN below because order placement is monotonically increasing — perfect BRIN territory.">
+            <rect x="500" y="274" width="320" height="32" fill="transparent"/>
+            <text x="515" y="296" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">placed_at</text>
+            <text x="610" y="296" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">TIMESTAMPTZ</text>
+            <text x="780" y="296" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" text-anchor="middle">now()</text>
+          </g>
+
+          <!-- Indexes -->
+          <g class="diag-node" data-info="idx_orders_user — Standard B-tree on user_id. B-tree is the right choice for equality lookups and range scans on selective columns. 'Show me this user's orders' is the canonical query.">
+            <rect x="510" y="318" width="150" height="20" rx="4" fill="#0b1a14" stroke="#22c55e" stroke-width="1"/>
+            <text x="585" y="332" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">B-tree · user_id</text>
+          </g>
+          <g class="diag-node" data-info="idx_orders_placed (BRIN) — Block Range INdex. BRIN is dramatically smaller than B-tree for time-series-shaped data, because it stores per-block min/max instead of every value. Ideal for append-only tables where the indexed column correlates with insertion order.">
+            <rect x="670" y="318" width="140" height="20" rx="4" fill="#1a1014" stroke="#fbbf24" stroke-width="1"/>
+            <text x="740" y="332" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">BRIN · placed_at</text>
+          </g>
+
+          <!-- FK arrow -->
+          <line x1="500" y1="155" x2="350" y2="120" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrFK)"/>
+          <text x="425" y="135" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1">FK</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Click any field, table, or index</div>
+        <p id="schemaInfo">Three things in this schema deserve highlighting because they pay off in later modules: BIGSERIAL ids (synced tables need PKs), TIMESTAMPTZ (avoid timezone bugs), and indexes matched to access patterns (B-tree for lookups, BRIN for time-series).</p>
+      </div>
+    </div>
+
+    <h3>Indexing reminder for Lakebase specifically</h3>
+    <p>There is no Lakebase-specific indexing hint. <code>CREATE INDEX ... USING &lt;type&gt;</code> works exactly as in any modern Postgres:</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Index type</th><th>Use when</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>B-tree</strong> (default)</td><td>Equality, range scans on selective columns</td></tr>
+          <tr><td><strong>BRIN</strong></td><td>Massive append-only columns where values correlate with insertion order (timestamps, monotonic IDs)</td></tr>
+          <tr><td><strong>GIN</strong></td><td>JSONB, array containment, full-text search</td></tr>
+          <tr><td><strong>HNSW</strong> (via <code>pgvector</code>)</td><td>Vector similarity — you'll use this in Module 5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The only Lakebase-specific advice: <strong>don't over-index on the <code>main</code> branch in dev</strong>. Branches share storage; indexes on <code>main</code> cost storage on every branch you ever spin off it. Build indexes on the production branch you'll eventually promote, not on the playground.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 3.4 -->
+  <section class="topic" id="t34">
+    <div class="topic-banner">
+      <span class="topic-id">3.4</span>
+      <span class="line"></span>
+      <span class="type">Theory · Integration</span>
+    </div>
+    <h2>Unity Catalog registration — the single most <em>important</em> step</h2>
+
+    <h3>What changes when you register</h3>
+    <p>Up to this point, your Lakebase project is reachable from any Postgres client. Useful, but it's just a managed Postgres — like any RDS. The one SQL command that promotes Lakebase to a <em>lakehouse-native</em> database is the one that registers it in Unity Catalog:</p>
+<pre class="code-snip"><span class="kw">CREATE CATALOG</span> lakebase_tutorial
+<span class="kw">USING DATABASE</span> lakebase-tutorial.databricks_postgres
+<span class="kw">OPTIONS</span> (description = <span class="st">'OLTP catalog for tutorial'</span>);</pre>
+
+    <p>The moment you run that, <strong>seven dependent capabilities</strong> flip from "not available" to "GA." Click any capability below to see what unlocks.</p>
+
+    <!-- DIAGRAM 3.4: UC Registration Unlock -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 3.4 · UC Registration: What Unlocks</span>
+        <div class="stepper" id="ucStepper">
+          <button data-mode="before" onclick="setUc('before')">Before Registration</button>
+          <button class="active" data-mode="after" onclick="setUc('after')">After Registration</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 400" xmlns="http://www.w3.org/2000/svg" class="uc-svg" id="ucSvg">
+          <defs>
+            <marker id="arrUc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#00bfa5"/>
+            </marker>
+          </defs>
+
+          <!-- Lakebase project (always shown) -->
+          <g class="diag-node" data-info="THE LAKEBASE PROJECT — your live Postgres 17 process. Reachable on the wire from any Postgres client at all times. UC registration does not change anything about the database itself.">
+            <rect x="340" y="280" width="200" height="80" rx="8" fill="#2a1a14" stroke="#ff6b35" stroke-width="2"/>
+            <text x="440" y="312" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">Lakebase Project</text>
+            <text x="440" y="332" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1.5">POSTGRES 17 · LIVE DNS</text>
+          </g>
+
+          <!-- BEFORE state - just a Postgres connection -->
+          <g id="ucBefore" style="display:none">
+            <text x="440" y="50" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8899bb" letter-spacing="2">▸ BEFORE — JUST A MANAGED POSTGRES</text>
+
+            <g class="diag-node" data-info="Postgres clients (psql, DataGrip, JDBC, psycopg) work at any time. This works WITHOUT UC registration — like any RDS or Aurora.">
+              <rect x="280" y="120" width="320" height="60" rx="6" fill="#1a2235" stroke="#4a9eff" stroke-width="1.5"/>
+              <text x="440" y="145" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Postgres clients</text>
+              <text x="440" y="165" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="1.5">PSQL · JDBC · PSYCOPG · DATAGRIP</text>
+            </g>
+            <line x1="440" y1="180" x2="440" y2="280" stroke="#4a9eff" stroke-width="1.5" marker-end="url(#arrUc)"/>
+
+            <text x="440" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1">DIRECT POSTGRES WIRE</text>
+          </g>
+
+          <!-- AFTER state - UC + 7 unlocks -->
+          <g id="ucAfter">
+            <text x="440" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#00bfa5" letter-spacing="2">▸ AFTER — UNITY CATALOG SEES IT</text>
+
+            <!-- UC band -->
+            <g class="diag-node" data-info="UNITY CATALOG — the governance plane. Once Lakebase is registered, UC sees it as a first-class catalog object alongside Delta catalogs. Permissions, audit, and discovery all converge here.">
+              <rect x="60" y="70" width="760" height="60" rx="6" fill="#0b1a18" stroke="#00bfa5" stroke-width="1.5"/>
+              <text x="440" y="95" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Unity Catalog</text>
+              <text x="440" y="115" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="2">CATALOG: lakebase_tutorial</text>
+            </g>
+
+            <!-- 7 unlocks -->
+            <g class="diag-node" data-info="DBSQL via federation — Run SELECTs against lakebase_tutorial.public.users from a SQL warehouse. Live data, no copy. Joins across Delta and Lakebase work natively in DBSQL.">
+              <rect x="60"  y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#a855f7" stroke-width="1.2"/>
+              <text x="110" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7">DBSQL</text>
+              <text x="110" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">federation</text>
+            </g>
+            <g class="diag-node" data-info="AI/BI Dashboards — Build dashboards directly against Lakebase tables. No ETL into Delta required. The dashboard query reads live OLTP data through the federation path.">
+              <rect x="170" y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#a855f7" stroke-width="1.2"/>
+              <text x="220" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7">AI/BI</text>
+              <text x="220" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">dashboards</text>
+            </g>
+            <g class="diag-node" data-info="Genie — Natural-language Q&amp;A on Lakebase tables. The LLM gets schema metadata from UC; queries route through federation. 'How many orders did we ship last week' just works.">
+              <rect x="280" y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#a855f7" stroke-width="1.2"/>
+              <text x="330" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7">Genie</text>
+              <text x="330" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">NL queries</text>
+            </g>
+            <g class="diag-node" data-info="Catalog Explorer — Lakebase tables show up alongside Delta tables in the workspace catalog browser. Schema, sample rows, lineage, all in one UI.">
+              <rect x="390" y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#a855f7" stroke-width="1.2"/>
+              <text x="440" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7">Notebooks</text>
+              <text x="440" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">catalog UI</text>
+            </g>
+            <g class="diag-node" data-info="Synced Tables — UC Delta tables can now be synced INTO Lakebase via managed CDC. Module 4 builds on this. Without UC registration, synced tables cannot target your DB.">
+              <rect x="500" y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#22c55e" stroke-width="1.2"/>
+              <text x="550" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e">Synced</text>
+              <text x="550" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">tables target</text>
+            </g>
+            <g class="diag-node" data-info="GRANT/REVOKE in UC — Workspace identity-based access control. GRANT SELECT ON CATALOG lakebase_tutorial TO `analysts`. UC permissions and Postgres GRANTs compose; the more restrictive wins.">
+              <rect x="610" y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#fbbf24" stroke-width="1.2"/>
+              <text x="660" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24">UC GRANT</text>
+              <text x="660" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">permissions</text>
+            </g>
+            <g class="diag-node" data-info="Audit logs — All access to Lakebase tables via UC surfaces is captured in system.access.audit. Compliance, who-saw-what, anomaly detection — same audit pipeline as the rest of the lakehouse.">
+              <rect x="720" y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#fbbf24" stroke-width="1.2"/>
+              <text x="770" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24">Audit</text>
+              <text x="770" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">system tables</text>
+            </g>
+
+            <!-- Connecting lines -->
+            <line x1="110" y1="210" x2="110" y2="245" stroke="#243550" stroke-width="1"/>
+            <line x1="220" y1="210" x2="220" y2="245" stroke="#243550" stroke-width="1"/>
+            <line x1="330" y1="210" x2="330" y2="245" stroke="#243550" stroke-width="1"/>
+            <line x1="440" y1="210" x2="440" y2="245" stroke="#243550" stroke-width="1"/>
+            <line x1="550" y1="210" x2="550" y2="245" stroke="#243550" stroke-width="1"/>
+            <line x1="660" y1="210" x2="660" y2="245" stroke="#243550" stroke-width="1"/>
+            <line x1="770" y1="210" x2="770" y2="245" stroke="#243550" stroke-width="1"/>
+
+            <!-- Federation rail -->
+            <rect x="60" y="245" width="760" height="22" rx="4" fill="#0b1a18" stroke="#00bfa5" stroke-width="1" stroke-dasharray="3,2"/>
+            <text x="440" y="261" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="2">FEDERATION · LIVE QUERY ROUTING</text>
+
+            <line x1="440" y1="267" x2="440" y2="280" stroke="#00bfa5" stroke-width="1.5" marker-end="url(#arrUc)"/>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Toggle and click any tile</div>
+        <p id="ucInfo">One CREATE CATALOG command flips seven dependent capabilities on at once. This is the structural difference between Lakebase and a sidecar Postgres — there is no equivalent of this command for RDS.</p>
+      </div>
+    </div>
+
+    <h3>The registration model — what UC actually sees</h3>
+    <p>The UC catalog object is a <strong>pointer, not a copy</strong>. SELECTs from DBSQL against <code>lakebase_tutorial.public.users</code> are answered by querying the live Lakebase Postgres, with row data flowing back through the federation path. You get one source of truth — UC governs access, Lakebase owns the rows.</p>
+
+    <h3>Permissions: GRANT works in both worlds</h3>
+    <p>After registration, you have <em>two</em> permission systems to think about, and they compose:</p>
+    <ul>
+      <li><strong>UC permissions</strong> (<code>GRANT SELECT ON CATALOG lakebase_tutorial TO ...</code>) gate who can see the catalog at all from Databricks surfaces.</li>
+      <li><strong>Postgres GRANTs</strong> (<code>GRANT SELECT ON TABLE users TO ...</code>) gate who can query at the row level when connected directly via Postgres clients.</li>
+    </ul>
+    <p>The honest answer when asked <em>"which one wins?"</em> is: <strong>whichever is more restrictive.</strong> If UC says no, Databricks tools won't show the catalog. If Postgres says no, direct PG connections fail. Module 7 (apps with on-behalf-of identity) is where this composition becomes powerful.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 3.5 -->
+  <section class="topic" id="t35">
+    <div class="topic-banner">
+      <span class="topic-id">3.5</span>
+      <span class="line"></span>
+      <span class="type">Theory · Branching</span>
+    </div>
+    <h2>Branching — <em>Git</em> for your database</h2>
+
+    <h3>The mental model</h3>
+    <p>If you've ever run <code>git checkout -b feature/new-thing</code>, you already understand Lakebase branching. Replace "commit graph" with "page versions" and the model is identical.</p>
+
+    <!-- DIAGRAM 3.5: Branching Flow -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 3.5 · Copy-on-Write Branching</span>
+        <div class="stepper" id="branchStepper">
+          <button class="active" data-step="1" onclick="setBranch(1)">1 · main only</button>
+          <button data-step="2" onclick="setBranch(2)">2 · branch dev</button>
+          <button data-step="3" onclick="setBranch(3)">3 · dev writes</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" class="branch-svg" id="branchSvg">
+          <defs>
+            <marker id="arrBr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8899bb"/>
+            </marker>
+          </defs>
+
+          <!-- Storage layer (always shown) -->
+          <rect x="60" y="240" width="760" height="100" rx="8" fill="#0b1a18" stroke="#00bfa5" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="80" y="265" font-family="IBM Plex Mono, monospace" font-size="10" fill="#00bfa5" letter-spacing="2">▸ STORAGE LAYER · PAGE SERVER (shared, copy-on-write)</text>
+
+          <!-- Pages on storage -->
+          <g id="storPages">
+            <rect x="100" y="285" width="60" height="40" rx="3" fill="#1a2235" stroke="#243550"/>
+            <text x="130" y="310" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb">page 1</text>
+            <rect x="180" y="285" width="60" height="40" rx="3" fill="#1a2235" stroke="#243550"/>
+            <text x="210" y="310" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb">page 2</text>
+            <rect x="260" y="285" width="60" height="40" rx="3" fill="#1a2235" stroke="#243550"/>
+            <text x="290" y="310" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb">page 3</text>
+            <rect x="340" y="285" width="60" height="40" rx="3" fill="#1a2235" stroke="#243550"/>
+            <text x="370" y="310" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb">page 4</text>
+          </g>
+
+          <!-- Page 2 mutated copy (only visible at step 3) -->
+          <g id="storPage2v2" style="display:none">
+            <rect x="180" y="200" width="60" height="40" rx="3" fill="#2a1a14" stroke="#fbbf24"/>
+            <text x="210" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24">page 2</text>
+            <text x="210" y="234" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#fbbf24">v2 (dev)</text>
+            <line x1="210" y1="240" x2="210" y2="285" stroke="#fbbf24" stroke-width="1" stroke-dasharray="2,2"/>
+          </g>
+
+          <!-- main branch (always visible) -->
+          <g class="diag-node" data-info="MAIN BRANCH — the project's primary branch. A compute process attached to a snapshot of the page server. Reads pages from storage as needed. This is your 'production' line in the Git analogy.">
+            <rect x="100" y="80" width="220" height="80" rx="8" fill="#2a1a14" stroke="#ff6b35" stroke-width="2"/>
+            <text x="210" y="110" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">main</text>
+            <text x="210" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1.5">PG PROCESS A</text>
+            <text x="210" y="146" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">rw-main.cloud.databricks.com</text>
+          </g>
+
+          <!-- main pointers (always visible) -->
+          <g id="mainPointers">
+            <line x1="160" y1="160" x2="130" y2="285" stroke="#ff6b35" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <line x1="190" y1="160" x2="210" y2="285" stroke="#ff6b35" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <line x1="230" y1="160" x2="290" y2="285" stroke="#ff6b35" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <line x1="260" y1="160" x2="370" y2="285" stroke="#ff6b35" stroke-width="1.5" stroke-dasharray="3,2"/>
+          </g>
+
+          <!-- dev branch (visible from step 2) -->
+          <g id="devBranch" style="display:none">
+            <g class="diag-node" data-info="DEV BRANCH — a new compute (PG process B) attached to a copy-on-write SNAPSHOT of the same storage. Created in seconds. No data is copied. Same pages, different compute, different DNS.">
+              <rect x="560" y="80" width="220" height="80" rx="8" fill="#0b1a18" stroke="#00bfa5" stroke-width="2"/>
+              <text x="670" y="110" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">dev</text>
+              <text x="670" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="1.5">PG PROCESS B</text>
+              <text x="670" y="146" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">rw-dev.cloud.databricks.com</text>
+            </g>
+
+            <!-- dev pointers -->
+            <g id="devPointers">
+              <line x1="620" y1="160" x2="130" y2="285" stroke="#00bfa5" stroke-width="1.2" stroke-dasharray="3,2"/>
+              <line id="devLineP2" x1="650" y1="160" x2="210" y2="285" stroke="#00bfa5" stroke-width="1.2" stroke-dasharray="3,2"/>
+              <line x1="690" y1="160" x2="290" y2="285" stroke="#00bfa5" stroke-width="1.2" stroke-dasharray="3,2"/>
+              <line x1="720" y1="160" x2="370" y2="285" stroke="#00bfa5" stroke-width="1.2" stroke-dasharray="3,2"/>
+            </g>
+          </g>
+
+          <!-- arrow between branches when step 2+ -->
+          <g id="splitArrow" style="display:none">
+            <path d="M 320 95 Q 440 50 560 95" stroke="#00bfa5" stroke-width="1.5" fill="none" marker-end="url(#arrBr)"/>
+            <text x="440" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="1">CREATE BRANCH dev FROM main</text>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Step through branching</div>
+        <p id="branchInfo">Step 1: only main exists. Step 2: dev branch is created — both branches point at the same physical pages. Step 3: dev writes to page 2 — only dev's version diverges; main is untouched.</p>
+      </div>
+    </div>
+
+    <h3>What "copy-on-write" actually means here</h3>
+    <p>Three properties, in plain terms:</p>
+    <ul>
+      <li><strong>Branch creation is constant-time, not data-size proportional.</strong> A new branch on a 1 GB database takes the same wall-clock time as a new branch on a 10 TB database. You're creating a pointer, not copying bytes.</li>
+      <li><strong>Reads on the new branch hit shared pages.</strong> No cost duplication for unchanged data.</li>
+      <li><strong>Writes diverge.</strong> The first time <code>dev</code> writes a page that exists on <code>main</code>, the storage layer creates a new version <em>for dev only</em>. <code>main</code> keeps the old one. From that moment, the two branches' histories diverge and will never converge unless you explicitly merge (which Lakebase does at the SQL level — there's no merge command, you <code>INSERT ... SELECT</code> between branches).</li>
+    </ul>
+
+    <h3>What branches unlock — the four production patterns</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Pattern</th><th>How it works</th><th>Replaces</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>PR-based migrations</strong></td><td>Branch off main, run migration, test, promote on merge</td><td>Manual <code>ALTER TABLE</code> rollouts at midnight</td></tr>
+          <tr><td><strong>Ephemeral CI databases</strong></td><td>Branch on PR open, drop on PR close</td><td>Shared dev DB with conflicting test data</td></tr>
+          <tr><td><strong>Blue-green deploys</strong></td><td>Validate on a branch, swap DNS instantly on success</td><td>Maintenance windows</td></tr>
+          <tr><td><strong>"What if?" analyses</strong></td><td>Analyst gets a writable copy of prod, runs anything</td><td>Read-only snapshots that frustrate analysts</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>In Lab 3.5 you'll build pattern #4: spin up a <code>dev</code> branch, run a destructive <code>DELETE FROM users</code>, verify <code>main</code> is intact, then drop the branch. It takes 90 seconds and demonstrates more value than any whitepaper can convey.</p>
+
+    <h3>What branches do NOT do</h3>
+    <ul>
+      <li><strong>They are not full multi-region replication.</strong> Branches share storage; if the storage region is down, every branch is down.</li>
+      <li><strong>They do not auto-merge.</strong> No equivalent of <code>git merge</code>. You do data movement explicitly with <code>INSERT ... SELECT FROM other_branch.table</code>.</li>
+      <li><strong>They are not free of conflicts at the schema level.</strong> If <code>main</code> and <code>dev</code> both add a column named <code>email</code>, when you reconcile you'll resolve it manually.</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 3.6 -->
+  <section class="topic" id="t36">
+    <div class="topic-banner">
+      <span class="topic-id">3.6</span>
+      <span class="line"></span>
+      <span class="type">Theory · Recovery</span>
+    </div>
+    <h2>Point-in-Time Restore — branching, <em>across time</em></h2>
+
+    <h3>The big idea</h3>
+    <p>Because the storage layer keeps every page version for the duration of <code>retention_window_in_days</code>, "restore to 5 minutes ago" is just <strong>branching from a timestamp instead of from a branch tip</strong>.</p>
+
+    <!-- DIAGRAM 3.6: PIT Restore Timeline -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 3.6 · Point-in-Time Restore Workflow</span>
+        <div class="stepper" id="pitStepper">
+          <button class="active" data-step="1" onclick="setPit(1)">1 · Corrupt</button>
+          <button data-step="2" onclick="setPit(2)">2 · Wait</button>
+          <button data-step="3" onclick="setPit(3)">3 · Branch</button>
+          <button data-step="4" onclick="setPit(4)">4 · Recover</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" class="pit-svg" id="pitSvg">
+          <defs>
+            <marker id="arrPit" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e"/>
+            </marker>
+          </defs>
+
+          <!-- Time axis -->
+          <line x1="60" y1="290" x2="820" y2="290" stroke="#243550" stroke-width="1.5"/>
+          <text x="60"  y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">t = -7d</text>
+          <text x="320" y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="middle">t = -5min (good state)</text>
+          <text x="600" y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" text-anchor="middle">t = -1min (corrupted)</text>
+          <text x="820" y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="end">now</text>
+
+          <!-- Retention window -->
+          <rect x="60" y="278" width="760" height="22" rx="3" fill="#0b1a18" stroke="#00bfa5" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="440" y="294" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="2">RETENTION WINDOW · ALL PAGE VERSIONS PRESERVED</text>
+
+          <!-- main branch line -->
+          <line x1="60" y1="180" x2="820" y2="180" stroke="#ff6b35" stroke-width="2"/>
+          <text x="40" y="184" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" text-anchor="end">main</text>
+
+          <!-- Step 1 marker - corruption -->
+          <g class="diag-node" id="pitStep1" data-info="STEP 1 · CORRUPT — On main, run UPDATE users SET email='oops' WHERE id=1. The bad value is now in the live DB. The original page version still exists in storage; the new corrupted page is just the latest version.">
+            <circle cx="600" cy="180" r="10" fill="#ef4444"/>
+            <text x="600" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fff" font-weight="700">!</text>
+            <text x="600" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444">corruption</text>
+          </g>
+
+          <!-- Step 2 marker - wait -->
+          <g class="diag-node" id="pitStep2" data-info="STEP 2 · WAIT — Wait 60 seconds so a timestamp 5 minutes in the past is firmly inside the retention window. The page server keeps every version regardless; the 60s wait is just to satisfy &gt;= NOW() - INTERVAL queries.">
+            <circle cx="700" cy="180" r="8" fill="#fbbf24" opacity="0.7"/>
+            <text x="700" y="155" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">wait 60s</text>
+          </g>
+
+          <!-- Step 3: recovery branch -->
+          <g class="diag-node" id="pitStep3" data-info="STEP 3 · BRANCH FROM TIMESTAMP — CREATE BRANCH recovery FROM TIMESTAMP (now() - 5 min). A new compute spins up, pointed at the storage state from 5 minutes ago. Read-write, just like main. Takes ~30 seconds. Email='oops' did not exist yet at that timestamp, so the branch has the original good value.">
+            <line x1="320" y1="180" x2="320" y2="100" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <line x1="320" y1="100" x2="450" y2="100" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrPit)"/>
+            <rect x="450" y="80" width="160" height="40" rx="6" fill="#0b1a18" stroke="#22c55e" stroke-width="1.5"/>
+            <text x="530" y="98" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">recovery branch</text>
+            <text x="530" y="113" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#22c55e" letter-spacing="1.5">FROM t = -5min</text>
+          </g>
+
+          <!-- Step 4: copy back -->
+          <g class="diag-node" id="pitStep4" data-info="STEP 4 · RECOVER — From main: UPDATE users SET email = (SELECT email FROM recovery.users WHERE id=1) WHERE id=1. The good row is copied back into main. Then DROP BRANCH recovery to clean up. Total resolution time: ~2 minutes from incident.">
+            <line x1="530" y1="120" x2="530" y2="180" stroke="#22c55e" stroke-width="1.2" stroke-dasharray="3,2"/>
+            <line x1="530" y1="180" x2="820" y2="180" stroke="#22c55e" stroke-width="2" marker-end="url(#arrPit)"/>
+            <text x="700" y="170" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">copy good row back</text>
+          </g>
+
+          <!-- "now" -->
+          <circle cx="820" cy="180" r="6" fill="#22c55e"/>
+          <text x="820" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">main fixed</text>
+
+          <!-- Title -->
+          <text x="440" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e" letter-spacing="2">▸ FOUR-STEP RECOVERY · ~2 MIN TOTAL</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Step through the recovery</div>
+        <p id="pitInfo">PIT restore is just branching from a timestamp. The retention window keeps every page version; you create a new branch at any past second; you copy the rows you need back to main; you drop the branch.</p>
+      </div>
+    </div>
+
+    <h3>The lab pattern (and why it beats <code>pg_dump</code>)</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Step</th><th>Where</th><th>What you do</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>1</strong></td><td>main</td><td><code>UPDATE users SET email='oops' WHERE id=1</code> — the deliberate "outage"</td></tr>
+          <tr><td><strong>2</strong></td><td>—</td><td>Wait 60s so timestamp <code>t=-60s</code> exists in retention</td></tr>
+          <tr><td><strong>3</strong></td><td>SDK</td><td><code>CREATE BRANCH recovery FROM TIMESTAMP (now() - '5 min'::interval)</code></td></tr>
+          <tr><td><strong>4</strong></td><td>recovery</td><td><code>SELECT email FROM users WHERE id=1</code> → original value</td></tr>
+          <tr><td><strong>5</strong></td><td>main</td><td><code>UPDATE users SET email = (SELECT email FROM recovery.users WHERE id=1)</code></td></tr>
+          <tr><td><strong>6</strong></td><td>SDK</td><td><code>DROP BRANCH recovery</code> — cleanup</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Compare with the <code>pg_dump</code> path: hourly snapshots (so you might lose up to an hour), restore the entire database to a separate instance (slow, costs full storage), then <code>pg_dump</code> the affected rows back. With Lakebase, the resolution is sub-second on time, the recovery branch costs only the diverged pages, and the cleanup is one command.</p>
+
+    <h3>When PIT restore is the wrong answer</h3>
+    <ul>
+      <li><strong>Soft-delete needs.</strong> If your application logically deletes rows (<code>deleted_at IS NOT NULL</code>), don't reach for PIT restore — just reset the column.</li>
+      <li><strong>Cross-table consistency at app level.</strong> If the corruption was caused by a multi-step business process (e.g., order placed but inventory not decremented), PIT restore restores both tables to a consistent point but may discard valid concurrent work. Use it carefully or use it with a maintenance window.</li>
+      <li><strong>Audit / compliance.</strong> Sometimes you legally cannot "make the bad data go away." PIT restore is operational, not regulatory.</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ WRAP-UP -->
+  <section class="topic" id="wrap">
+    <div class="topic-banner">
+      <span class="topic-id">3·Σ</span>
+      <span class="line"></span>
+      <span class="type">Wrap-Up</span>
+    </div>
+    <h2>What the Module 3 lab actually <em>proves</em></h2>
+
+    <p>By the end of Lab 3 (the hands-on notebook), you will have:</p>
+    <ol>
+      <li><strong>Provisioned a Lakebase project programmatically</strong> via SDK — reproducible across workspaces.</li>
+      <li><strong>Connected with auto-refreshing OAuth credentials</strong> — the only pattern safe for long-running code.</li>
+      <li><strong>Built a real schema</strong> with constraints, indexes, and reasonable types — not toy <code>CREATE TABLE foo (x INT)</code>.</li>
+      <li><strong>Registered the database in Unity Catalog</strong> — the single command that promotes Lakebase from "managed Postgres" to "lakehouse-native OLTP."</li>
+      <li><strong>Branched, mutated, and verified isolation</strong> — confirmed <code>main</code> is untouched when <code>dev</code> is destroyed.</li>
+      <li><strong>Recovered from a deliberate corruption</strong> via point-in-time branching — the operational story you'll tell every customer.</li>
+    </ol>
+
+    <p>These six capabilities are what every later module assumes you have working hands-on. <strong>Module 4</strong> builds synced tables on top of #1 and #4. <strong>Modules 5 and 6</strong> layer pgvector and agent memory onto #3. <strong>Module 7</strong> uses #2 in production. The Module 3 lab is the load-bearing notebook for the rest of the roadmap.</p>
+
+    <h3>Common pitfalls — the things RSAs forget</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Pitfall</th><th>Why it happens</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>read_write_dns</code> is <code>None</code> right after create</td><td>DNS publishes ~5–10s after <code>READY</code></td><td>Poll project state until <code>READY</code>, then read endpoint</td></tr>
+          <tr><td>Connection works at first, fails after an hour</td><td>Hardcoded token in connection string</td><td>Use <code>pool_pre_ping=True</code> + regenerate via SDK</td></tr>
+          <tr><td><code>CREATE INDEX</code> slow on a small table</td><td>Old page versions counted in size</td><td>Check with <code>pg_total_relation_size</code>; <code>VACUUM FULL</code> on dev</td></tr>
+          <tr><td>UC catalog created but DBSQL can't see tables</td><td>UC permissions not granted</td><td><code>GRANT USE CATALOG, BROWSE</code> to user/group</td></tr>
+          <tr><td>Branch creation hangs &gt; 60s</td><td>First branch in fresh project warming caches</td><td>Normal once; subsequent branches are seconds</td></tr>
+          <tr><td>PIT restore: "timestamp out of retention window"</td><td><code>retention_window_in_days</code> too low at provision</td><td>Cannot fix retroactively; recreate with larger window</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="wrap-up">
+      <h3>Module 3 — what's <em>next</em></h3>
+      <p>Once you've completed the six labs (3.1 → 3.6) in the Module 3 hands-on notebook, you have a fully working Lakebase project, real experience with branching and point-in-time restore, and Unity Catalog registration done — the two features that most differentiate Lakebase from RDS.</p>
+      <p><strong>Up next: Module 4</strong> — <em>Sync, Federate &amp; Unify with Unity Catalog.</em> You'll learn the three integration patterns (UC → PG synced tables, PG → UC Lakehouse Sync, and live federation), then build a real reverse-ETL replacement that pushes Delta data into your Lakebase project automatically.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ Progress bar ═══════════════
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+// ═══════════════ Diagram 3.1 — Provisioning Stepper ═══════════════
+const provData = {
+  1: 'STAGE 1 · ACCEPT — The control plane validates entitlement, capacity, and name uniqueness within the workspace. Returns a uid immediately. State: PROVISIONING. The SDK call returns in under a second.',
+  2: 'STAGE 2 · STORAGE — A slice of the multi-tenant page server is reserved for your project. Page versions for the entire retention window will live here. NOT a per-customer S3 bucket — a logical tenant on a shared, hardened page server.',
+  3: 'STAGE 3 · COMPUTE — A Postgres process at your chosen capacity (CU_1 = 1 compute unit) is launched and attached to the storage tenant. This is the actual PG 17 process that will answer your queries.',
+  4: 'STAGE 4 · MAIN BRANCH — Every new project gets a `main` branch automatically. The branch is just a pointer record into the storage layer; no data movement. From this branch you will create dev, staging, and recovery branches in seconds.',
+  5: 'STAGE 5 · DNS — The read_write_dns endpoint becomes resolvable and the connection accepts TLS handshakes. State transitions to READY. Until DNS publishes (~5–10s after compute is up), connection attempts fail with name resolution errors.'
+};
+function setProv(step) {
+  document.querySelectorAll('#provStepper button').forEach(b => b.classList.toggle('active', +b.dataset.step === step));
+  for (let i = 1; i <= 5; i++) {
+    const node = document.getElementById('prov-' + i);
+    if (!node) continue;
+    const rect = node.querySelector('rect');
+    const stageLabel = node.querySelector('text:nth-of-type(1)');
+    const titleLabel = node.querySelector('text:nth-of-type(2)');
+    const isActive = i <= step;
+    rect.setAttribute('stroke', isActive ? '#ff6b35' : '#243550');
+    rect.setAttribute('stroke-width', isActive ? 2 : 1.5);
+    rect.setAttribute('fill', isActive ? '#1a2235' : '#0b0f1a');
+    if (stageLabel) stageLabel.setAttribute('fill', isActive ? '#ff6b35' : '#4a5878');
+    if (titleLabel) titleLabel.setAttribute('fill', isActive ? '#e8edf5' : '#8899bb');
+    // dim the body text
+    node.querySelectorAll('text').forEach((t, idx) => {
+      if (idx >= 2) t.setAttribute('fill', isActive ? (idx === 5 ? '#fbbf24' : '#8899bb') : '#4a5878');
+    });
+  }
+  document.getElementById('provInfo').textContent = provData[step];
+}
+document.querySelectorAll('#provSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('provInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 3.2 — TTL Trap toggle ═══════════════
+function setTtl(mode) {
+  document.querySelectorAll('#ttlStepper button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('ttlTrap').style.display = mode === 'trap' ? 'block' : 'none';
+  document.getElementById('ttlFix').style.display  = mode === 'fix'  ? 'block' : 'none';
+  document.getElementById('ttlInfo').textContent = mode === 'trap'
+    ? 'THE TRAP — A hardcoded token works for an hour, then every NEW connection fails. The pool kept the original socket alive past expiry; the next checkout that needs a fresh socket dies on auth.'
+    : 'THE FIX — pool_pre_ping=True checks each connection before handing it over. App refreshes credentials before token expiry. The rotation is invisible to application code.';
+}
+document.querySelectorAll('#ttlSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('ttlInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 3.3 — Schema hover ═══════════════
+document.querySelectorAll('#schemaSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('schemaInfo').textContent = info;
+  });
+  n.addEventListener('click', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('schemaInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 3.4 — UC Registration toggle ═══════════════
+function setUc(mode) {
+  document.querySelectorAll('#ucStepper button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('ucBefore').style.display = mode === 'before' ? 'block' : 'none';
+  document.getElementById('ucAfter').style.display  = mode === 'after'  ? 'block' : 'none';
+  document.getElementById('ucInfo').textContent = mode === 'before'
+    ? 'BEFORE REGISTRATION — Lakebase is reachable on the wire from any Postgres client. Useful, but it is just a managed Postgres — the same as RDS. None of the lakehouse-native capabilities are available yet.'
+    : 'AFTER REGISTRATION — One CREATE CATALOG command flips seven dependent capabilities ON at once. This is the structural difference between Lakebase and a sidecar Postgres. There is no equivalent of this command for RDS.';
+}
+document.querySelectorAll('#ucSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('ucInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 3.5 — Branching stepper ═══════════════
+const branchData = {
+  1: 'STEP 1 · MAIN ONLY — The project has just one branch (main) attached to four pages on storage. Every read goes to those pages. This is the starting state for any new Lakebase project.',
+  2: 'STEP 2 · BRANCH dev FROM main — A new compute (PG process B) is created in seconds. It points at a copy-on-write SNAPSHOT of the same pages. No data is copied. Both branches read the exact same physical pages until one of them writes.',
+  3: 'STEP 3 · DEV WRITES PAGE 2 — When dev mutates a row on page 2, the storage layer creates a NEW version of page 2 (v2) for dev only. Main keeps reading the original page 2. The two branches have now diverged for that page; all other pages remain shared.'
+};
+function setBranch(step) {
+  document.querySelectorAll('#branchStepper button').forEach(b => b.classList.toggle('active', +b.dataset.step === step));
+  document.getElementById('devBranch').style.display    = step >= 2 ? 'block' : 'none';
+  document.getElementById('splitArrow').style.display   = step >= 2 ? 'block' : 'none';
+  document.getElementById('storPage2v2').style.display  = step >= 3 ? 'block' : 'none';
+  // when dev writes page 2, the dev pointer to page 2 should now point to the new copy
+  const devLineP2 = document.getElementById('devLineP2');
+  if (devLineP2) {
+    if (step >= 3) {
+      devLineP2.setAttribute('x2', '210');
+      devLineP2.setAttribute('y2', '200');
+      devLineP2.setAttribute('stroke', '#fbbf24');
+    } else {
+      devLineP2.setAttribute('x2', '210');
+      devLineP2.setAttribute('y2', '285');
+      devLineP2.setAttribute('stroke', '#00bfa5');
+    }
+  }
+  document.getElementById('branchInfo').textContent = branchData[step];
+}
+document.querySelectorAll('#branchSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('branchInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 3.6 — PIT stepper ═══════════════
+const pitData = {
+  1: 'STEP 1 · CORRUPT — On main, run UPDATE users SET email=\'oops\' WHERE id=1. The bad value is now live. The original page version still exists in storage; the new corrupted page is just the latest version.',
+  2: 'STEP 2 · WAIT 60s — Wait so a timestamp 5 minutes in the past is firmly inside the retention window. The page server keeps every version regardless; the wait is just to satisfy the timestamp predicate.',
+  3: 'STEP 3 · BRANCH FROM TIMESTAMP — CREATE BRANCH recovery FROM TIMESTAMP (now() - 5 min). A new compute spins up pointed at the storage state from 5 minutes ago. Read-write, just like main. ~30 seconds.',
+  4: 'STEP 4 · RECOVER — Copy the good row from recovery.users back into main.users. Drop the recovery branch. Total resolution time: ~2 minutes from the moment of incident detection.'
+};
+function setPit(step) {
+  document.querySelectorAll('#pitStepper button').forEach(b => b.classList.toggle('active', +b.dataset.step === step));
+  // only show steps up to current
+  document.getElementById('pitStep1').style.opacity = step >= 1 ? 1 : 0.25;
+  document.getElementById('pitStep2').style.opacity = step >= 2 ? 1 : 0.25;
+  document.getElementById('pitStep3').style.opacity = step >= 3 ? 1 : 0.25;
+  document.getElementById('pitStep4').style.opacity = step >= 4 ? 1 : 0.25;
+  document.getElementById('pitInfo').textContent = pitData[step];
+}
+document.querySelectorAll('#pitSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('pitInfo').textContent = info;
+  });
+});
+
+// initialize all diagrams
+setProv(1);
+setBranch(1);
+setPit(1);
+</script>
+</body>
+</html>

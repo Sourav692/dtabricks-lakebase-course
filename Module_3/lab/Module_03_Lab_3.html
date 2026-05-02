@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 03 · Lab 3 — Your First Lakebase Project, End-to-End</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  --code-bg: #020509;
+  --code-text: #e8dcc4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 56px 48px 48px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 70% at 90% 30%, rgba(168,85,247,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 80%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.crumb .tag {
+  color: var(--accent-purple);
+  padding: 4px 12px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.06);
+  border-radius: 2px;
+}
+.crumb .tag.lab {
+  color: var(--accent-orange);
+  border-color: rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-purple); }
+
+.lede {
+  font-size: 16.5px; color: var(--text-dim);
+  max-width: 740px; line-height: 1.75;
+  margin-bottom: 28px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 17px; font-weight: 500;
+  color: var(--accent-purple);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── PROGRESS TRACKER (sticky) ─── */
+.tracker {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,8,15,0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 48px;
+}
+.tracker-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
+}
+.tracker-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.steps {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.step-pill::before {
+  content: '○';
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.step-pill:hover {
+  border-color: var(--accent-purple);
+  color: var(--text);
+}
+.step-pill.done {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.4);
+  color: var(--accent-green);
+}
+.step-pill.done::before {
+  content: '✓';
+  color: var(--accent-green);
+}
+.step-pill.active {
+  background: rgba(168,85,247,0.1);
+  border-color: var(--accent-purple);
+  color: var(--text);
+}
+.tracker-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-purple);
+  white-space: nowrap;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 48px 100px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 12px 0 18px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 5px 0 5px 22px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  color: var(--accent-purple);
+  font-size: 16px;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  margin: 0 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  margin: 28px 0 12px;
+  color: var(--text);
+}
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 22px 0 10px;
+}
+
+/* ─── INTRO BLOCK ─── */
+.intro-block { margin-bottom: 56px; }
+
+/* ─── PREREQ BOX ─── */
+.prereq {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0 40px;
+}
+.prereq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 22px;
+}
+.prereq-card.need { border-left: 3px solid var(--accent-green); }
+.prereq-card.skip { border-left: 3px solid var(--text-muted); opacity: 0.85; }
+.prereq-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.prereq-card.need .prereq-title { color: var(--accent-green); }
+.prereq-card.skip .prereq-title { color: var(--text-muted); }
+.prereq-card ul { margin: 0; }
+.prereq-card li { padding: 4px 0 4px 20px; font-size: 13.5px; }
+.prereq-card.need li::before { content: '✓'; color: var(--accent-green); }
+.prereq-card.skip li::before { content: '×'; color: var(--text-muted); }
+
+/* ─── STEP CARD ─── */
+.step {
+  margin: 0 0 56px;
+  scroll-margin-top: 90px;
+}
+.step-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.step-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-purple);
+  padding: 4px 10px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.06);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  letter-spacing: -0.005em;
+  flex: 1;
+}
+.step-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.step-mark:hover { border-color: var(--accent-green); color: var(--text); }
+.step-mark.done {
+  background: rgba(34,197,94,0.08);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+/* ─── CODE CELL ─── */
+.cell {
+  margin: 16px 0 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.cell-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.cell-label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.cell-label::before { content: '▸'; color: var(--accent-orange); }
+.cell-lang {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  margin-left: 8px;
+}
+.cell-actions { display: flex; gap: 6px; }
+.copy-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 5px 11px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: var(--accent-orange);
+  color: #fff;
+  border-color: var(--accent-orange);
+}
+.copy-btn.copied {
+  background: var(--accent-green);
+  color: #fff;
+  border-color: var(--accent-green);
+}
+.cell pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--code-text);
+  white-space: pre;
+}
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.st { color: #c3e88d; }
+.cm { color: var(--text-muted); font-style: italic; }
+.nm { color: var(--accent-orange); }
+.nu { color: #f78c6c; }
+
+/* ─── EXPECTED OUTPUT BLOCK ─── */
+.expect {
+  margin: 0 0 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-teal);
+  background: var(--surface);
+}
+.expect-header {
+  padding: 8px 16px;
+  background: rgba(0,191,165,0.05);
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+}
+.expect pre {
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  overflow-x: auto;
+  white-space: pre;
+}
+.expect pre .ok-line { color: var(--accent-green); }
+
+/* ─── PROVE/IF-FAILS ─── */
+.proves {
+  margin: 12px 0 0;
+  padding: 12px 16px;
+  background: rgba(0,191,165,0.04);
+  border-left: 2px solid var(--accent-teal);
+  border-radius: 0 4px 4px 0;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.proves strong { color: var(--accent-teal); }
+
+/* ─── TROUBLESHOOTING TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 20px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 11px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.55;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+td code {
+  font-size: 11.5px;
+  padding: 0 5px;
+  background: var(--code-bg);
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.callout strong { color: var(--text); }
+.callout-note { background: rgba(74,158,255,0.05); border-left-color: var(--accent-blue); }
+.callout-warn { background: rgba(251,191,36,0.05); border-left-color: var(--accent-yellow); }
+.callout-success { background: rgba(34,197,94,0.05); border-left-color: var(--accent-green); }
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+.callout-note .callout-label { color: var(--accent-blue); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-success .callout-label { color: var(--accent-green); }
+
+/* ─── INTERACTIVE CHECKLIST ─── */
+.checklist-section {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 30px;
+  margin: 40px 0;
+}
+.checklist-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.checklist-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--text);
+}
+.checklist-title em { color: var(--accent-purple); }
+.checklist-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+.checklist-status.complete {
+  background: rgba(34,197,94,0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 200px 28px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.check-row:last-child { border-bottom: none; }
+.check-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.check-name { font-size: 14.5px; color: var(--text); }
+.check-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.check-detail {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: right;
+  padding-right: 8px;
+}
+.check-toggle {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  padding: 0;
+}
+.check-toggle:hover { border-color: var(--accent-green); color: var(--accent-green); }
+.check-toggle.checked {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #fff;
+}
+
+.checklist-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reset-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+
+/* ─── COMPLETION BANNER ─── */
+.done-banner {
+  margin-top: 56px;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(168,85,247,0.04) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.done-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.done-banner h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 24px;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+.done-banner h3 em { color: var(--accent-purple); }
+
+/* ─── SUB-STEP HEADER ─── */
+.substep {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  font-style: italic;
+  color: var(--text);
+  margin: 28px 0 8px;
+  padding: 6px 0 6px 14px;
+  border-left: 2px solid var(--accent-purple);
+}
+.substep span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-style: normal;
+  color: var(--accent-purple);
+  margin-right: 10px;
+  letter-spacing: 0.1em;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main, .tracker { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 28px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+  .prereq { grid-template-columns: 1fr; }
+  .check-row {
+    grid-template-columns: 1fr 28px;
+    grid-template-rows: auto auto;
+  }
+  .check-num { grid-column: 1; grid-row: 1; }
+  .check-detail { grid-column: 1; grid-row: 2; text-align: left; padding: 0; }
+  .check-toggle { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+  .step-banner { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 03</span>
+      <span>/</span>
+      <span class="tag lab">Lab 3</span>
+      <span>/</span>
+      <span>Hands-on · Your First Lakebase Project</span>
+    </div>
+    <h1>Your First Lakebase Project,<br><em>End-to-End</em></h1>
+    <p class="lede">Provision a real Lakebase project, connect with auto-refreshing OAuth, build a real schema, register it in Unity Catalog, and prove out branching and point-in-time restore. By the end you will have done — for real, not in slides — every operation the rest of the roadmap depends on.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">7</span><span class="meta-lbl">Steps</span></div>
+      <div class="meta-item"><span class="meta-val">~75 min</span><span class="meta-lbl">Duration</span></div>
+      <div class="meta-item"><span class="meta-val">6</span><span class="meta-lbl">Final Checks</span></div>
+      <div class="meta-item"><span class="meta-val">100%</span><span class="meta-lbl">Hands-On</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── STICKY PROGRESS TRACKER ── -->
+<div class="tracker" id="tracker">
+  <div class="tracker-inner">
+    <span class="tracker-label">Progress →</span>
+    <div class="steps">
+      <a href="#step1" class="step-pill" data-step="1">Step 1 · Provision</a>
+      <a href="#step2" class="step-pill" data-step="2">Step 2 · Connect</a>
+      <a href="#step3" class="step-pill" data-step="3">Step 3 · Schema</a>
+      <a href="#step4" class="step-pill" data-step="4">Step 4 · UC Register</a>
+      <a href="#step5" class="step-pill" data-step="5">Step 5 · Branch</a>
+      <a href="#step6" class="step-pill" data-step="6">Step 6 · PIT Restore</a>
+      <a href="#step7" class="step-pill" data-step="7">Step 7 · Verify &amp; Cleanup</a>
+    </div>
+    <span class="tracker-count" id="trackerCount">0 / 7</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- ─── INTRO ─── -->
+  <section class="intro-block">
+    <h2>Why this lab exists</h2>
+    <p>Every later lab in the roadmap assumes a working Lakebase project that you have personally provisioned, connected to, and registered in Unity Catalog. <strong>Module 4</strong> synced tables write into the schema you build here. <strong>Modules 5 and 6</strong> add pgvector and agent memory to it. <strong>Module 7</strong> connects a real Databricks App to it.</p>
+    <p>This lab walks the six steps in order, then a 7th step verifies and offers cleanup. Total runtime ~75 minutes, of which about 5 minutes is your hands on the keyboard and ~70 is Lakebase doing what you asked. Use the wait times to skim the Module 3 theory primer if you haven't.</p>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Run mode</span>
+      <p>Do this lab in a <strong>Databricks notebook</strong> attached to a serverless cluster (or DBR 14+). All cells are Python except where SQL is explicitly called out via <code>%sql</code>. Copy each cell into your own notebook as you go — every code block on this page has a Copy button.</p>
+    </div>
+
+    <h3>Prerequisites</h3>
+    <div class="prereq">
+      <div class="prereq-card need">
+        <div class="prereq-title">▸ You need</div>
+        <ul>
+          <li><strong>Module 1 Lab 1.4 passed</strong> with all 9 checks green</li>
+          <li>An attached compute cluster (serverless recommended)</li>
+          <li>The <code>TUTORIAL</code> config from Lab 1.4 — re-run it if needed</li>
+        </ul>
+      </div>
+      <div class="prereq-card skip">
+        <div class="prereq-title">▸ You do NOT need</div>
+        <ul>
+          <li>Any pre-existing Lakebase project</li>
+          <li>Production data — we generate seed rows in Step 3</li>
+          <li>Any Module 2 lab (Module 2 was theory only)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ Billing note</span>
+      <p>The project you create runs at <code>CU_1</code> for this lab — roughly the cost of a small RDS instance, prorated by the minute. Step 7b includes a cleanup cell. Most readers leave <code>CLEANUP=False</code> so Module 4 can reuse the project.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 1 -->
+  <section class="step" id="step1">
+    <div class="step-banner">
+      <span class="step-num">STEP 01</span>
+      <h2 class="step-title">Provision a Lakebase Autoscaling project</h2>
+      <button class="step-mark" data-step="1" onclick="markStep(1)">Mark done</button>
+    </div>
+    <p>One SDK call kicks off five things on the control plane: API accept → storage allocation → Postgres compute spin-up → <code>main</code> branch creation → DNS publishing. Total wall-clock is typically 60–90 seconds.</p>
+
+    <div class="cell" id="cell-1">
+      <div class="cell-header">
+        <span class="cell-label">Cell 1 · install dependencies<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-1')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 1 — install dependencies (re-run if kernel restarted since Lab 1.4)</span>
+%pip install --quiet <span class="st">"databricks-sdk&gt;=0.30.0"</span> <span class="st">"psycopg[binary]"</span> sqlalchemy pgvector
+dbutils.library.<span class="fn">restartPython</span>()</pre>
+    </div>
+
+    <div class="cell" id="cell-2">
+      <div class="cell-header">
+        <span class="cell-label">Cell 2 · tutorial config + project creation<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-2')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 2 — tutorial config + project creation</span>
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+<span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> DatabaseProject
+<span class="kw">import</span> time
+
+w = <span class="fn">WorkspaceClient</span>()
+
+TUTORIAL = {
+    <span class="st">"catalog"</span>:      <span class="st">"main"</span>,
+    <span class="st">"schema"</span>:       <span class="st">"lakebase_tutorial"</span>,
+    <span class="st">"project_name"</span>: <span class="st">"lakebase-tutorial"</span>,
+    <span class="st">"embed_model"</span>:  <span class="st">"databricks-bge-large-en"</span>,
+    <span class="st">"chat_model"</span>:   <span class="st">"databricks-meta-llama-3-3-70b-instruct"</span>,
+    <span class="st">"user"</span>:         w.current_user.<span class="fn">me</span>().user_name,
+    <span class="st">"host"</span>:         w.config.host,
+}
+
+<span class="cm"># Idempotent: if the project already exists, just fetch it.</span>
+existing = {p.name: p <span class="kw">for</span> p <span class="kw">in</span> w.database.<span class="fn">list_database_projects</span>()}
+<span class="kw">if</span> TUTORIAL[<span class="st">"project_name"</span>] <span class="kw">in</span> existing:
+    <span class="fn">print</span>(<span class="st">f"Project '</span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">' already exists — reusing."</span>)
+    project = existing[TUTORIAL[<span class="st">"project_name"</span>]]
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">f"Creating project '</span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">' (capacity=CU_1, retention=7d)..."</span>)
+    project = w.database.<span class="fn">create_database_project</span>(
+        project=<span class="fn">DatabaseProject</span>(
+            name=TUTORIAL[<span class="st">"project_name"</span>],
+            capacity=<span class="st">"CU_1"</span>,
+            retention_window_in_days=<span class="nu">7</span>,
+        )
+    )
+
+<span class="cm"># Poll until READY</span>
+<span class="fn">print</span>(<span class="st">"Waiting for state=READY (typically 60–90s)..."</span>)
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">40</span>):  <span class="cm"># 40 * 5s = 200s max</span>
+    p = w.database.<span class="fn">get_database_project</span>(TUTORIAL[<span class="st">"project_name"</span>])
+    <span class="kw">if</span> p.state == <span class="st">"READY"</span>:
+        project = p
+        <span class="kw">break</span>
+    time.<span class="fn">sleep</span>(<span class="nu">5</span>)
+    <span class="fn">print</span>(<span class="st">f"  [</span><span class="nm">{i*5:3d}</span><span class="st">s] state=</span><span class="nm">{p.state}</span><span class="st">"</span>)
+<span class="kw">else</span>:
+    <span class="kw">raise</span> <span class="fn">RuntimeError</span>(<span class="st">f"Project did not reach READY: state=</span><span class="nm">{p.state}</span><span class="st">"</span>)
+
+<span class="fn">print</span>()
+<span class="fn">print</span>(<span class="st">f"✅ Project ready"</span>)
+<span class="fn">print</span>(<span class="st">f"   UID:      </span><span class="nm">{project.uid}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"   State:    </span><span class="nm">{project.state}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"   Endpoint: </span><span class="nm">{project.read_write_dns}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>Creating project 'lakebase-tutorial' (capacity=CU_1, retention=7d)...
+Waiting for state=READY (typically 60–90s)...
+  [  0s] state=PROVISIONING
+  [  5s] state=PROVISIONING
+  [ 10s] state=PROVISIONING
+  ... (continues for ~60–90s)
+  [ 75s] state=READY
+
+<span class="ok-line">✅ Project ready</span>
+   UID:      a3f9e1c4-...
+   State:    READY
+   Endpoint: instance-a3f9e1c4-rw.cloud.databricks.com</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the control plane provisioned a multi-tenant page server slice, spun up <code>CU_1</code> of Postgres compute, attached it to a fresh <code>main</code> branch, and published the read-write DNS. You now have a live Postgres 17 endpoint.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>PermissionDenied: Missing entitlement DATABASE_CREATE</code></td><td>Module 1 Lab 1.4 didn't actually pass</td><td>Re-run Lab 1.4 cell 7; resolve the ❌ entitlement row before retrying here</td></tr>
+          <tr><td><code>state=FAILED</code> after polling</td><td>Region not yet GA, or workspace at quota</td><td>Read <code>project.state_message</code>; if region issue, switch to a US workspace</td></tr>
+          <tr><td>Polling timeout (<code>state=PROVISIONING</code> after 200s)</td><td>Control-plane slowness</td><td>Bump the timeout to 300s and retry. Don't recreate — the existing project will eventually become READY</td></tr>
+          <tr><td><code>read_write_dns</code> is <code>None</code> even at READY</td><td>DNS publishes 5–10s after READY</td><td>Sleep 10s and re-fetch with <code>get_database_project()</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 2 -->
+  <section class="step" id="step2">
+    <div class="step-banner">
+      <span class="step-num">STEP 02</span>
+      <h2 class="step-title">Connect with auto-refreshing OAuth credentials</h2>
+      <button class="step-mark" data-step="2" onclick="markStep(2)">Mark done</button>
+    </div>
+    <p>The trap from Module 2.5: hardcoded passwords silently fail after the OAuth token TTL (~1 hour). The pattern below generates a fresh credential per engine and uses <code>pool_pre_ping</code> so a stale connection is detected before it's handed to your code.</p>
+
+    <div class="cell" id="cell-3">
+      <div class="cell-header">
+        <span class="cell-label">Cell 3 · open a SQLAlchemy engine with auto-refresh<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-3')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 3 — open a SQLAlchemy engine with auto-refresh</span>
+<span class="kw">import</span> uuid
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+
+w = <span class="fn">WorkspaceClient</span>()
+project = w.database.<span class="fn">get_database_project</span>(TUTORIAL[<span class="st">"project_name"</span>])
+
+<span class="cm"># Generate a fresh OAuth token for this engine</span>
+cred = w.database.<span class="fn">generate_database_credential</span>(
+    request_id=<span class="fn">str</span>(uuid.<span class="fn">uuid4</span>()),
+    instance_names=[project.name],
+)
+
+url = (
+    <span class="st">f"postgresql+psycopg://</span><span class="nm">{TUTORIAL['user']}</span><span class="st">:</span><span class="nm">{cred.token}</span><span class="st">"</span>
+    <span class="st">f"@</span><span class="nm">{project.read_write_dns}</span><span class="st">:5432/databricks_postgres"</span>
+    <span class="st">f"?sslmode=require"</span>
+)
+
+<span class="cm"># pool_pre_ping=True = before handing a pooled connection to your code,</span>
+<span class="cm"># SQLAlchemy sends a cheap SELECT 1. If it fails (e.g. token expired</span>
+<span class="cm"># between checkouts), SQLAlchemy discards and reopens.</span>
+engine = <span class="fn">create_engine</span>(url, pool_pre_ping=<span class="kw">True</span>, pool_recycle=<span class="nu">1800</span>)
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    version = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT version()"</span>)).<span class="fn">scalar</span>()
+    <span class="fn">print</span>(<span class="st">f"✅ Connected"</span>)
+    <span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{version}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Connected</span>
+   PostgreSQL 17.x on aarch64-unknown-linux-gnu, compiled by gcc ...</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> your workspace identity authenticated via short-lived OAuth, TLS handshake succeeded, and you ran your first real SQL against Lakebase.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>connection refused</code></td><td>DNS hasn't fully propagated</td><td>Sleep 15s, refetch project, retry</td></tr>
+          <tr><td><code>password authentication failed</code></td><td>Stale token; you ran Step 2 a long time ago</td><td>Re-run Cell 3 — <code>generate_database_credential</code> issues a new token</td></tr>
+          <tr><td><code>SSL connection required</code></td><td><code>sslmode=require</code> missing in URL</td><td>Confirm the URL includes <code>?sslmode=require</code></td></tr>
+          <tr><td><code>could not translate host name</code></td><td>Hyphenated DNS issue with very old psycopg</td><td>Upgrade <code>psycopg[binary]</code> to &gt;=3.2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 3 -->
+  <section class="step" id="step3">
+    <div class="step-banner">
+      <span class="step-num">STEP 03</span>
+      <h2 class="step-title">Build a real schema and seed data</h2>
+      <button class="step-mark" data-step="3" onclick="markStep(3)">Mark done</button>
+    </div>
+    <p>A toy <code>CREATE TABLE foo (x INT)</code> would be useless for Modules 4–8. We build a small but realistic users + orders schema, with constraints and two index types so you'll feel the difference between B-tree and BRIN.</p>
+
+    <div class="substep"><span>3a</span>Create tables</div>
+
+    <div class="cell" id="cell-4">
+      <div class="cell-header">
+        <span class="cell-label">Cell 4 · schema DDL<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-4')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 4 — schema DDL</span>
+DDL = <span class="st">"""
+CREATE TABLE IF NOT EXISTS users (
+    id          BIGSERIAL PRIMARY KEY,
+    email       TEXT UNIQUE NOT NULL,
+    full_name   TEXT,
+    created_at  TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     BIGINT REFERENCES users(id),
+    sku         TEXT NOT NULL,
+    qty         INT CHECK (qty &gt; 0),
+    total_cents BIGINT,
+    placed_at   TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_orders_user   ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_placed ON orders USING BRIN(placed_at);
+"""</span>
+
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+    <span class="kw">for</span> stmt <span class="kw">in</span> [s.<span class="fn">strip</span>() <span class="kw">for</span> s <span class="kw">in</span> DDL.<span class="fn">split</span>(<span class="st">";"</span>) <span class="kw">if</span> s.<span class="fn">strip</span>()]:
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(stmt))
+
+<span class="cm"># Confirm</span>
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    rows = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        SELECT tablename FROM pg_tables
+        WHERE schemaname = 'public' ORDER BY tablename
+    """</span>)).<span class="fn">fetchall</span>()
+    <span class="fn">print</span>(<span class="st">"✅ Tables in public schema:"</span>)
+    <span class="kw">for</span> r <span class="kw">in</span> rows:
+        <span class="fn">print</span>(<span class="st">f"   · </span><span class="nm">{r.tablename}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Tables in public schema:</span>
+   · orders
+   · users</pre>
+    </div>
+
+    <div class="substep"><span>3b</span>Seed sample data</div>
+
+    <div class="cell" id="cell-5">
+      <div class="cell-header">
+        <span class="cell-label">Cell 5 · seed data (idempotent)<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-5')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 5 — seed data (idempotent: ON CONFLICT skips dupes)</span>
+SEED = <span class="st">"""
+INSERT INTO users (email, full_name) VALUES
+  ('alice@example.com', 'Alice Anderson'),
+  ('bob@example.com',   'Bob Brown'),
+  ('carla@example.com', 'Carla Cruz')
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO orders (user_id, sku, qty, total_cents) VALUES
+  ((SELECT id FROM users WHERE email='alice@example.com'), 'SKU-101', 2, 4998),
+  ((SELECT id FROM users WHERE email='alice@example.com'), 'SKU-205', 1, 1299),
+  ((SELECT id FROM users WHERE email='bob@example.com'),   'SKU-101', 5, 12495),
+  ((SELECT id FROM users WHERE email='carla@example.com'), 'SKU-309', 3, 8997);
+"""</span>
+
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+    <span class="kw">for</span> stmt <span class="kw">in</span> [s.<span class="fn">strip</span>() <span class="kw">for</span> s <span class="kw">in</span> SEED.<span class="fn">split</span>(<span class="st">";"</span>) <span class="kw">if</span> s.<span class="fn">strip</span>()]:
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(stmt))
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    nu = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM users"</span>)).<span class="fn">scalar</span>()
+    no = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM orders"</span>)).<span class="fn">scalar</span>()
+
+<span class="fn">print</span>(<span class="st">f"✅ Seeded </span><span class="nm">{nu}</span><span class="st"> users and </span><span class="nm">{no}</span><span class="st"> orders"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Seeded 3 users and 4 orders</span></pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> you can run DDL and DML against Lakebase exactly as you would against any Postgres. No Databricks-flavored quirks, no proprietary syntax — <code>BIGSERIAL</code>, <code>REFERENCES</code>, <code>CHECK</code>, <code>BRIN</code> indexes, all standard PostgreSQL 17.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>relation "users" already exists</code></td><td>DDL ran already on a previous attempt</td><td>Acceptable — tables are idempotent in this lab</td></tr>
+          <tr><td><code>permission denied for schema public</code></td><td>Workspace identity not the project owner</td><td>Confirm you ran Cell 2 — the creator gets owner role automatically</td></tr>
+          <tr><td><code>BRIN</code> errors on older PG</td><td>Lakebase is PG 17; this should never happen</td><td>Verify <code>SELECT version()</code> returned 17.x</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 4 -->
+  <section class="step" id="step4">
+    <div class="step-banner">
+      <span class="step-num">STEP 04</span>
+      <h2 class="step-title">Register the project in Unity Catalog</h2>
+      <button class="step-mark" data-step="4" onclick="markStep(4)">Mark done</button>
+    </div>
+    <p>The single most important command in this lab. Until you run it, your project is just a managed Postgres. After you run it, DBSQL, AI/BI, Genie, the catalog explorer, synced tables, and UC permissions all see it.</p>
+
+    <div class="cell" id="cell-6">
+      <div class="cell-header">
+        <span class="cell-label">Cell 6 · register Lakebase in UC<span class="cell-lang">SQL</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-6')">COPY</button></div>
+      </div>
+      <pre><span class="cm">-- Cell 6 — register Lakebase as a Unity Catalog catalog</span>
+<span class="cm">-- (in the notebook UI prefix this cell with %sql)</span>
+
+<span class="kw">CREATE CATALOG IF NOT EXISTS</span> lakebase_tutorial
+<span class="kw">USING DATABASE</span> `lakebase-tutorial.databricks_postgres`
+<span class="kw">OPTIONS</span> (description = <span class="st">'OLTP catalog for the Lakebase tutorial'</span>);</pre>
+    </div>
+
+    <div class="cell" id="cell-7">
+      <div class="cell-header">
+        <span class="cell-label">Cell 7 · verify the catalog<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-7')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 7 — verify the catalog from the Python side</span>
+catalogs = spark.<span class="fn">sql</span>(<span class="st">"SHOW CATALOGS"</span>).<span class="fn">toPandas</span>()
+present = <span class="st">"lakebase_tutorial"</span> <span class="kw">in</span> catalogs[<span class="st">"catalog"</span>].values
+<span class="fn">print</span>(<span class="st">f"✅ Catalog 'lakebase_tutorial' visible to Spark: </span><span class="nm">{present}</span><span class="st">"</span>)
+
+<span class="cm"># Query the Lakebase table FROM DBSQL via federation</span>
+df = spark.<span class="fn">sql</span>(<span class="st">"SELECT * FROM lakebase_tutorial.public.users ORDER BY id"</span>)
+df.<span class="fn">show</span>(truncate=<span class="kw">False</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Catalog 'lakebase_tutorial' visible to Spark: True</span>
+
++---+-------------------+-----------------+--------------------------+
+|id |email              |full_name        |created_at                |
++---+-------------------+-----------------+--------------------------+
+|1  |alice@example.com  |Alice Anderson   |2026-05-02 14:23:01.123+00|
+|2  |bob@example.com    |Bob Brown        |2026-05-02 14:23:01.124+00|
+|3  |carla@example.com  |Carla Cruz       |2026-05-02 14:23:01.125+00|
++---+-------------------+-----------------+--------------------------+</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the <code>CREATE CATALOG</code> command flipped seven dependent capabilities on at once. The <code>spark.sql(...)</code> call against <code>lakebase_tutorial.public.users</code> is answered by a federation query that hits your live Lakebase Postgres — no copy, no ETL.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>permission denied: must be metastore admin</code></td><td>Workspace UC requires elevated rights for catalog creation</td><td>Ask your admin to grant <code>CREATE CATALOG</code> on the metastore, or have them run Cell 6</td></tr>
+          <tr><td>Catalog created but <code>SHOW CATALOGS</code> doesn't show it</td><td>Catalog browser cache</td><td>Refresh the Catalog Explorer; or re-run Cell 7</td></tr>
+          <tr><td>Federation SELECT errors with <code>connection refused</code></td><td>Your project went idle and is cold-starting</td><td>Wait 10 seconds, retry</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 5 -->
+  <section class="step" id="step5">
+    <div class="step-banner">
+      <span class="step-num">STEP 05</span>
+      <h2 class="step-title">Branching: dev branch, destroy data, verify main</h2>
+      <button class="step-mark" data-step="5" onclick="markStep(5)">Mark done</button>
+    </div>
+    <p>This is the lab's "wow" moment. You'll create a fully writable copy of your database in seconds, run a destructive <code>DELETE</code>, and verify <code>main</code> is untouched. If a customer is skeptical about copy-on-write branching, this is the demo.</p>
+
+    <div class="substep"><span>5a</span>Create the branch</div>
+
+    <div class="cell" id="cell-8">
+      <div class="cell-header">
+        <span class="cell-label">Cell 8 · create the dev branch from main<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-8')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 8 — create the dev branch from main</span>
+<span class="kw">from</span> databricks.sdk.service.database <span class="kw">import</span> DatabaseBranch
+
+<span class="fn">print</span>(<span class="st">"Creating branch 'dev' from 'main'..."</span>)
+branch = w.database.<span class="fn">create_database_branch</span>(
+    project_name=TUTORIAL[<span class="st">"project_name"</span>],
+    branch=<span class="fn">DatabaseBranch</span>(name=<span class="st">"dev"</span>),
+)
+
+<span class="cm"># Poll until the branch is READY</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">30</span>):
+    b = w.database.<span class="fn">get_database_branch</span>(
+        project_name=TUTORIAL[<span class="st">"project_name"</span>], branch_name=<span class="st">"dev"</span>
+    )
+    <span class="kw">if</span> b.state == <span class="st">"READY"</span>:
+        branch = b
+        <span class="kw">break</span>
+    time.<span class="fn">sleep</span>(<span class="nu">3</span>)
+
+<span class="fn">print</span>(<span class="st">f"✅ Branch 'dev' ready"</span>)
+<span class="fn">print</span>(<span class="st">f"   Endpoint: </span><span class="nm">{branch.read_write_dns}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>Creating branch 'dev' from 'main'...
+<span class="ok-line">✅ Branch 'dev' ready</span>
+   Endpoint: instance-a3f9e1c4-dev-rw.cloud.databricks.com</pre>
+    </div>
+
+    <div class="substep"><span>5b</span>Destroy data on dev</div>
+
+    <div class="cell" id="cell-9">
+      <div class="cell-header">
+        <span class="cell-label">Cell 9 · connect to dev, delete everything<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-9')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 9 — connect to the dev branch</span>
+cred_dev = w.database.<span class="fn">generate_database_credential</span>(
+    request_id=<span class="fn">str</span>(uuid.<span class="fn">uuid4</span>()),
+    instance_names=[project.name],
+)
+
+dev_url = (
+    <span class="st">f"postgresql+psycopg://</span><span class="nm">{TUTORIAL['user']}</span><span class="st">:</span><span class="nm">{cred_dev.token}</span><span class="st">"</span>
+    <span class="st">f"@</span><span class="nm">{branch.read_write_dns}</span><span class="st">:5432/databricks_postgres?sslmode=require"</span>
+)
+dev_engine = <span class="fn">create_engine</span>(dev_url, pool_pre_ping=<span class="kw">True</span>)
+
+<span class="cm"># Confirm dev sees the same seed data</span>
+<span class="kw">with</span> dev_engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+    rows = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM users"</span>)).<span class="fn">scalar</span>()
+    <span class="fn">print</span>(<span class="st">f"   dev branch — users count BEFORE delete: </span><span class="nm">{rows}</span><span class="st">"</span>)
+
+<span class="cm"># DESTRUCTIVE: wipe all users on dev only</span>
+<span class="kw">with</span> dev_engine.<span class="fn">begin</span>() <span class="kw">as</span> c:
+    c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"DELETE FROM orders"</span>))
+    c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"DELETE FROM users"</span>))
+
+<span class="kw">with</span> dev_engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+    rows = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM users"</span>)).<span class="fn">scalar</span>()
+    <span class="fn">print</span>(<span class="st">f"   dev branch — users count AFTER delete:  </span><span class="nm">{rows}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>   dev branch — users count BEFORE delete: 3
+   dev branch — users count AFTER delete:  0</pre>
+    </div>
+
+    <div class="substep"><span>5c</span>Verify main is untouched</div>
+
+    <div class="cell" id="cell-10">
+      <div class="cell-header">
+        <span class="cell-label">Cell 10 · sanity check on main<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-10')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 10 — sanity check on main</span>
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+    nu = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM users"</span>)).<span class="fn">scalar</span>()
+    no = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM orders"</span>)).<span class="fn">scalar</span>()
+<span class="fn">print</span>(<span class="st">f"✅ main branch — users=</span><span class="nm">{nu}</span><span class="st">, orders=</span><span class="nm">{no}</span><span class="st"> (unchanged)"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ main branch — users=3, orders=4 (unchanged)</span></pre>
+    </div>
+
+    <div class="substep"><span>5d</span>Drop the dev branch</div>
+
+    <div class="cell" id="cell-11">
+      <div class="cell-header">
+        <span class="cell-label">Cell 11 · clean up the dev branch<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-11')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 11 — clean up the dev branch</span>
+w.database.<span class="fn">delete_database_branch</span>(
+    project_name=TUTORIAL[<span class="st">"project_name"</span>], branch_name=<span class="st">"dev"</span>
+)
+<span class="fn">print</span>(<span class="st">"✅ Branch 'dev' deleted"</span>)</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the <code>dev</code> branch was a writable, isolated copy of <code>main</code> that you destroyed without affecting production data. Branch creation took seconds, not minutes — because no data was physically copied. You just experienced copy-on-write, the feature that most differentiates Lakebase from RDS.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>branch creation failed: too many branches</code></td><td>Project soft-limits concurrent branches</td><td>Delete unused branches with <code>delete_database_branch</code></td></tr>
+          <tr><td>Step 5b: dev shows 0 users immediately</td><td>You created the branch BEFORE seeding</td><td>Branches inherit storage state at branch-creation time. Re-seed on main, recreate dev</td></tr>
+          <tr><td>Step 5c: main shows 0 users</td><td>Catastrophic — you ran the DELETE on <code>engine</code> not <code>dev_engine</code></td><td>Recreate seed data with Cell 5</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 6 -->
+  <section class="step" id="step6">
+    <div class="step-banner">
+      <span class="step-num">STEP 06</span>
+      <h2 class="step-title">Point-in-Time Restore via branch-from-timestamp</h2>
+      <button class="step-mark" data-step="6" onclick="markStep(6)">Mark done</button>
+    </div>
+    <p>Because the storage layer keeps every page version for <code>retention_window_in_days</code>, "restore to 5 minutes ago" is just creating a branch from a past timestamp. We'll deliberately corrupt a row, then recover it without <code>pg_dump</code>.</p>
+
+    <div class="substep"><span>6a</span>Mark the safe-recovery point</div>
+
+    <div class="cell" id="cell-12">
+      <div class="cell-header">
+        <span class="cell-label">Cell 12 · capture T_GOOD<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-12')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 12 — capture a "known good" timestamp BEFORE we corrupt anything</span>
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone, timedelta
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+    pre_corrupt_email = c.<span class="fn">execute</span>(<span class="fn">text</span>(
+        <span class="st">"SELECT email FROM users WHERE id = 1"</span>
+    )).<span class="fn">scalar</span>()
+
+<span class="fn">print</span>(<span class="st">f"Original email for user id=1: </span><span class="nm">{pre_corrupt_email}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">"Saving the current time. We'll branch from this point shortly."</span>)
+T_GOOD = datetime.<span class="fn">now</span>(timezone.utc)
+<span class="fn">print</span>(<span class="st">f"   T_GOOD = </span><span class="nm">{T_GOOD.isoformat()}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>Original email for user id=1: alice@example.com
+Saving the current time. We'll branch from this point shortly.
+   T_GOOD = 2026-05-02T14:35:42.123456+00:00</pre>
+    </div>
+
+    <div class="substep"><span>6b</span>Wait, then corrupt</div>
+
+    <div class="cell" id="cell-13">
+      <div class="cell-header">
+        <span class="cell-label">Cell 13 · sleep 65s, then corrupt<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-13')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 13 — wait 60s so T_GOOD is firmly in the past, then corrupt</span>
+<span class="fn">print</span>(<span class="st">"Sleeping 65s so T_GOOD is comfortably in retention..."</span>)
+time.<span class="fn">sleep</span>(<span class="nu">65</span>)
+
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> c:
+    c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"UPDATE users SET email = 'oops' WHERE id = 1"</span>))
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+    bad = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT email FROM users WHERE id = 1"</span>)).<span class="fn">scalar</span>()
+<span class="fn">print</span>(<span class="st">f"⚠ Corrupted: user id=1 email is now '</span><span class="nm">{bad}</span><span class="st">'"</span>)</pre>
+    </div>
+
+    <div class="substep"><span>6c</span>Branch from T_GOOD</div>
+
+    <div class="cell" id="cell-14">
+      <div class="cell-header">
+        <span class="cell-label">Cell 14 · create recovery branch<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-14')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 14 — create a recovery branch from T_GOOD</span>
+<span class="fn">print</span>(<span class="st">f"Creating branch 'recovery' FROM TIMESTAMP </span><span class="nm">{T_GOOD.isoformat()}</span><span class="st">..."</span>)
+recovery = w.database.<span class="fn">create_database_branch</span>(
+    project_name=TUTORIAL[<span class="st">"project_name"</span>],
+    branch=<span class="fn">DatabaseBranch</span>(
+        name=<span class="st">"recovery"</span>,
+        parent_branch_name=<span class="st">"main"</span>,
+        parent_timestamp=T_GOOD,  <span class="cm"># branch-from-timestamp</span>
+    ),
+)
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">30</span>):
+    b = w.database.<span class="fn">get_database_branch</span>(
+        project_name=TUTORIAL[<span class="st">"project_name"</span>], branch_name=<span class="st">"recovery"</span>
+    )
+    <span class="kw">if</span> b.state == <span class="st">"READY"</span>:
+        recovery = b; <span class="kw">break</span>
+    time.<span class="fn">sleep</span>(<span class="nu">3</span>)
+
+<span class="fn">print</span>(<span class="st">f"✅ Branch 'recovery' ready @ </span><span class="nm">{recovery.read_write_dns}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="substep"><span>6d</span>Verify recovery, then copy back to main</div>
+
+    <div class="cell" id="cell-15">
+      <div class="cell-header">
+        <span class="cell-label">Cell 15 · verify + copy back<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-15')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 15 — open recovery, confirm the original email is intact, then copy it back</span>
+cred_r = w.database.<span class="fn">generate_database_credential</span>(
+    request_id=<span class="fn">str</span>(uuid.<span class="fn">uuid4</span>()),
+    instance_names=[project.name],
+)
+recovery_url = (
+    <span class="st">f"postgresql+psycopg://</span><span class="nm">{TUTORIAL['user']}</span><span class="st">:</span><span class="nm">{cred_r.token}</span><span class="st">"</span>
+    <span class="st">f"@</span><span class="nm">{recovery.read_write_dns}</span><span class="st">:5432/databricks_postgres?sslmode=require"</span>
+)
+recovery_engine = <span class="fn">create_engine</span>(recovery_url, pool_pre_ping=<span class="kw">True</span>)
+
+<span class="kw">with</span> recovery_engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+    good_email = c.<span class="fn">execute</span>(<span class="fn">text</span>(
+        <span class="st">"SELECT email FROM users WHERE id = 1"</span>
+    )).<span class="fn">scalar</span>()
+<span class="fn">print</span>(<span class="st">f"   recovery branch has email: '</span><span class="nm">{good_email}</span><span class="st">'"</span>)
+<span class="kw">assert</span> good_email == pre_corrupt_email, <span class="st">"recovery did not preserve the original!"</span>
+
+<span class="cm"># Copy the good value back to main</span>
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> c:
+    c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"UPDATE users SET email = :e WHERE id = 1"</span>), {<span class="st">"e"</span>: good_email})
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+    fixed = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT email FROM users WHERE id = 1"</span>)).<span class="fn">scalar</span>()
+<span class="fn">print</span>(<span class="st">f"✅ main fixed: user id=1 email is now '</span><span class="nm">{fixed}</span><span class="st">'"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>   recovery branch has email: 'alice@example.com'
+<span class="ok-line">✅ main fixed: user id=1 email is now 'alice@example.com'</span></pre>
+    </div>
+
+    <div class="substep"><span>6e</span>Drop the recovery branch</div>
+
+    <div class="cell" id="cell-16">
+      <div class="cell-header">
+        <span class="cell-label">Cell 16 · clean up<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-16')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 16 — clean up</span>
+w.database.<span class="fn">delete_database_branch</span>(
+    project_name=TUTORIAL[<span class="st">"project_name"</span>], branch_name=<span class="st">"recovery"</span>
+)
+<span class="fn">print</span>(<span class="st">"✅ Branch 'recovery' deleted"</span>)</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> point-in-time restore on Lakebase is sub-second wall-clock on time (the storage layer always knew the old page), an instant compute spin-up (~30s), and a single SQL UPDATE to restore. Total time from corruption to fix: ~2 minutes. With <code>pg_dump</code>-based recovery on RDS, you would still be waiting for the restore to finish.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>timestamp out of retention window</code></td><td><code>retention_window_in_days</code> was 0 or 1</td><td>This lab requires retention ≥ 1 day; recreate project with <code>retention_window_in_days=7</code></td></tr>
+          <tr><td>recovery branch has email <code>'oops'</code></td><td>T_GOOD was captured AFTER the corruption</td><td>Re-run Cells 12 → 13 → 14 in order</td></tr>
+          <tr><td>AssertionError on the assert line</td><td>Same as above</td><td>Same as above</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 7 -->
+  <section class="step" id="step7">
+    <div class="step-banner">
+      <span class="step-num">STEP 07</span>
+      <h2 class="step-title">Final verification &amp; cleanup</h2>
+      <button class="step-mark" data-step="7" onclick="markStep(7)">Mark done</button>
+    </div>
+    <p>A pass/fail summary of everything you built. Then the cleanup that deletes the project (so your bill stops, if you want).</p>
+
+    <div class="substep"><span>7a</span>The summary checklist</div>
+
+    <div class="cell" id="cell-17">
+      <div class="cell-header">
+        <span class="cell-label">Cell 17 · final checklist<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-17')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 17 — final checklist</span>
+checks = []
+
+<span class="cm"># 1. Project exists and is READY</span>
+<span class="kw">try</span>:
+    p = w.database.<span class="fn">get_database_project</span>(TUTORIAL[<span class="st">"project_name"</span>])
+    checks.<span class="fn">append</span>((<span class="st">"Project provisioned"</span>, <span class="st">f"state=</span><span class="nm">{p.state}</span><span class="st">"</span>, p.state == <span class="st">"READY"</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Project provisioned"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 2. Engine connects and SELECT version() works</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        v = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT version()"</span>)).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"Engine + SQL works"</span>, v.<span class="fn">split</span>(<span class="st">","</span>)[<span class="nu">0</span>], <span class="st">"PostgreSQL 17"</span> <span class="kw">in</span> v))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Engine + SQL works"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 3. Schema exists with seed data</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        nu = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM users"</span>)).<span class="fn">scalar</span>()
+        no = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM orders"</span>)).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"Schema + seed data"</span>, <span class="st">f"users=</span><span class="nm">{nu}</span><span class="st">, orders=</span><span class="nm">{no}</span><span class="st">"</span>, nu &gt;= <span class="nu">3</span> <span class="kw">and</span> no &gt;= <span class="nu">4</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"Schema + seed data"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 4. UC catalog visible</span>
+<span class="kw">try</span>:
+    cats = spark.<span class="fn">sql</span>(<span class="st">"SHOW CATALOGS"</span>).<span class="fn">toPandas</span>()[<span class="st">"catalog"</span>].values
+    ok = <span class="st">"lakebase_tutorial"</span> <span class="kw">in</span> cats
+    checks.<span class="fn">append</span>((<span class="st">"UC catalog registered"</span>, <span class="st">"lakebase_tutorial"</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="st">"missing"</span>, ok))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"UC catalog registered"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 5. Federation SELECT works</span>
+<span class="kw">try</span>:
+    n = spark.<span class="fn">sql</span>(<span class="st">"SELECT count(*) AS n FROM lakebase_tutorial.public.users"</span>).<span class="fn">collect</span>()[<span class="nu">0</span>][<span class="st">"n"</span>]
+    checks.<span class="fn">append</span>((<span class="st">"UC federation works"</span>, <span class="st">f"n=</span><span class="nm">{n}</span><span class="st">"</span>, n &gt;= <span class="nu">3</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"UC federation works"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 6. PIT restore worked</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        e = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT email FROM users WHERE id=1"</span>)).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"PIT restore success"</span>, e, e == <span class="st">"alice@example.com"</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> ex:
+    checks.<span class="fn">append</span>((<span class="st">"PIT restore success"</span>, <span class="fn">str</span>(ex)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># Print</span>
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+<span class="fn">print</span>(<span class="st">f"</span><span class="nm">{'CHECK':&lt;28}</span><span class="st"> </span><span class="nm">{'DETAIL':&lt;28}</span><span class="st"> STATUS"</span>)
+<span class="fn">print</span>(<span class="st">"-"</span> * <span class="nu">70</span>)
+<span class="kw">for</span> name, detail, ok <span class="kw">in</span> checks:
+    icon = <span class="st">"✅"</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="st">"❌"</span>
+    <span class="fn">print</span>(<span class="st">f"</span><span class="nm">{name:&lt;28}</span><span class="st"> </span><span class="nm">{str(detail)[:28]:&lt;28}</span><span class="st"> </span><span class="nm">{icon}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+passed = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> _, _, ok <span class="kw">in</span> checks <span class="kw">if</span> ok)
+total = <span class="fn">len</span>(checks)
+<span class="kw">if</span> passed == total:
+    <span class="fn">print</span>(<span class="st">f"\n🎯 ALL </span><span class="nm">{total}</span><span class="st"> CHECKS PASSED — Module 3 complete."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">f"\n⚠ </span><span class="nm">{passed}</span><span class="st">/</span><span class="nm">{total}</span><span class="st"> passed. Resolve the ❌ rows before Module 4."</span>)</pre>
+    </div>
+
+    <!-- ─── INTERACTIVE CHECKLIST ─── -->
+    <div class="checklist-section">
+      <div class="checklist-header">
+        <span class="checklist-title">Tap each check as Cell 17 prints <em>✅</em></span>
+        <span class="checklist-status" id="clStatus">0 / 6 complete</span>
+      </div>
+      <div class="check-row">
+        <span class="check-num">01</span>
+        <div>
+          <div class="check-name">Project provisioned</div>
+          <div class="check-desc">state=READY</div>
+        </div>
+        <span class="check-detail" id="d1">— pending —</span>
+        <button class="check-toggle" data-check="1" onclick="toggleCheck(1)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">02</span>
+        <div>
+          <div class="check-name">Engine + SQL works</div>
+          <div class="check-desc">SELECT version() returns PostgreSQL 17</div>
+        </div>
+        <span class="check-detail" id="d2">— pending —</span>
+        <button class="check-toggle" data-check="2" onclick="toggleCheck(2)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">03</span>
+        <div>
+          <div class="check-name">Schema + seed data</div>
+          <div class="check-desc">3 users, 4 orders</div>
+        </div>
+        <span class="check-detail" id="d3">— pending —</span>
+        <button class="check-toggle" data-check="3" onclick="toggleCheck(3)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">04</span>
+        <div>
+          <div class="check-name">UC catalog registered</div>
+          <div class="check-desc">lakebase_tutorial visible to Spark</div>
+        </div>
+        <span class="check-detail" id="d4">— pending —</span>
+        <button class="check-toggle" data-check="4" onclick="toggleCheck(4)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">05</span>
+        <div>
+          <div class="check-name">UC federation works</div>
+          <div class="check-desc">SELECT count(*) FROM lakebase_tutorial.public.users</div>
+        </div>
+        <span class="check-detail" id="d5">— pending —</span>
+        <button class="check-toggle" data-check="5" onclick="toggleCheck(5)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">06</span>
+        <div>
+          <div class="check-name">PIT restore success</div>
+          <div class="check-desc">user id=1 email is alice@example.com</div>
+        </div>
+        <span class="check-detail" id="d6">— pending —</span>
+        <button class="check-toggle" data-check="6" onclick="toggleCheck(6)">○</button>
+      </div>
+
+      <div class="checklist-footer">
+        <span id="clMessage">▸ Run Cell 17. Tap each ✅ above as it appears.</span>
+        <button class="reset-btn" onclick="resetChecks()">RESET</button>
+      </div>
+    </div>
+
+    <div class="substep"><span>7b</span>Cleanup (optional)</div>
+
+    <div class="cell" id="cell-18">
+      <div class="cell-header">
+        <span class="cell-label">Cell 18 · cleanup<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-18')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 18 — cleanup</span>
+<span class="cm"># Set CLEANUP = False if you want to keep the project for Module 4 hands-on.</span>
+<span class="cm"># Module 4 builds synced tables INTO this project, so most readers KEEP it.</span>
+CLEANUP = <span class="kw">False</span>
+
+<span class="kw">if</span> CLEANUP:
+    <span class="fn">print</span>(<span class="st">"Dropping UC catalog..."</span>)
+    spark.<span class="fn">sql</span>(<span class="st">"DROP CATALOG IF EXISTS lakebase_tutorial CASCADE"</span>)
+
+    <span class="fn">print</span>(<span class="st">f"Deleting Lakebase project '</span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">'..."</span>)
+    w.database.<span class="fn">delete_database_project</span>(name=TUTORIAL[<span class="st">"project_name"</span>])
+    <span class="fn">print</span>(<span class="st">"✅ Cleanup complete — billing stops within minutes."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"⏸ Cleanup skipped. The project will be reused in Module 4."</span>)
+    <span class="fn">print</span>(<span class="st">f"   Project: </span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">"</span>)
+    <span class="fn">print</span>(<span class="st">f"   Endpoint: </span><span class="nm">{project.read_write_dns}</span><span class="st">"</span>)
+    <span class="fn">print</span>()
+    <span class="fn">print</span>(<span class="st">"   To delete later, set CLEANUP=True and re-run this cell, OR"</span>)
+    <span class="fn">print</span>(<span class="st">"   visit Compute → Lakebase in the workspace UI."</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ─── TROUBLESHOOTING REFERENCE ─── -->
+  <section>
+    <h2>Troubleshooting reference</h2>
+    <p>If your final checklist has any ❌ rows, find the row in the table below and apply the fix. Don't proceed to Module 4 with failing checks — synced tables in Module 4 require a healthy registered project.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>❌ Row</th><th>Most common cause</th><th>Resolution path</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Project provisioned</strong></td><td>Region not GA, or quota</td><td>Read <code>project.state_message</code>; switch region or contact your admin</td></tr>
+          <tr><td><strong>Engine + SQL works</strong></td><td>DNS not propagated, or token expired</td><td>Re-run Cell 3 — that regenerates a fresh token and engine</td></tr>
+          <tr><td><strong>Schema + seed data</strong></td><td>Cell 4 or 5 failed silently with a transaction rollback</td><td>Re-run Cells 4 + 5; check for prior <code>BEGIN</code> left open</td></tr>
+          <tr><td><strong>UC catalog registered</strong></td><td>Workspace UC requires elevated <code>CREATE CATALOG</code> rights</td><td>Ask admin to run Cell 6 once, then re-run Cell 7</td></tr>
+          <tr><td><strong>UC federation works</strong></td><td>Catalog created but query routing misconfigured</td><td>Wait 30s; check <code>SHOW CATALOGS</code> shows the catalog of type LAKEBASE</td></tr>
+          <tr><td><strong>PIT restore success</strong></td><td>T_GOOD captured after the bad UPDATE</td><td>Recreate the corruption: <code>UPDATE users SET email='oops' WHERE id=1</code>, capture a NEW T_GOOD before it, retry from Cell 14</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── DONE BANNER ─── -->
+  <section class="done-banner">
+    <h3>What you've <em>accomplished</em></h3>
+    <p>If your final cell printed <code>🎯 ALL 6 CHECKS PASSED</code>, you have done — for real, not in slides:</p>
+    <ul>
+      <li>✅ Provisioned a Lakebase Autoscaling project programmatically via SDK</li>
+      <li>✅ Connected with auto-refreshing OAuth credentials (the only pattern safe for long-running code)</li>
+      <li>✅ Built a real schema with constraints, indexes, and seed data</li>
+      <li>✅ Registered Lakebase in Unity Catalog — flipping seven dependent capabilities ON</li>
+      <li>✅ Created a branch, mutated the branch, and verified <code>main</code> was untouched</li>
+      <li>✅ Recovered from a deliberate corruption via point-in-time branching</li>
+    </ul>
+    <p>These six capabilities are what every later module assumes you have working hands-on. Module 4 builds synced tables on top of the project + UC registration. Modules 5 and 6 layer pgvector and agent memory onto your schema. Module 7 uses the OAuth pattern in production. <strong>Save this notebook somewhere you can find it again.</strong></p>
+
+    <div class="callout callout-success" style="margin-top: 24px;">
+      <span class="callout-label">▸ Module 3 complete</span>
+      <p>You finished six theory topics (3.1–3.6) and the hands-on lab. <strong>Next up: Module 4</strong> — <em>Sync, Federate &amp; Unify with Unity Catalog.</em> You'll learn the three integration patterns and build a real reverse-ETL replacement that pushes Delta data into the project you just created.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ COPY BUTTONS ═══════════════
+function copyCell(cellId) {
+  const cell = document.getElementById(cellId);
+  const pre = cell.querySelector('pre');
+  const text = pre.innerText;
+  const btn = cell.querySelector('.copy-btn');
+
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.textContent = 'COPIED ✓';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = 'COPY';
+    }, 1800);
+  }).catch(() => {
+    btn.textContent = 'PRESS ⌘+C';
+    const range = document.createRange();
+    range.selectNode(pre);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    setTimeout(() => { btn.textContent = 'COPY'; }, 2200);
+  });
+}
+
+// ═══════════════ STEP TRACKER ═══════════════
+const STEP_KEY  = 'lakebase_lab3_steps';
+const CHECK_KEY = 'lakebase_lab3_checks';
+
+function loadSteps() {
+  try { return JSON.parse(localStorage.getItem(STEP_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveSteps(s) {
+  try { localStorage.setItem(STEP_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+function markStep(n) {
+  const steps = loadSteps();
+  steps[n] = !steps[n];
+  saveSteps(steps);
+  renderSteps();
+}
+
+function renderSteps() {
+  const steps = loadSteps();
+  const total = 7;
+  let done = 0;
+  for (let i = 1; i <= total; i++) {
+    const pill = document.querySelector(`.step-pill[data-step="${i}"]`);
+    const btn = document.querySelector(`.step-mark[data-step="${i}"]`);
+    if (steps[i]) {
+      done++;
+      if (pill) pill.classList.add('done');
+      if (btn) {
+        btn.classList.add('done');
+        btn.textContent = '✓ Done';
+      }
+    } else {
+      if (pill) pill.classList.remove('done');
+      if (btn) {
+        btn.classList.remove('done');
+        btn.textContent = 'Mark done';
+      }
+    }
+  }
+  const counter = document.getElementById('trackerCount');
+  if (counter) {
+    counter.textContent = `${done} / ${total}`;
+    counter.style.color = (done === total) ? 'var(--accent-green)' : 'var(--accent-purple)';
+  }
+}
+
+// Highlight active step on scroll
+function highlightActive() {
+  const sections = document.querySelectorAll('section.step');
+  const scrollY = window.scrollY + 200;
+  let active = null;
+  sections.forEach(s => {
+    if (s.offsetTop <= scrollY) active = s.id;
+  });
+  document.querySelectorAll('.step-pill').forEach(p => p.classList.remove('active'));
+  if (active) {
+    const n = active.replace('step', '');
+    const pill = document.querySelector(`.step-pill[data-step="${n}"]`);
+    if (pill && !pill.classList.contains('done')) pill.classList.add('active');
+  }
+}
+window.addEventListener('scroll', highlightActive);
+
+// ═══════════════ INTERACTIVE CHECKLIST ═══════════════
+const CHECK_DETAILS = {
+  1: 'state=READY',
+  2: 'PostgreSQL 17',
+  3: 'users=3, orders=4',
+  4: 'lakebase_tutorial',
+  5: 'n=3',
+  6: 'alice@example.com'
+};
+
+function loadChecks() {
+  try { return JSON.parse(localStorage.getItem(CHECK_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveChecks(c) {
+  try { localStorage.setItem(CHECK_KEY, JSON.stringify(c)); } catch (e) {}
+}
+
+function toggleCheck(n) {
+  const checks = loadChecks();
+  checks[n] = !checks[n];
+  saveChecks(checks);
+  renderChecks();
+}
+
+function resetChecks() {
+  if (!confirm('Reset all checks?')) return;
+  saveChecks({});
+  renderChecks();
+}
+
+function renderChecks() {
+  const checks = loadChecks();
+  const total = 6;
+  let done = 0;
+  for (let i = 1; i <= total; i++) {
+    const btn = document.querySelector(`.check-toggle[data-check="${i}"]`);
+    const detail = document.getElementById('d' + i);
+    if (checks[i]) {
+      done++;
+      if (btn) {
+        btn.classList.add('checked');
+        btn.textContent = '✓';
+      }
+      if (detail) {
+        detail.textContent = CHECK_DETAILS[i];
+        detail.style.color = 'var(--accent-green)';
+      }
+    } else {
+      if (btn) {
+        btn.classList.remove('checked');
+        btn.textContent = '○';
+      }
+      if (detail) {
+        detail.textContent = '— pending —';
+        detail.style.color = 'var(--text-muted)';
+      }
+    }
+  }
+  const status = document.getElementById('clStatus');
+  const msg = document.getElementById('clMessage');
+  if (status) {
+    status.textContent = `${done} / ${total} complete`;
+    if (done === total) status.classList.add('complete');
+    else status.classList.remove('complete');
+  }
+  if (msg) {
+    if (done === 0) {
+      msg.textContent = '▸ Run Cell 17. Tap each ✅ above as it appears.';
+      msg.style.color = '';
+    } else if (done < total) {
+      msg.textContent = `▸ ${total - done} check${total - done === 1 ? '' : 's'} remaining. Keep going.`;
+      msg.style.color = '';
+    } else {
+      msg.textContent = '🎯 All checks complete — Module 3 done. Move on to Module 4.';
+      msg.style.color = 'var(--accent-green)';
+    }
+  }
+}
+
+// initial render
+renderSteps();
+renderChecks();
+highlightActive();
+</script>
+
+</body>
+</html>
