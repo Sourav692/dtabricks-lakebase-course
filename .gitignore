@@ -2,3 +2,4 @@
 .databricks
 .venv
 __builtins__.pyi
+.DS_Store

@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 06 — Lakebase as Memory Store for AI Agents: Concepts Behind the Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 64px 48px 56px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(255,107,53,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(168,85,247,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.crumb .tag {
+  color: var(--accent-orange);
+  padding: 4px 12px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.crumb .sep { color: var(--text-muted); }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  color: var(--text);
+}
+h1 em {
+  font-style: italic;
+  color: var(--accent-orange);
+  font-weight: 400;
+}
+
+.lede {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  max-width: 880px;
+  margin-bottom: 32px;
+}
+
+.meta-row {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-top: 28px;
+}
+.meta-item {
+  flex: 1;
+  padding: 18px 24px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  color: var(--accent-orange);
+  line-height: 1;
+}
+.meta-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px;
+}
+
+/* ─── TOC ─── */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 22px 28px;
+  margin-bottom: 56px;
+}
+.toc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--accent-orange);
+  margin-bottom: 12px;
+}
+.toc ol { counter-reset: toc; padding: 0; margin: 0; }
+.toc ol li {
+  list-style: none;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; align-items: baseline; gap: 14px;
+}
+.toc ol li::before {
+  content: counter(toc, decimal-leading-zero);
+  counter-increment: toc;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--accent-teal);
+  position: static;
+  letter-spacing: 0.15em;
+}
+.toc ol li:last-child { border-bottom: none; }
+.toc a {
+  color: var(--text);
+  text-decoration: none;
+  flex: 1;
+  font-size: 14.5px;
+}
+.toc a:hover { color: var(--accent-orange); }
+.toc .dur {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ─── TOPICS ─── */
+.topic { margin-bottom: 80px; }
+
+.topic-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.topic-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-orange);
+  padding: 4px 10px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.topic-banner .line { flex: 1; height: 1px; background: var(--border); }
+.topic-banner .type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.5vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+h2 em { font-style: italic; color: var(--accent-orange); }
+
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin: 36px 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 28px 0 10px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 16px 0 20px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 6px 0 6px 24px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  color: var(--accent-orange);
+  font-size: 16px;
+}
+ol { counter-reset: ol; }
+ol li::before {
+  content: counter(ol, decimal-leading-zero);
+  counter-increment: ol;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--accent-orange);
+  top: 9px;
+  left: 0;
+}
+li strong { color: var(--text); }
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+pre.code-snip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-orange);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 18px 0 24px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+pre.code-snip .kw { color: var(--accent-purple); }
+pre.code-snip .st { color: var(--accent-green); }
+pre.code-snip .nu { color: var(--accent-yellow); }
+pre.code-snip .cm { color: var(--text-muted); font-style: italic; }
+pre.code-snip .fn { color: var(--accent-blue); }
+pre.code-snip .nm { color: var(--text); }
+
+/* ─── TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 24px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.5;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+.yes { color: var(--accent-green); font-weight: 600; }
+.no  { color: var(--accent-red); }
+.warn { color: var(--accent-yellow); }
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 28px 0;
+  padding: 20px 24px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.callout strong { color: var(--text); }
+.callout-checkpoint {
+  background: rgba(0,191,165,0.05);
+  border-left-color: var(--accent-teal);
+}
+.callout-warn {
+  background: rgba(251,191,36,0.05);
+  border-left-color: var(--accent-yellow);
+}
+.callout-note {
+  background: rgba(74,158,255,0.05);
+  border-left-color: var(--accent-blue);
+}
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+.callout-checkpoint .callout-label { color: var(--accent-teal); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-note .callout-label { color: var(--accent-blue); }
+
+/* ─── DIAGRAM SHELL ─── */
+.diagram {
+  margin: 32px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.diagram-header {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.diagram-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+}
+.diagram-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+.diagram-hint::before { content: '◉ '; color: var(--accent-teal); }
+
+.diagram-stage {
+  padding: 24px;
+  position: relative;
+  min-height: 380px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.diagram-info {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,191,165,0.03);
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  min-height: 70px;
+}
+.diagram-info-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin-bottom: 6px;
+}
+
+.diagram-svg {
+  width: 100%; max-width: 920px; height: auto;
+}
+.diag-node {
+  cursor: pointer;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.diag-node:hover { filter: brightness(1.18); }
+.diag-node.dimmed { opacity: 0.3; }
+.diag-node text { pointer-events: none; }
+
+/* ─── STEPPER ─── */
+.stepper {
+  display: flex; gap: 0;
+  background: var(--surface3);
+  border-radius: 4px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+.stepper button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.stepper button.active {
+  background: var(--accent-orange);
+  color: #fff;
+}
+.stepper button:hover:not(.active) { color: var(--text); }
+
+/* ─── WRAP-UP ─── */
+.wrap-up {
+  margin-top: 80px;
+  padding: 36px 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.wrap-up::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wrap-up h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 26px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.wrap-up h3 em { color: var(--accent-orange); }
+
+/* ─── PROGRESS BAR ─── */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--accent-orange);
+  z-index: 1000;
+  transition: width 0.1s;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 30px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 06</span>
+      <span class="sep">/</span>
+      <span>Lakebase Mastery</span>
+      <span class="sep">/</span>
+      <span>Concepts Behind the Lab</span>
+    </div>
+    <h1>Lakebase as Memory Store for AI Agents<br><em>The Concepts Behind the Lab</em></h1>
+    <p class="lede">Module 5 turned your Postgres into a vector store. Module 6 turns it into the memory substrate of an AI agent — where conversations, distilled episodes, knowledge, and tool-call audit trails all live in one Postgres, one auth, one bill. Six conceptual jumps before you wire your first agent loop.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">6</span><span class="meta-lbl">Concept Topics</span></div>
+      <div class="meta-item"><span class="meta-val">~60m</span><span class="meta-lbl">Theory</span></div>
+      <div class="meta-item"><span class="meta-val">Intermediate</span><span class="meta-lbl">Level</span></div>
+      <div class="meta-item"><span class="meta-val">3</span><span class="meta-lbl">Interactive Diagrams</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ───── TABLE OF CONTENTS ───── -->
+  <div class="toc">
+    <div class="toc-label">▸ On this page</div>
+    <ol>
+      <li><a href="#t61">The Four Memory Layers — Conceptual Model</a><span class="dur">~10 min</span></li>
+      <li><a href="#t62">Schema Design — Sessions, Messages, Episodes, Tool Calls</a><span class="dur">~12 min</span></li>
+      <li><a href="#t63">The AgentMemory Contract — Clean Python over Raw SQL</a><span class="dur">~10 min</span></li>
+      <li><a href="#t64">The Agent Loop — Where Everything Composes</a><span class="dur">~12 min</span></li>
+      <li><a href="#t65">Episode Distillation — Nightly Memory Compression</a><span class="dur">~8 min</span></li>
+      <li><a href="#t66">Wiring into Mosaic AI Agent Framework</a><span class="dur">~5 min</span></li>
+      <li><a href="#wrap">Module 6 Wrap-Up &amp; Common Pitfalls</a><span class="dur">~3 min</span></li>
+    </ol>
+  </div>
+
+  <!-- ────────── INTRO ────────── -->
+  <section class="topic">
+    <h3 style="margin-top:0">What this module gives you</h3>
+    <p>Module 1 gave you the vocabulary. Module 2 gave you the architecture. Module 3 put a real Lakebase project in your hands. Module 4 wired it to the lakehouse. Module 5 turned that same Postgres into a vector store. <strong>Module 6 turns it into the memory substrate of an AI agent</strong> — short-term context, long-term episodic memory, semantic knowledge, and tool-call audit trails all in the same database.</p>
+    <p>Before you open the notebook, you need a clean mental model of four conceptual jumps: the four memory layers and why they collapse into one Postgres, the schema that makes this work, the <code>AgentMemory</code> contract that hides the SQL, and the agent loop where all four layers compose into a single stateful turn.</p>
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Prerequisite Check</span>
+      You should have completed <strong>Module 3 Lab 3</strong> (working Lakebase project), <strong>Module 4 Lab 4</strong> (synced tables understood), and <strong>Module 5 Lab 5</strong> with the <code>documents</code> table still alive (<code>pgvector</code> enabled, HNSW indexes built). Module 6 layers four new tables onto that schema — it does not provision a new project, and it reuses the same embedding pipeline you used in Module 5.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 6.1 -->
+  <section class="topic" id="t61">
+    <div class="topic-banner">
+      <span class="topic-id">6.1</span>
+      <span class="line"></span>
+      <span class="type">Theory · Concept</span>
+    </div>
+    <h2>The four memory layers — <em>conceptual model</em></h2>
+
+    <h3>Why agents need memory at all</h3>
+    <p>A pure LLM call is stateless. You hand it a prompt; it hands you a response; the next call starts from zero. That's fine for a chatbot answering one-off factual questions. It is <strong>catastrophic</strong> for an agent that should:</p>
+    <ul>
+      <li>Remember what you said three turns ago in the same conversation</li>
+      <li>Remember a preference you set last week (<em>"I like concise replies"</em>)</li>
+      <li>Look things up in a shared knowledge base</li>
+      <li>Keep an audit trail of every tool it called and what came back</li>
+    </ul>
+    <p>These four needs are not the same need. They differ in <strong>lifetime, scope, and access pattern</strong>. Modern agent frameworks — LangGraph, AutoGen, Mosaic AI Agent Framework — all converge on the same four-layer answer.</p>
+
+    <h3>The four layers — memorize this table</h3>
+    <p>The diagram below visualizes the four layers, what each contains, and how they relate. Click any layer card to see how it maps to a Lakebase table.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 6.1 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 6.1 · The Four Memory Layers</span>
+        <span class="diagram-hint">Click any layer to inspect</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 420" xmlns="http://www.w3.org/2000/svg" class="diagram-svg" id="layersSvg">
+          <defs>
+            <marker id="arrL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8899bb"/>
+            </marker>
+          </defs>
+
+          <!-- Title -->
+          <text x="460" y="26" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ AGENT MEMORY · 4 LAYERS · 1 POSTGRES</text>
+
+          <!-- Agent core (center) -->
+          <g class="diag-node" id="lay-agent" data-info="THE AGENT — A stateless LLM call by itself has no memory. It needs the four layers below to behave like an agent: remember the conversation, recall past sessions, look up knowledge, and log what it did.">
+            <circle cx="460" cy="210" r="48" fill="#1a2235" stroke="#ff6b35" stroke-width="2.5"/>
+            <text x="460" y="206" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" font-style="italic" fill="#ff6b35">Agent</text>
+            <text x="460" y="224" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">LLM + tools</text>
+          </g>
+
+          <!-- Layer 1: Short-term -->
+          <g class="diag-node" id="lay-short" data-info="SHORT-TERM (working) — The current conversation. Lives in the messages table keyed by session_id. Lifetime: one session. Index: composite (session_id, created_at). Retrieved via 'last N messages' query at every turn.">
+            <rect x="60" y="80" width="260" height="80" rx="8" fill="#0d1f2a" stroke="#4a9eff" stroke-width="2"/>
+            <text x="80" y="104" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a9eff" letter-spacing="1.5">SHORT-TERM · WORKING</text>
+            <text x="80" y="126" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#e8edf5">messages</text>
+            <text x="80" y="146" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">current chat · session lifetime</text>
+          </g>
+          <line x1="320" y1="120" x2="412" y2="190" stroke="#4a9eff" stroke-width="1.5" marker-end="url(#arrL)"/>
+
+          <!-- Layer 2: Long-term episodic -->
+          <g class="diag-node" id="lay-long" data-info="LONG-TERM EPISODIC — Distilled summaries from past sessions, one user. Lives in the episodes table with vector(1024) embeddings + an importance score. Lifetime: pruned by policy. Retrieved via vector recall ranked by distance minus importance.">
+            <rect x="600" y="80" width="260" height="80" rx="8" fill="#1a1230" stroke="#a855f7" stroke-width="2"/>
+            <text x="620" y="104" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="1.5">LONG-TERM · EPISODIC</text>
+            <text x="620" y="126" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#e8edf5">episodes</text>
+            <text x="620" y="146" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">past summaries · per user</text>
+          </g>
+          <line x1="600" y1="120" x2="508" y2="190" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arrL)"/>
+
+          <!-- Layer 3: Semantic -->
+          <g class="diag-node" id="lay-sem" data-info="SEMANTIC — Cross-user knowledge base. The exact documents table you built in Module 5, with HNSW + GIN indexes for hybrid retrieval. Lifetime: forever (or until business says otherwise). Accessed via the retrieve tool.">
+            <rect x="60" y="280" width="260" height="80" rx="8" fill="#0d1f17" stroke="#22c55e" stroke-width="2"/>
+            <text x="80" y="304" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1.5">SEMANTIC · KNOWLEDGE</text>
+            <text x="80" y="326" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#e8edf5">documents</text>
+            <text x="80" y="346" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">shared corpus · Module 5</text>
+          </g>
+          <line x1="320" y1="320" x2="412" y2="240" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrL)"/>
+
+          <!-- Layer 4: Procedural -->
+          <g class="diag-node" id="lay-proc" data-info="PROCEDURAL — Append-only audit trail of every tool call. Lives in the tool_calls table with args, result, duration_ms, ok, ts. Lifetime: retention policy (90d typical). Almost never queried at runtime; read by humans during incident review.">
+            <rect x="600" y="280" width="260" height="80" rx="8" fill="#1a1209" stroke="#fbbf24" stroke-width="2"/>
+            <text x="620" y="304" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="1.5">PROCEDURAL · AUDIT</text>
+            <text x="620" y="326" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#e8edf5">tool_calls</text>
+            <text x="620" y="346" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">tool log · append-only</text>
+          </g>
+          <line x1="600" y1="320" x2="508" y2="240" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrL)"/>
+
+          <!-- Bottom band: one Postgres -->
+          <rect x="60" y="385" width="800" height="22" rx="3" fill="#111827" stroke="#1e2d45" stroke-width="1"/>
+          <text x="460" y="400" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#00bfa5" letter-spacing="2">▸ ONE LAKEBASE · ONE AUTH · ONE BILL · ONE QUERY PLANE</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Click any layer above</div>
+        <p id="layersInfo">Four memory layers, each with a different lifetime and access pattern, all served by one Postgres database. Click any layer card to see the table pattern, the index choice, and the typical query.</p>
+      </div>
+    </div>
+
+    <p>Three things to internalize about these four layers:</p>
+    <ul>
+      <li><strong>All four can live in the same Lakebase database.</strong> One auth, one connection pool, one query plane, one bill. This is the entire pitch — the seam between "app data" and "agent state" disappears.</li>
+      <li><strong>Lifetime increases as you go down.</strong> A short-term message dies with the session. An episode lives until you prune it. A document lives forever. A tool call is your audit trail and lives until retention.</li>
+      <li><strong>Access pattern differs.</strong> Short-term is <code>WHERE session_id = ?</code> — pure B-tree. Episodic is vector similarity filtered by user — HNSW. Semantic is hybrid retrieval (vector + BM25) — Module 5. Procedural is rarely queried at runtime; it's read by humans during incident review.</li>
+    </ul>
+
+    <h3>Why this is one Postgres, not four services</h3>
+    <p>Customers often arrive with this stack already half-built — short-term in Redis, long-term in DynamoDB, knowledge in Pinecone, tool logs in CloudWatch. That works, but every cross-layer query is now a fan-out across four services with four auth models, four billing lines, four eventual-consistency windows, and four places to look during a P1.</p>
+    <p><strong>Lakebase collapses all four into one Postgres.</strong> A query that joins "this user's messages this session" with "their top-3 episodes" with "the documents we cited" with "the tool calls we made" is one SQL statement, one transaction, one ACL.</p>
+
+    <h3>Why this works on Postgres specifically</h3>
+    <p>The reason this works <em>cleanly</em> on Postgres — and not on, say, MySQL or MongoDB — comes down to four properties Postgres already has:</p>
+    <ul>
+      <li><strong>JSONB</strong> for flexible tool-call args and results, with GIN indexing for filter pushdown</li>
+      <li><strong><code>pgvector</code></strong> (Module 5) for embedding-based recall on episodes</li>
+      <li><strong>Foreign keys with <code>ON DELETE CASCADE</code></strong> so deleting a session also drops its messages atomically</li>
+      <li><strong>MVCC</strong> so a long-running agent loop reading from <code>messages</code> doesn't block another agent writing to it</li>
+    </ul>
+    <p>Without these four, "one database for memory" becomes painful fast. With them, it's just good schema design.</p>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 6.1</span>
+      Without looking, name the four memory layers with their lifetime and the Postgres table pattern for each. A passing answer: short-term/<code>messages</code>, long-term/<code>episodes</code>, semantic/<code>documents</code>, procedural/<code>tool_calls</code>. If you can also state why all four belong in one database, you're set.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 6.2 -->
+  <section class="topic" id="t62">
+    <div class="topic-banner">
+      <span class="topic-id">6.2</span>
+      <span class="line"></span>
+      <span class="type">Theory · Schema</span>
+    </div>
+    <h2>Schema design — <em>sessions, messages, episodes, tool calls</em></h2>
+
+    <h3>The full schema, in 40 lines of DDL</h3>
+<pre class="code-snip"><span class="kw">CREATE TABLE</span> sessions (
+  id          UUID <span class="kw">PRIMARY KEY DEFAULT</span> <span class="fn">gen_random_uuid</span>(),
+  user_id     <span class="kw">TEXT NOT NULL</span>,
+  agent_name  <span class="kw">TEXT</span>,
+  created_at  <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>(),
+  ended_at    <span class="kw">TIMESTAMPTZ</span>
+);
+
+<span class="kw">CREATE TABLE</span> messages (
+  id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+  session_id  UUID <span class="kw">REFERENCES</span> sessions(id) <span class="kw">ON DELETE CASCADE</span>,
+  role        <span class="kw">TEXT CHECK</span> (role <span class="kw">IN</span>
+              (<span class="st">'system'</span>,<span class="st">'user'</span>,<span class="st">'assistant'</span>,<span class="st">'tool'</span>)),
+  content     <span class="kw">TEXT</span>,
+  tool_call   JSONB,
+  created_at  <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>()
+);
+<span class="kw">CREATE INDEX ON</span> messages(session_id, created_at);
+
+<span class="kw">CREATE TABLE</span> episodes (
+  id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+  user_id     <span class="kw">TEXT NOT NULL</span>,
+  summary     <span class="kw">TEXT</span>,
+  embedding   vector(<span class="nu">1024</span>),
+  importance  <span class="kw">REAL DEFAULT</span> <span class="nu">0.5</span>,
+  last_seen   <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>()
+);
+<span class="kw">CREATE INDEX ON</span> episodes <span class="kw">USING</span> hnsw (embedding vector_cosine_ops);
+<span class="kw">CREATE INDEX ON</span> episodes(user_id);
+
+<span class="kw">CREATE TABLE</span> tool_calls (
+  id          BIGSERIAL <span class="kw">PRIMARY KEY</span>,
+  session_id  UUID <span class="kw">REFERENCES</span> sessions(id),
+  tool_name   <span class="kw">TEXT</span>,
+  args        JSONB,
+  result      JSONB,
+  duration_ms <span class="kw">INT</span>,
+  ok          <span class="kw">BOOL</span>,
+  ts          <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">now</span>()
+);
+<span class="kw">CREATE INDEX ON</span> tool_calls(session_id, ts);</pre>
+
+    <p>Every line earns its place. Walk through it once with intent and you'll never have to look it up again.</p>
+
+    <h3><code>sessions</code> — UUID, not BIGSERIAL</h3>
+    <p>The session ID is a <strong>UUID</strong> generated by <code>gen_random_uuid()</code>, not a sequential integer. There's a deliberate reason:</p>
+    <ul>
+      <li><strong>Clients can mint session IDs themselves</strong> — a Streamlit front-end can <code>uuid.uuid4()</code> a session ID and use it in the very first INSERT, eliminating a round-trip to fetch a <code>RETURNING id</code></li>
+      <li><strong>No collision across distributed agents</strong> — three workers in three regions can all create sessions without coordinating</li>
+      <li><strong>Privacy</strong> — UUIDs don't leak how many sessions exist (BIGSERIAL would: <code>id=42</code> tells you 41 sessions came before)</li>
+    </ul>
+    <p>The <code>ended_at</code> column is nullable on purpose. An open session has <code>ended_at IS NULL</code>. The nightly distillation job (Topic 6.5) uses this column to find sessions ready to summarize.</p>
+
+    <h3><code>messages</code> — the role check and the JSONB tool_call</h3>
+    <p>The <code>role CHECK</code> constraint enforces the OpenAI / Anthropic / Mosaic AI message-role contract: <code>system</code>, <code>user</code>, <code>assistant</code>, <code>tool</code>. Anything else is an error at insert time, not a silent bug at LLM-call time. <strong>Catch the typo when it's cheap to fix.</strong></p>
+    <p>The <code>tool_call</code> column is <code>JSONB</code>, not <code>TEXT</code>. This matters when an <code>assistant</code> message contains a function call: the LLM hands you back structured arguments, and you store them as JSONB so you can later query them (e.g., <em>"show me every time this agent called <code>get_orders</code> with <code>email='alice@example.com'</code>"</em>).</p>
+    <p>The composite index <code>(session_id, created_at)</code> is the workhorse. Every recall of conversation history runs <code>WHERE session_id = ? ORDER BY created_at DESC LIMIT n</code> — that index serves it in microseconds even at millions of rows.</p>
+
+    <h3><code>episodes</code> — the vector + importance trick</h3>
+    <p>Episodes are the bridge between sessions. After a session ends, you ask the LLM to compress it into a 3-sentence summary, embed the summary with the same model you used in Module 5 (BGE 1024-dim), and write it as a row.</p>
+    <p>Two columns deserve attention:</p>
+    <ul>
+      <li><strong><code>embedding vector(1024)</code></strong> — same dimension as the Module 5 documents table. Use the same model. <strong>Never mix models in the same schema</strong>; the cosine distances become meaningless.</li>
+      <li><strong><code>importance REAL DEFAULT 0.5</code></strong> — a 0.0–1.0 score saying "how important is this memory?" The LLM scores it during distillation. Recall ranks by <code>(distance) − (importance × 0.1)</code> — so a slightly less semantically similar but high-importance episode beats a perfect match with low importance.</li>
+    </ul>
+    <p>The HNSW index on <code>embedding</code> makes recall fast. The B-tree on <code>user_id</code> is the access pattern: every recall query is <code>WHERE user_id = :u</code>, never cross-user.</p>
+
+    <h3><code>tool_calls</code> — the procedural log</h3>
+    <p>This is your audit trail. Every time the agent invokes a tool — <code>retrieve</code>, <code>get_orders</code>, <code>recall</code>, anything — you write one row. The columns:</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Column</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>tool_name</code></td><td>What was called</td></tr>
+          <tr><td><code>args</code> (JSONB)</td><td>What arguments were passed in</td></tr>
+          <tr><td><code>result</code> (JSONB)</td><td>What the tool returned</td></tr>
+          <tr><td><code>duration_ms</code></td><td>How long it took (for SLO tracking)</td></tr>
+          <tr><td><code>ok</code> (BOOL)</td><td>Did it succeed</td></tr>
+          <tr><td><code>ts</code></td><td>When</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>This table is <strong>append-only by convention</strong>. You never UPDATE a tool call, you never DELETE one (until a retention job purges them at, say, 90 days). It's the receipt your agent leaves for every action it took.</p>
+
+    <h3>Why <code>ON DELETE CASCADE</code> on messages but not on tool_calls</h3>
+    <p>Notice the asymmetry:</p>
+    <ul>
+      <li><code>messages.session_id REFERENCES sessions(id) ON DELETE CASCADE</code></li>
+      <li><code>tool_calls.session_id REFERENCES sessions(id)</code> — <strong>no CASCADE</strong></li>
+    </ul>
+    <p>The reason is policy, not technology. If a user requests deletion of their conversation history (GDPR, internal retention), you <code>DELETE FROM sessions WHERE user_id = ?</code> and Postgres atomically removes the messages too. Tool-call logs are typically retained longer for audit / SRE / billing reasons — so they hang around even after the session row is gone, accessible by <code>session_id</code>. <strong>Pick the policy that matches your customer's compliance posture.</strong></p>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ The user_id design choice</span>
+      The schema uses <code>user_id TEXT</code> rather than a foreign key into a <code>users</code> table. In a Databricks Apps deployment, <code>user_id</code> is the workspace OAuth identity (email or numeric ID) — there's no Lakebase-side user record to join to. Module 7 makes this concrete. If you have a <code>users</code> table for an operational reason, add the FK; otherwise let the auth layer be the source of truth.
+    </div>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 6.2</span>
+      Without looking, name the four tables, their primary keys, and the indexes on each. A passing answer touches: UUID on sessions, the composite index on messages, HNSW + user_id on episodes, the (session_id, ts) index on tool_calls. If you can also state why messages cascades on session delete but tool_calls doesn't, that's the depth.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 6.3 -->
+  <section class="topic" id="t63">
+    <div class="topic-banner">
+      <span class="topic-id">6.3</span>
+      <span class="line"></span>
+      <span class="type">Theory · Contract</span>
+    </div>
+    <h2>The AgentMemory contract — <em>clean Python over raw SQL</em></h2>
+
+    <h3>Why wrap SQL behind a class</h3>
+    <p>The agent loop is going to call into memory dozens of times per turn — start a session, recall episodes, fetch recent history, log a message, log a tool call, write an episode at the end. If every one of those is hand-written SQL spread across the agent code, three things go wrong:</p>
+    <ul>
+      <li><strong>SQL injection risk</strong> — someone, somewhere, will eventually concatenate a user-controlled string into a query</li>
+      <li><strong>Inconsistency</strong> — six different places that fetch "the last 10 messages" will end up with six slightly different queries</li>
+      <li><strong>Untestable</strong> — you can't mock a Postgres connection without standing up a real database</li>
+    </ul>
+    <p>The fix is a thin <strong>memory contract</strong> — one class, six methods, every method takes parameters and emits parameterized SQL. The agent never sees a <code>text()</code> call.</p>
+
+    <h3>The contract</h3>
+<pre class="code-snip"><span class="kw">class</span> <span class="fn">AgentMemory</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, engine, embed_fn):
+        self.e, self.embed = engine, embed_fn
+
+    <span class="kw">def</span> <span class="fn">start_session</span>(self, user_id, agent=<span class="st">"assistant"</span>) -&gt; <span class="fn">str</span>: ...
+    <span class="kw">def</span> <span class="fn">add_message</span>(self, sid, role, content, tool_call=<span class="kw">None</span>): ...
+    <span class="kw">def</span> <span class="fn">recent_messages</span>(self, sid, n=<span class="nu">20</span>): ...
+    <span class="kw">def</span> <span class="fn">remember</span>(self, user_id, summary, importance=<span class="nu">0.5</span>): ...
+    <span class="kw">def</span> <span class="fn">recall</span>(self, user_id, query, k=<span class="nu">5</span>): ...
+    <span class="kw">def</span> <span class="fn">log_tool_call</span>(self, sid, name, args, result, duration_ms, ok): ...</pre>
+    <p>Six methods cover the entire surface area of agent memory. Nothing else needs raw SQL.</p>
+
+    <h3>Method-by-method reasoning</h3>
+    <p><strong><code>__init__(engine, embed_fn)</code></strong> — Two dependencies, both injected. The <code>engine</code> is a SQLAlchemy engine (so the test suite can pass a SQLite engine pointing at <code>:memory:</code>). The <code>embed_fn</code> is whatever embeds text — Foundation Models in production, a stub that returns zeros in tests. <strong>No globals, no module-level state.</strong> This is the single most important property of the contract.</p>
+
+    <p><strong><code>start_session(user_id, agent)</code></strong> — One INSERT, returns the new UUID as a string. Idempotent? No — calling it twice creates two sessions. That's correct: the agent loop should call this exactly once per conversation start.</p>
+
+    <p><strong><code>add_message(sid, role, content, tool_call=None)</code></strong> — One INSERT into <code>messages</code>. The <code>tool_call</code> is <code>json.dumps</code>'d if present. Notice: parameterized — <code>:s, :r, :c, :t</code> — never f-string formatting. <strong>This is non-negotiable.</strong></p>
+
+    <p><strong><code>recent_messages(sid, n=20)</code></strong> — <code>SELECT role, content FROM messages WHERE session_id=:s ORDER BY created_at DESC LIMIT :n</code>, then reverse the result list in Python (<code>[::-1]</code>) so the caller gets oldest-first. Why fetch DESC and reverse instead of ASC with <code>OFFSET</code>? Because DESC + LIMIT is O(log n) with the composite index, while ASC + OFFSET on a large session is a scan.</p>
+
+    <p><strong><code>remember(user_id, summary, importance=0.5)</code></strong> — Embed once, insert once. The vector is passed as a stringified Python list — pgvector parses it from the SQL literal. Importance is the LLM-scored salience.</p>
+
+    <p><strong><code>recall(user_id, query, k=5)</code></strong> — The interesting one. The SQL:</p>
+<pre class="code-snip"><span class="kw">SELECT</span> summary, importance, embedding &lt;=&gt; :q <span class="kw">AS</span> dist
+<span class="kw">FROM</span> episodes <span class="kw">WHERE</span> user_id = :u
+<span class="kw">ORDER BY</span> (embedding &lt;=&gt; :q) - importance*<span class="nu">0.1</span>
+<span class="kw">LIMIT</span> :k</pre>
+
+    <p>The diagram below shows how recall ranking actually works — with three example episodes, you'll see why a high-importance memory can beat a more semantically similar low-importance one.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 6.3 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 6.3 · Recall Ranking — Distance vs. Importance</span>
+        <div class="stepper" id="recallStepper">
+          <button class="active" data-mode="dist" onclick="setRecall('dist')">Distance only</button>
+          <button data-mode="boost" data-mode-b="boost" onclick="setRecall('boost')">+ Importance boost</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 380" xmlns="http://www.w3.org/2000/svg" class="diagram-svg" id="recallSvg">
+          <text x="460" y="26" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ TOP-3 RECALL · QUERY: "what does this user prefer?"</text>
+
+          <!-- 3 columns header -->
+          <text x="180" y="62" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1.5">EPISODE</text>
+          <text x="460" y="62" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1.5">DIST &amp; IMPORTANCE</text>
+          <text x="740" y="62" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1.5">FINAL RANK</text>
+
+          <!-- Episode A -->
+          <g class="diag-node" id="rec-a" data-info="EPISODE A — &quot;User likes detailed answers.&quot; Cosine distance 0.10 (very similar to query). Importance 0.3 (medium). Without the boost, this is the top hit. With the boost, it gets edged out by the high-importance email preference.">
+            <rect x="60" y="80" width="240" height="60" rx="6" fill="#0d1f2a" stroke="#4a9eff" stroke-width="1.5"/>
+            <text x="80" y="103" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff">EP A · LIKES DETAILED ANSWERS</text>
+            <text x="80" y="124" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">"User prefers detailed replies"</text>
+          </g>
+          <rect x="340" y="80" width="240" height="60" rx="6" fill="#111827" stroke="#1e2d45" stroke-width="1"/>
+          <text x="360" y="100" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">dist = 0.10</text>
+          <text x="360" y="118" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">imp  = 0.3</text>
+          <text x="360" y="135" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" id="rec-a-calc">score = 0.10</text>
+
+          <g id="rec-a-rank-dist">
+            <rect x="620" y="80" width="240" height="60" rx="6" fill="#0d1f17" stroke="#22c55e" stroke-width="2"/>
+            <text x="740" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1.5">▸ RANK #1</text>
+            <text x="740" y="125" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">closest match</text>
+          </g>
+          <g id="rec-a-rank-boost" style="display:none">
+            <rect x="620" y="80" width="240" height="60" rx="6" fill="#1a2235" stroke="#8899bb" stroke-width="1"/>
+            <text x="740" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1.5">▸ RANK #2</text>
+            <text x="740" y="125" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#8899bb">edged out</text>
+          </g>
+
+          <!-- Episode B -->
+          <g class="diag-node" id="rec-b" data-info="EPISODE B — &quot;User prefers email replies.&quot; Cosine distance 0.18 (still relevant). Importance 0.9 (very high — durable preference). Importance boost = 0.09. Final score 0.18 - 0.09 = 0.09. Beats Episode A's 0.10 - 0.03 = 0.07. Wait — A still wins by a hair. The lesson: importance shifts the order on close calls, doesn't override large semantic gaps.">
+            <rect x="60" y="160" width="240" height="60" rx="6" fill="#1a1230" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="80" y="183" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7">EP B · PREFERS EMAIL</text>
+            <text x="80" y="204" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">"User prefers email replies"</text>
+          </g>
+          <rect x="340" y="160" width="240" height="60" rx="6" fill="#111827" stroke="#1e2d45" stroke-width="1"/>
+          <text x="360" y="180" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">dist = 0.18</text>
+          <text x="360" y="198" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">imp  = 0.9</text>
+          <text x="360" y="215" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" id="rec-b-calc">score = 0.18</text>
+
+          <g id="rec-b-rank-dist">
+            <rect x="620" y="160" width="240" height="60" rx="6" fill="#1a2235" stroke="#8899bb" stroke-width="1"/>
+            <text x="740" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1.5">▸ RANK #2</text>
+            <text x="740" y="205" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#8899bb">just dist</text>
+          </g>
+          <g id="rec-b-rank-boost" style="display:none">
+            <rect x="620" y="160" width="240" height="60" rx="6" fill="#0d1f17" stroke="#22c55e" stroke-width="2"/>
+            <text x="740" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1.5">▸ RANK #1</text>
+            <text x="740" y="205" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">importance wins</text>
+          </g>
+
+          <!-- Episode C -->
+          <g class="diag-node" id="rec-c" data-info="EPISODE C — &quot;User asked about pricing once.&quot; Cosine distance 0.55 (weak match). Importance 0.1 (low — one-off question). Both modes: rank #3. Far enough off in semantics that no importance boost saves it. This is what should happen: low-signal, low-importance memories stay buried.">
+            <rect x="60" y="240" width="240" height="60" rx="6" fill="#1f1612" stroke="#8899bb" stroke-width="1.5"/>
+            <text x="80" y="263" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">EP C · ASKED PRICING ONCE</text>
+            <text x="80" y="284" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">"Asked about pricing in May"</text>
+          </g>
+          <rect x="340" y="240" width="240" height="60" rx="6" fill="#111827" stroke="#1e2d45" stroke-width="1"/>
+          <text x="360" y="260" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">dist = 0.55</text>
+          <text x="360" y="278" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">imp  = 0.1</text>
+          <text x="360" y="295" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" id="rec-c-calc">score = 0.55</text>
+
+          <rect x="620" y="240" width="240" height="60" rx="6" fill="#1a1209" stroke="#1e2d45" stroke-width="1"/>
+          <text x="740" y="265" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1.5">▸ RANK #3</text>
+          <text x="740" y="285" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#8899bb">stays buried</text>
+
+          <!-- Formula bar -->
+          <rect x="60" y="320" width="800" height="40" rx="4" fill="#111827" stroke="#1e2d45" stroke-width="1"/>
+          <text x="80" y="340" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">RANKING FORMULA</text>
+          <text x="80" y="354" font-family="IBM Plex Mono, monospace" font-size="11" fill="#e8edf5" id="recallFormula">score = distance</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Toggle the importance boost</div>
+        <p id="recallInfo">Click "Distance only" then "Importance boost" to see how the recall ranking changes. The high-importance email preference (Ep B) overtakes the closer-but-less-important detailed-answer memory (Ep A). The low-relevance pricing question (Ep C) stays buried in both modes.</p>
+      </div>
+    </div>
+
+    <p>Three things to notice about the recall query:</p>
+    <ol>
+      <li><strong>Filter by <code>user_id</code> first.</strong> This is enforced by Postgres using the B-tree index, before HNSW runs. Episodes are <em>per-user</em> — you never recall someone else's memory.</li>
+      <li><strong><code>ORDER BY (distance) − (importance × 0.1)</code>.</strong> A perfect-match low-importance memory has distance 0.0, score = 0.0 − 0.05 = −0.05. A near-match high-importance memory might have distance 0.15, score = 0.15 − 0.10 = 0.05. The first still wins, but the second can beat a slightly better match if its importance is high enough. Tune the <code>0.1</code> weight to taste.</li>
+      <li><strong><code>LIMIT :k</code></strong> — typically k=3 or k=5. You want a small number; the system prompt has finite room.</li>
+    </ol>
+
+    <p><strong><code>log_tool_call(...)</code></strong> — One INSERT into <code>tool_calls</code>. Always inside the <code>try/finally</code> of the actual tool execution so the row gets written even when the tool raises. <strong>This is the audit trail; it must never be skipped.</strong></p>
+
+    <h3>Parameterized SQL is non-negotiable</h3>
+    <p>Every method uses SQLAlchemy's <code>text(":param")</code> syntax with a dict. Never <code>f"...{user_input}..."</code>. Never <code>.format()</code>. Never <code>%</code> formatting. The reason isn't style — it's that <code>summary</code> and <code>tool_call</code> arguments will eventually carry user-controlled content, and the only way to be safe by construction is to never let user input touch the SQL string at all.</p>
+
+    <h3>Testability</h3>
+    <p>Because the engine and embed function are injected, you can test the entire <code>AgentMemory</code> class against an in-memory SQLite + a stub embedder that returns deterministic vectors. Module 6 lab includes exactly this test in the verification step.</p>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 6.3</span>
+      Without looking, name the six methods on <code>AgentMemory</code> and one reason each exists. A passing answer covers: <code>start_session</code>, <code>add_message</code>, <code>recent_messages</code>, <code>remember</code>, <code>recall</code>, <code>log_tool_call</code>. If you can also explain why <code>recall</code> ranks by <code>distance − importance × 0.1</code>, you've internalized the design.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 6.4 -->
+  <section class="topic" id="t64">
+    <div class="topic-banner">
+      <span class="topic-id">6.4</span>
+      <span class="line"></span>
+      <span class="type">Theory · Loop</span>
+    </div>
+    <h2>The agent loop — <em>where everything composes</em></h2>
+
+    <h3>The control flow, in five steps</h3>
+    <p>The agent loop is the place where short-term, long-term, semantic, and procedural memory all meet. Every turn looks the same:</p>
+    <ol>
+      <li><strong>Recall episodes</strong> — <code>mem.recall(user_id, user_msg, k=3)</code> → top-3 long-term memories</li>
+      <li><strong>Build the message stack</strong> — system prompt (with recalled episodes injected) + recent history + new user message</li>
+      <li><strong>Call the LLM</strong> — with tools defined; LLM may emit a function call</li>
+      <li><strong>Execute tools, log them</strong> — for each tool call: run, capture result + duration + ok, write to <code>tool_calls</code>, append a <code>tool</code> message to <code>messages</code></li>
+      <li><strong>Write the assistant's reply</strong> — <code>mem.add_message(sid, 'assistant', reply)</code></li>
+    </ol>
+    <p>That's the whole loop. Everything else is plumbing.</p>
+
+    <h3>Where each memory layer enters</h3>
+    <p>The diagram below walks through one full turn. Step through it to see exactly when each of the four memory layers activates.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 6.4 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 6.4 · One Agent Turn — Step Through the Loop</span>
+        <div class="stepper" id="loopStepper">
+          <button class="active" data-step="1" onclick="setLoop(1)">1 · Recall</button>
+          <button data-step="2" onclick="setLoop(2)">2 · Build</button>
+          <button data-step="3" onclick="setLoop(3)">3 · LLM</button>
+          <button data-step="4" onclick="setLoop(4)">4 · Tools</button>
+          <button data-step="5" onclick="setLoop(5)">5 · Write</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 400" xmlns="http://www.w3.org/2000/svg" class="diagram-svg" id="loopSvg">
+          <defs>
+            <marker id="arrLoop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff6b35"/>
+            </marker>
+          </defs>
+
+          <text x="460" y="26" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ ONE TURN · USER MSG → AGENT REPLY</text>
+
+          <!-- User msg input (top-left) -->
+          <rect x="40" y="60" width="160" height="50" rx="6" fill="#1a2235" stroke="#8899bb" stroke-width="1.5"/>
+          <text x="120" y="82" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1.5">USER MSG</text>
+          <text x="120" y="98" text-anchor="middle" font-family="Syne, sans-serif" font-size="11" fill="#e8edf5">"any update?"</text>
+
+          <!-- Step 1: Recall episodes (top) -->
+          <g id="loop-step1" class="loop-step">
+            <rect x="240" y="60" width="180" height="50" rx="6" fill="#1a1230" stroke="#a855f7" stroke-width="2"/>
+            <text x="330" y="82" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1.5">STEP 1 · RECALL</text>
+            <text x="330" y="98" text-anchor="middle" font-family="Syne, sans-serif" font-size="11" fill="#e8edf5">episodes (long-term)</text>
+          </g>
+          <line x1="200" y1="85" x2="232" y2="85" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#arrLoop)"/>
+
+          <!-- Step 2: Build msg stack -->
+          <g id="loop-step2" class="loop-step">
+            <rect x="460" y="60" width="180" height="50" rx="6" fill="#0d1f2a" stroke="#4a9eff" stroke-width="2"/>
+            <text x="550" y="82" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="1.5">STEP 2 · BUILD STACK</text>
+            <text x="550" y="98" text-anchor="middle" font-family="Syne, sans-serif" font-size="11" fill="#e8edf5">+ history (short-term)</text>
+          </g>
+          <line x1="420" y1="85" x2="452" y2="85" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#arrLoop)"/>
+
+          <!-- Step 3: LLM call -->
+          <g id="loop-step3" class="loop-step">
+            <rect x="680" y="60" width="180" height="50" rx="6" fill="#1f1611" stroke="#ff6b35" stroke-width="2"/>
+            <text x="770" y="82" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1.5">STEP 3 · LLM</text>
+            <text x="770" y="98" text-anchor="middle" font-family="Syne, sans-serif" font-size="11" fill="#e8edf5">may emit tool_call</text>
+          </g>
+          <line x1="640" y1="85" x2="672" y2="85" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#arrLoop)"/>
+
+          <!-- Step 4: Tools (bottom, branching) -->
+          <line x1="770" y1="110" x2="770" y2="160" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#arrLoop)"/>
+
+          <g id="loop-step4" class="loop-step">
+            <rect x="600" y="170" width="340" height="80" rx="6" fill="#1a1209" stroke="#fbbf24" stroke-width="2"/>
+            <text x="770" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="1.5">STEP 4 · EXECUTE TOOLS · LOG</text>
+            <text x="770" y="217" text-anchor="middle" font-family="Syne, sans-serif" font-size="11" fill="#e8edf5">retrieve · get_orders · recall</text>
+            <text x="770" y="235" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">→ tool_calls (procedural)</text>
+          </g>
+
+          <!-- documents and orders feeding the tools -->
+          <rect x="600" y="270" width="160" height="40" rx="4" fill="#0d1f17" stroke="#22c55e" stroke-width="1"/>
+          <text x="680" y="287" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">documents (semantic)</text>
+          <text x="680" y="302" text-anchor="middle" font-family="Syne, sans-serif" font-size="10" fill="#8899bb">retrieve tool</text>
+
+          <rect x="780" y="270" width="160" height="40" rx="4" fill="#1a1230" stroke="#a855f7" stroke-width="1"/>
+          <text x="860" y="287" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7">orders (operational)</text>
+          <text x="860" y="302" text-anchor="middle" font-family="Syne, sans-serif" font-size="10" fill="#8899bb">get_orders tool</text>
+
+          <line x1="680" y1="270" x2="680" y2="252" stroke="#8899bb" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="860" y1="270" x2="860" y2="252" stroke="#8899bb" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <!-- Step 5: Write reply -->
+          <line x1="600" y1="210" x2="430" y2="210" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#arrLoop)"/>
+
+          <g id="loop-step5" class="loop-step">
+            <rect x="240" y="170" width="180" height="80" rx="6" fill="#0d1f2a" stroke="#4a9eff" stroke-width="2"/>
+            <text x="330" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="1.5">STEP 5 · WRITE REPLY</text>
+            <text x="330" y="217" text-anchor="middle" font-family="Syne, sans-serif" font-size="11" fill="#e8edf5">add_message(assistant)</text>
+            <text x="330" y="235" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">→ messages (short-term)</text>
+          </g>
+
+          <line x1="240" y1="210" x2="208" y2="210" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#arrLoop)"/>
+
+          <!-- Reply output -->
+          <rect x="40" y="185" width="160" height="50" rx="6" fill="#1a2235" stroke="#22c55e" stroke-width="1.5"/>
+          <text x="120" y="207" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1.5">AGENT REPLY</text>
+          <text x="120" y="223" text-anchor="middle" font-family="Syne, sans-serif" font-size="11" fill="#e8edf5">"yes, shipped today"</text>
+
+          <!-- Status bar -->
+          <rect x="40" y="340" width="840" height="40" rx="4" fill="#111827" stroke="#1e2d45" stroke-width="1"/>
+          <text x="60" y="360" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">CURRENT STEP</text>
+          <text x="60" y="372" font-family="IBM Plex Mono, monospace" font-size="11" fill="#e8edf5" id="loopStatus">Step 1 · Recall top-3 episodes for this user</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Step through the loop</div>
+        <p id="loopInfo">Click each step button to see how a single agent turn flows through all four memory layers. Notice that long-term episodes enter at step 1 (system prompt), short-term history enters at step 2 (message stack), semantic knowledge enters at step 4 (retrieve tool), and procedural logging happens at step 4 (tool_calls write).</p>
+      </div>
+    </div>
+
+    <p>This is the diagram that makes the four layers click:</p>
+    <ul>
+      <li><strong>Short-term</strong> enters at step 2 — <code>recent_messages(sid, n=10)</code> is the working memory of the conversation.</li>
+      <li><strong>Long-term episodic</strong> enters at step 1 — recalled summaries are <em>prepended to the system prompt</em>, so the LLM treats them as facts it knows.</li>
+      <li><strong>Semantic</strong> enters at step 4 (sometimes step 3) — when the LLM decides to call the <code>retrieve</code> tool, that hits the Module 5 <code>documents</code> table via the same <code>rag()</code> function you already built.</li>
+      <li><strong>Procedural</strong> enters at step 4 — every tool call gets logged, success or failure, with duration.</li>
+    </ul>
+    <p>If you understand where each of those four arrows lands in this loop, you understand the entire architecture of Module 6.</p>
+
+    <h3>The three tools the lab agent ships with</h3>
+    <p>The lab gives the agent three tools, each with an explicit JSON schema:</p>
+    <ul>
+      <li><strong><code>retrieve(query)</code></strong> — hybrid search over the <code>documents</code> table (Module 5). This is <em>semantic</em> memory access.</li>
+      <li><strong><code>get_orders(email)</code></strong> — operational lookup against the <code>orders</code> table (Module 3). This is the operational app data.</li>
+      <li><strong><code>recall(query)</code></strong> — vector search over <code>episodes</code>. The agent can explicitly fetch its own past memories when the LLM decides it needs to.</li>
+    </ul>
+    <p>Three tools is the right size: enough to demonstrate composition, small enough that you can read every code path. Real production agents end up with 10–50 tools; the pattern doesn't change, just the registry.</p>
+
+    <h3>Why recalled episodes go in the system prompt, not as a tool</h3>
+    <p>This is a design choice worth understanding. The recalled episodes <em>could</em> be exposed via the <code>recall</code> tool and the LLM could decide whether to call it. Some frameworks do this. The lab does it differently — episodes are pre-fetched and injected into the system prompt every turn. The reason:</p>
+    <ul>
+      <li><strong>Lower latency</strong> — one fewer round-trip per turn</li>
+      <li><strong>More reliable</strong> — the LLM doesn't get to "forget" to recall its own memory</li>
+      <li><strong>Cheaper</strong> — you only embed the user message once</li>
+    </ul>
+    <p>The trade-off: you fetch episodes even on turns that don't need them. At k=3, this is cheap. The <code>recall</code> tool still exists as an <em>escape hatch</em> — when the user explicitly asks "what do you remember about me?" the LLM can call it directly with a custom query.</p>
+
+    <h3>End-of-session distillation</h3>
+    <p>When the session ends — user closes the tab, an idle timeout fires, or the agent itself decides — one final action: ask the LLM to summarize the session in three sentences, score it for importance, embed it, write to <code>episodes</code>. <strong>That's what makes the next session memory-aware.</strong></p>
+<pre class="code-snip"><span class="cm"># The summary prompt is short and explicit:</span>
+<span class="st">"""
+Summarize this user's conversation in 3 sentences.
+Focus on stated preferences, durable facts, and decisions made.
+Skip pleasantries and chitchat.
+Then on a new line, write IMPORTANCE: 0.0-1.0
+based on how useful this is for future sessions.
+"""</span></pre>
+    <p>You parse the response, embed the summary, write the row. Done. That row is now the long-term memory the agent will recall in the user's next session.</p>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 6.4</span>
+      Without looking, walk through the five steps of the agent loop and name which memory layer enters at each step. A passing answer: step 1 long-term, step 2 short-term, step 4 semantic + procedural. If you can also explain why recalled episodes go in the system prompt rather than behind a tool, you've got the design choice.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 6.5 -->
+  <section class="topic" id="t65">
+    <div class="topic-banner">
+      <span class="topic-id">6.5</span>
+      <span class="line"></span>
+      <span class="type">Theory · Operations</span>
+    </div>
+    <h2>Episode distillation — <em>nightly memory compression</em></h2>
+
+    <h3>The problem distillation solves</h3>
+    <p>Without distillation, your <code>messages</code> table grows linearly with every turn forever. After a year of one user chatting daily, you have ~10,000 rows of mostly-noise — pleasantries, restated context, abandoned threads. None of that is useful for the <em>next</em> conversation. What's useful is the <em>summary</em>: <em>"this user prefers concise email replies, works on Snowflake migrations, runs Postgres 17."</em></p>
+    <p>Distillation is the nightly compaction job that produces those summaries.</p>
+
+    <h3>The pattern</h3>
+    <p>A Databricks Workflow runs on a schedule — typically nightly, can be hourly for high-volume agents. It does this:</p>
+    <ol>
+      <li><strong>Find candidate sessions</strong> — <code>SELECT id, user_id FROM sessions WHERE ended_at IS NULL AND created_at &lt; now() - interval '24 hours'</code> (sessions that died without explicit end). Mark them ended.</li>
+      <li><strong>For each session</strong> — read all messages, send to LLM with the summarization prompt</li>
+      <li><strong>Parse summary + importance</strong> — get back 3-sentence summary and a 0.0–1.0 score</li>
+      <li><strong>Embed the summary</strong> — same Foundation Models call, same 1024-dim model</li>
+      <li><strong>Write the episode</strong> — INSERT into <code>episodes</code></li>
+      <li><strong>Optional: prune messages</strong> — for sessions older than 90 days you can DELETE the message rows; the episode preserves the durable signal</li>
+    </ol>
+    <p>That's the entire job. Forty lines of Python in a Workflow. Idempotent — re-running just produces another episode (or you add a unique constraint on <code>(user_id, session_id)</code> to prevent duplicates).</p>
+
+    <h3>What "importance" should capture</h3>
+    <p>The LLM's importance score is a soft signal. A good prompt makes the model score <strong>high</strong> for:</p>
+    <ul>
+      <li>Stated preferences ("I prefer email", "always use metric units")</li>
+      <li>Durable facts about the user's environment ("Postgres 17", "team of 8")</li>
+      <li>Decisions made ("we chose pgvector over Pinecone")</li>
+    </ul>
+    <p>And <strong>low</strong> for:</p>
+    <ul>
+      <li>One-off questions with answers that are public knowledge</li>
+      <li>Pleasantries</li>
+      <li>Resolved confusions</li>
+    </ul>
+    <p>Don't over-engineer this. A simple 0.0–1.0 from a well-prompted LLM is plenty for the recall ranking to work. You can revisit this with a fine-tuned scorer later if recall quality demands it.</p>
+
+    <h3>Pruning policy</h3>
+    <p>A sensible default policy:</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Importance Range</th><th>Retention</th><th>Reasoning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>≥ 0.7</strong></td><td>Keep forever</td><td>Durable preferences and facts — never expire</td></tr>
+          <tr><td><strong>0.3 – 0.7</strong></td><td>180 days</td><td>Useful but not critical — review periodically</td></tr>
+          <tr><td><strong>&lt; 0.3</strong></td><td>30 days, then delete</td><td>Low signal — recall doesn't benefit from keeping</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Optionally: re-embed surviving episodes once a year if you upgrade the embedding model. The numbers matter less than having a policy. <strong>Without one, <code>episodes</code> grows forever and <code>recall</code> slowly degrades</strong> as more low-importance noise accumulates near the top of the HNSW graph.</p>
+
+    <h3>This is the same pattern ChatGPT uses</h3>
+    <p>The phrase "ChatGPT remembers things across conversations" describes exactly this pattern: a background process distills sessions into summaries, embeds them, retrieves them at the start of new conversations, injects them into the system prompt. LangGraph's checkpoint summarization is structurally identical. <strong>You're not inventing this — you're implementing the published pattern on Lakebase.</strong></p>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 6.5</span>
+      Without looking, describe the inputs, outputs, and frequency of the distillation job. A passing answer: input = ended sessions in the last 24h, output = one episode row per session, frequency = nightly. If you can also explain the importance-based pruning policy, you've got the operational picture.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 6.6 -->
+  <section class="topic" id="t66">
+    <div class="topic-banner">
+      <span class="topic-id">6.6</span>
+      <span class="line"></span>
+      <span class="type">Theory · Integration</span>
+    </div>
+    <h2>Wiring into <em>Mosaic AI Agent Framework</em></h2>
+
+    <h3>Where Lakebase fits in the framework</h3>
+    <p>Mosaic AI Agent Framework (the Databricks-native agent build/serve/eval stack on top of MLflow) ships with the concept of a <strong>checkpoint store</strong> — a place to persist the state of a multi-step agent so it can survive restarts, scale events, and asynchronous tool calls. The framework supports pluggable persistence; <strong>Lakebase becomes that store</strong>.</p>
+    <p>In practical terms:</p>
+    <ul>
+      <li><strong>LangGraph state</strong> (the node graph, current node, accumulated tool plans) → persisted as JSONB in a <code>checkpoints</code> table in the same Lakebase</li>
+      <li><strong>MLflow tracing</strong> → spans tagged with <code>session_id</code> so you can join traces with messages and tool calls</li>
+      <li><strong>Agent versioning</strong> → the <code>agent_name</code> and a version number live on the session row, so you can A/B compare two agent revisions on the same memory schema</li>
+    </ul>
+    <p>The benefit of having all of this in Lakebase rather than a separate state store: <strong>every dashboard, every debug query, every retention job runs against the same Postgres</strong>, queryable from DBSQL with the same OAuth.</p>
+
+    <h3>The query patterns this enables</h3>
+    <p>Once everything lives in one place, certain queries become trivial that would otherwise require multi-system fan-out:</p>
+    <ul>
+      <li><strong>"Show every tool call that returned an error in the last hour"</strong> — <code>SELECT * FROM tool_calls WHERE NOT ok AND ts &gt; now() - interval '1 hour'</code></li>
+      <li><strong>"What was the agent's checkpointed state when this session crashed?"</strong> — join <code>checkpoints</code> to <code>sessions</code> on <code>session_id</code></li>
+      <li><strong>"Which users have ever set the preference 'concise replies'?"</strong> — full-text search on <code>episodes.summary</code></li>
+      <li><strong>"What did the agent recall, then call, then answer?"</strong> — left join <code>messages</code> ⨝ <code>tool_calls</code> on <code>(session_id, ts)</code></li>
+    </ul>
+    <p>Every one of these is a single SQL statement, one transaction, one ACL. <strong>No cross-service tracing required.</strong></p>
+
+    <h3>MLflow tracing alignment</h3>
+    <p>If you're using MLflow Tracing (which the Mosaic AI Agent Framework ships with), the natural pattern is:</p>
+    <ul>
+      <li>Span attribute <code>session_id</code> = the Lakebase <code>sessions.id</code></li>
+      <li>Span attribute <code>user_id</code> = same as the row</li>
+      <li>Span attribute <code>tool_call_id</code> = the row ID in <code>tool_calls</code> for cross-correlation</li>
+    </ul>
+    <p>Now an MLflow trace and a Lakebase row are two views of the same fact. Debugging an agent failure becomes: <em>read the trace, jump to the SQL, run a follow-up query against <code>tool_calls</code> to find similar failures.</em></p>
+
+    <h3>The "no opaque pickle blob" benefit</h3>
+    <p>A common alternative for agent state is "pickle the LangGraph state object and stuff it in S3." That works until you need to query across sessions, or read state from a tool that doesn't speak Python, or audit what state existed last Tuesday. Storing checkpoints as <strong>JSONB rows in Lakebase</strong> keeps them queryable, indexable, retentionable, and accessible from DBSQL — at the cost of a little serialization care (which the framework handles).</p>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 6.6</span>
+      Without looking, name two query patterns that get easier when agent state, conversation history, and knowledge all live in one Lakebase. A passing answer: any cross-layer join (e.g., "messages plus their tool calls"), or any audit query (e.g., "every error in the last hour"). If you can also state why JSONB checkpoints beat pickle blobs, that's the production-readiness answer.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ WRAP-UP -->
+  <section class="topic" id="wrap">
+    <div class="wrap-up">
+      <h3>Module 6 · <em>theory complete</em></h3>
+      <p>You should now be able to handle the first thirty minutes of any "how do we do agent memory on Databricks?" customer conversation:</p>
+      <ul>
+        <li>Name and explain the four memory layers and why all four belong in one Postgres (6.1)</li>
+        <li>Design the four-table schema with the right indexes, foreign keys, and column types (6.2)</li>
+        <li>Write the <code>AgentMemory</code> contract and explain why every method is parameterized (6.3)</li>
+        <li>Walk the agent loop and identify which memory layer enters at each step (6.4)</li>
+        <li>Describe the nightly distillation job and an importance-based pruning policy (6.5)</li>
+        <li>Wire the schema into the Mosaic AI Agent Framework as a checkpoint store with MLflow alignment (6.6)</li>
+      </ul>
+      <p>The Module 6 lab notebook puts every one of these in your hands. You'll add the four tables to your Module 5 project, implement the <code>AgentMemory</code> class, write the three tools, build the agent loop, and prove cross-session memory works end-to-end with the "I prefer email replies" demo.</p>
+
+      <h4 style="margin-top: 30px">▸ Common pitfalls to remember</h4>
+      <ul>
+        <li><strong>Mixing embedding models between <code>documents</code> and <code>episodes</code>.</strong> Both must use the same model and dimension. Cosine distances are not comparable across models.</li>
+        <li><strong>Forgetting <code>ON DELETE CASCADE</code> on <code>messages</code>.</strong> Deleting a session leaves orphaned message rows. GDPR auditors will find them.</li>
+        <li><strong>String-formatting SQL.</strong> Every parameter goes through <code>text(":x")</code> + dict. No exceptions.</li>
+        <li><strong>Logging tool calls only on success.</strong> The <code>tool_calls</code> row must be written in a <code>try/finally</code> so failures are recorded too. The audit trail is most useful when something went wrong.</li>
+        <li><strong>Skipping importance scoring.</strong> Without a 0.0–1.0 score, recall ranks purely by cosine distance and high-signal but slightly-off-topic memories get buried.</li>
+        <li><strong>Letting <code>episodes</code> grow unbounded.</strong> Pick a pruning policy at week one, not month six.</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-note" style="margin-top: 36px">
+      <span class="callout-label">▸ Up Next</span>
+      <strong>Module 6 Lab</strong> — you'll build the four-table schema on top of your Module 5 project, implement the <code>AgentMemory</code> class, define three tools with explicit JSON schemas, run the agent loop, and watch the cross-session memory demo work — set "I prefer email" in session 1, see the agent honor it in session 2.
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ Progress bar ═══════════════
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+// ═══════════════ Diagram 6.1 — Four layers hover ═══════════════
+const layersData = {
+  'lay-agent': 'THE AGENT — A stateless LLM call by itself has no memory. It needs the four layers below to behave like an agent: remember the conversation, recall past sessions, look up knowledge, log what it did.',
+  'lay-short': 'SHORT-TERM (working) — The current conversation. Lives in messages keyed by session_id. Lifetime: one session. Index: composite (session_id, created_at). Retrieved via "last N messages" at every turn.',
+  'lay-long':  'LONG-TERM EPISODIC — Distilled summaries from past sessions, one user. Lives in episodes with vector(1024) + importance score. Pruned by policy. Retrieved via vector recall ranked by distance minus importance.',
+  'lay-sem':   'SEMANTIC — Cross-user knowledge base. The exact documents table from Module 5 with HNSW + GIN. Lifetime: forever (or until business says otherwise). Accessed via the retrieve tool.',
+  'lay-proc':  'PROCEDURAL — Append-only audit trail of every tool call. Lives in tool_calls (args, result, duration_ms, ok, ts). Retention 90d typical. Read by humans during incident review, not at runtime.'
+};
+document.querySelectorAll('#layersSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('layersInfo').textContent = info;
+  });
+  n.addEventListener('click', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('layersInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 6.3 — Recall ranking ═══════════════
+const recallHints = {
+  dist:  'DISTANCE ONLY — Without importance boost, ranking is pure cosine similarity. Episode A wins because "detailed answers" matches "what does this user prefer?" most closely. The high-importance email preference (B) ranks second.',
+  boost: 'IMPORTANCE BOOST ON — Score = distance - importance × 0.1. Episode B (importance 0.9) gets a 0.09 reduction, beating Episode A (importance 0.3, only 0.03 reduction). The user\'s durable preference (email) now leads. Episode C stays at #3 — too far off semantically for any boost to save it.'
+};
+const recallFormulas = {
+  dist:  'score = distance',
+  boost: 'score = distance - (importance × 0.1)'
+};
+const recallScores = {
+  dist:  { a: 'score = 0.10', b: 'score = 0.18', c: 'score = 0.55' },
+  boost: { a: 'score = 0.07', b: 'score = 0.09', c: 'score = 0.54' }
+};
+function setRecall(mode) {
+  document.querySelectorAll('#recallStepper button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('recallFormula').textContent = recallFormulas[mode];
+  document.getElementById('rec-a-calc').textContent = recallScores[mode].a;
+  document.getElementById('rec-b-calc').textContent = recallScores[mode].b;
+  document.getElementById('rec-c-calc').textContent = recallScores[mode].c;
+
+  // Toggle rank labels
+  document.getElementById('rec-a-rank-dist').style.display  = mode === 'dist'  ? 'block' : 'none';
+  document.getElementById('rec-a-rank-boost').style.display = mode === 'boost' ? 'block' : 'none';
+  document.getElementById('rec-b-rank-dist').style.display  = mode === 'dist'  ? 'block' : 'none';
+  document.getElementById('rec-b-rank-boost').style.display = mode === 'boost' ? 'block' : 'none';
+
+  document.getElementById('recallInfo').textContent = recallHints[mode];
+}
+document.querySelectorAll('#recallSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('recallInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 6.4 — Agent loop stepper ═══════════════
+const loopStatuses = {
+  1: 'Step 1 · Recall top-3 episodes for this user',
+  2: 'Step 2 · Build message stack: system + episodes + history + user msg',
+  3: 'Step 3 · Send to LLM (with tools); LLM may emit a function call',
+  4: 'Step 4 · Execute tools, capture duration + result, log every call to tool_calls',
+  5: 'Step 5 · Write the assistant reply to messages, return to user'
+};
+const loopHints = {
+  1: 'STEP 1 · RECALL — mem.recall(user_id, user_msg, k=3) hits the episodes table. HNSW + B-tree (user_id) make this microseconds. The top-3 summaries get prepended to the system prompt as facts the LLM "knows."',
+  2: 'STEP 2 · BUILD STACK — Combine the system prompt (with episodes) + recent_messages(sid, n=10) + the new user message. Short-term memory enters here.',
+  3: 'STEP 3 · LLM — Send the stack with tool definitions. LLM either replies directly or emits a function_call. The model decides whether tools are needed.',
+  4: 'STEP 4 · EXECUTE TOOLS — For each tool the LLM called: run it, capture result + duration_ms + ok. Write a tool_calls row in try/finally. Append a tool message to messages. Semantic + procedural memory both enter here.',
+  5: 'STEP 5 · WRITE REPLY — mem.add_message(sid, "assistant", reply). The conversation history grows by one row. Next turn starts from this state.'
+};
+function setLoop(step) {
+  document.querySelectorAll('#loopStepper button').forEach(b => b.classList.toggle('active', +b.dataset.step === step));
+
+  // Highlight current step, dim others
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`loop-step${i}`);
+    if (el) {
+      el.style.opacity = (i === step) ? 1 : 0.32;
+    }
+  }
+  document.getElementById('loopStatus').textContent = loopStatuses[step];
+  document.getElementById('loopInfo').textContent = loopHints[step];
+}
+
+// initialize all diagrams
+setRecall('dist');
+setLoop(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 05 — Lakebase as a Vector Store: Concepts Behind the Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 64px 48px 56px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(255,107,53,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(168,85,247,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.crumb .tag {
+  color: var(--accent-orange);
+  padding: 4px 12px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.crumb .sep { color: var(--text-muted); }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-orange); }
+
+.lede {
+  font-size: 17px; color: var(--text-dim);
+  max-width: 760px; line-height: 1.75;
+  margin-bottom: 32px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px; font-weight: 500;
+  color: var(--accent-teal);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 48px 100px;
+}
+
+/* ─── TOC ─── */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-orange);
+  border-radius: 6px;
+  padding: 22px 26px;
+  margin-bottom: 56px;
+}
+.toc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  margin-bottom: 14px;
+}
+.toc ol { list-style: none; counter-reset: tc; }
+.toc li {
+  counter-increment: tc;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; align-items: baseline; gap: 16px;
+  font-size: 14px;
+}
+.toc li:last-child { border-bottom: none; }
+.toc li::before {
+  content: counter(tc, decimal-leading-zero);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  min-width: 24px;
+}
+.toc a { color: var(--text); text-decoration: none; transition: color 0.2s; }
+.toc a:hover { color: var(--accent-orange); }
+.toc .dur {
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ─── SECTION ─── */
+section.topic {
+  margin-bottom: 72px;
+  scroll-margin-top: 32px;
+}
+
+.topic-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px;
+}
+.topic-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-orange);
+  padding: 4px 10px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.topic-banner .line { flex: 1; height: 1px; background: var(--border); }
+.topic-banner .type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.5vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+h2 em { font-style: italic; color: var(--accent-orange); }
+
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin: 36px 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 28px 0 10px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 16px 0 20px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 6px 0 6px 24px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  color: var(--accent-orange);
+  font-size: 16px;
+}
+ol { counter-reset: ol; }
+ol li::before {
+  content: counter(ol, decimal-leading-zero);
+  counter-increment: ol;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--accent-orange);
+  top: 9px;
+  left: 0;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+pre.code-snip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-orange);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 18px 0 24px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+pre.code-snip .kw { color: var(--accent-purple); }
+pre.code-snip .st { color: var(--accent-green); }
+pre.code-snip .nu { color: var(--accent-yellow); }
+pre.code-snip .cm { color: var(--text-muted); font-style: italic; }
+pre.code-snip .fn { color: var(--accent-blue); }
+
+/* ─── TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 24px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.5;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+.yes { color: var(--accent-green); font-weight: 600; }
+.no  { color: var(--accent-red); }
+.warn { color: var(--accent-yellow); }
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 28px 0;
+  padding: 20px 24px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.callout strong { color: var(--text); }
+.callout-checkpoint {
+  background: rgba(0,191,165,0.05);
+  border-left-color: var(--accent-teal);
+}
+.callout-warn {
+  background: rgba(251,191,36,0.05);
+  border-left-color: var(--accent-yellow);
+}
+.callout-note {
+  background: rgba(74,158,255,0.05);
+  border-left-color: var(--accent-blue);
+}
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+.callout-checkpoint .callout-label { color: var(--accent-teal); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-note .callout-label { color: var(--accent-blue); }
+
+/* ─── INTERACTIVE DIAGRAM SHELL ─── */
+.diagram {
+  margin: 32px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.diagram-header {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.diagram-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+}
+.diagram-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+.diagram-hint::before { content: '◉ '; color: var(--accent-teal); }
+
+.diagram-stage {
+  padding: 24px;
+  position: relative;
+  min-height: 380px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.diagram-info {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,191,165,0.03);
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  min-height: 70px;
+}
+.diagram-info-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin-bottom: 6px;
+}
+
+/* ─── DIAGRAM SVG common ─── */
+.decision-svg, .hnsw-svg, .rrf-svg {
+  width: 100%; max-width: 920px; height: auto;
+}
+.diag-node {
+  cursor: pointer;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.diag-node:hover { filter: brightness(1.18); }
+.diag-node.dimmed { opacity: 0.3; }
+.diag-node text { pointer-events: none; }
+
+/* ─── STEPPER ─── */
+.stepper {
+  display: flex; gap: 0;
+  background: var(--surface3);
+  border-radius: 4px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+.stepper button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.stepper button.active {
+  background: var(--accent-orange);
+  color: #fff;
+}
+.stepper button:hover:not(.active) { color: var(--text); }
+
+/* ─── WRAP-UP ─── */
+.wrap-up {
+  margin-top: 80px;
+  padding: 36px 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.wrap-up::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wrap-up h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 26px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.wrap-up h3 em { color: var(--accent-orange); }
+
+/* ─── PROGRESS BAR ─── */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--accent-orange);
+  z-index: 1000;
+  transition: width 0.1s;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 30px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 05</span>
+      <span class="sep">/</span>
+      <span>Lakebase Mastery</span>
+      <span class="sep">/</span>
+      <span>Concepts Behind the Lab</span>
+    </div>
+    <h1>Lakebase as a Vector Store<br><em>The Concepts Behind the Lab</em></h1>
+    <p class="lede">Module 1 gave you the vocabulary. Module 2 gave you the architecture. Module 3 put a Lakebase project in your hands. Module 4 wired it to the lakehouse. Module 5 turns that same Postgres into a production-grade vector store — three conceptual jumps before you write a line of pgvector code.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">3</span><span class="meta-lbl">Concept Topics</span></div>
+      <div class="meta-item"><span class="meta-val">~75m</span><span class="meta-lbl">Theory</span></div>
+      <div class="meta-item"><span class="meta-val">Intermediate</span><span class="meta-lbl">Level</span></div>
+      <div class="meta-item"><span class="meta-val">3</span><span class="meta-lbl">Interactive Diagrams</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ───── TABLE OF CONTENTS ───── -->
+  <div class="toc">
+    <div class="toc-label">▸ On this page</div>
+    <ol>
+      <li><a href="#t51">When To Use Lakebase + pgvector vs. Mosaic AI Vector Search</a><span class="dur">~22 min</span></li>
+      <li><a href="#t52">Schema Design for Embeddings — Indexes That Matter</a><span class="dur">~28 min</span></li>
+      <li><a href="#t53">Hybrid Retrieval and Reciprocal Rank Fusion</a><span class="dur">~20 min</span></li>
+      <li><a href="#wrap">Module 5 Wrap-Up &amp; Common Pitfalls</a><span class="dur">~5 min</span></li>
+    </ol>
+  </div>
+
+  <!-- ────────── INTRO ────────── -->
+  <section class="topic">
+    <h3 style="margin-top:0">What this module gives you</h3>
+    <p>Module 1 gave you the vocabulary. Module 2 gave you the architecture. Module 3 put a real Lakebase project in your hands. Module 4 wired it to the lakehouse. <strong>Module 5 turns that same Postgres into a production-grade vector store</strong> — for RAG, semantic search, and embedding-driven features — without bolting on a third-party service.</p>
+    <p>Before you open the notebook, you need a clean mental model of three conceptual jumps: when to use pgvector vs. Mosaic AI Vector Search, how to design a schema with the right indexes, and why hybrid retrieval beats pure vector search.</p>
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Prerequisite Check</span>
+      You should have completed <strong>Module 3 Lab 3</strong> with a working Lakebase project registered in Unity Catalog, and ideally <strong>Module 4 Lab 4</strong> with at least one synced table. Module 5 layers <code>pgvector</code> onto the schema you already built — it does not provision a new project.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 5.1 -->
+  <section class="topic" id="t51">
+    <div class="topic-banner">
+      <span class="topic-id">5.1</span>
+      <span class="line"></span>
+      <span class="type">Theory · Decision</span>
+    </div>
+    <h2>When to use <em>pgvector</em> vs. Mosaic AI Vector Search</h2>
+
+    <h3>Two products, one platform, no contradiction</h3>
+    <p>Databricks ships <strong>two</strong> first-party answers for "I need to do vector search." This confuses customers more often than it helps them. The first thing to internalize is that this is not a competition — they solve overlapping problems at <em>different scales</em>, and the right answer depends on three numbers and two architecture facts.</p>
+    <ul>
+      <li><strong>Lakebase + pgvector</strong> — the <code>vector</code> extension running inside your Postgres compute. Embeddings are columns. Search is a SQL query. Hybrid filters and joins come for free.</li>
+      <li><strong>Mosaic AI Vector Search</strong> — a dedicated, governed retrieval service that indexes a Delta table and serves nearest-neighbor queries via a REST endpoint. Tuned for very large corpora.</li>
+    </ul>
+
+    <h3>The decision rule (memorize this)</h3>
+    <p>Walk through the diagram below. Each branch point is a real customer question — answer them in order and you arrive at the right product.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 5.1 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 5.1 · The pgvector vs. Mosaic Vector Search Decision Tree</span>
+        <span class="diagram-hint">Hover any node to inspect</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 460" xmlns="http://www.w3.org/2000/svg" class="decision-svg" id="decisionSvg">
+          <defs>
+            <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8899bb"/>
+            </marker>
+          </defs>
+
+          <!-- Top heading -->
+          <text x="460" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ START · Customer says "we need vector search"</text>
+
+          <!-- Q1: corpus size -->
+          <g class="diag-node" id="dec-q1" data-info="Q1 · CORPUS SIZE — The single most predictive number. Below 5M vectors, pgvector almost always wins on TCO and operational simplicity. Above 10M, Mosaic AI Vector Search is purpose-built for scale. Between, query patterns matter more than count.">
+            <rect x="340" y="50" width="240" height="60" rx="6" fill="#1a2235" stroke="#ff6b35" stroke-width="2"/>
+            <text x="460" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="1.5">QUESTION 1</text>
+            <text x="460" y="98" text-anchor="middle" font-family="Syne, sans-serif" font-size="13" fill="#e8edf5">How many vectors?</text>
+          </g>
+
+          <!-- Branches from Q1 -->
+          <line x1="380" y1="110" x2="190" y2="155" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="460" y1="110" x2="460" y2="155" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="540" y1="110" x2="730" y2="155" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+          <text x="270" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">&lt; 5M</text>
+          <text x="475" y="135" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">5M – 10M</text>
+          <text x="650" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444">&gt; 10M</text>
+
+          <!-- Small corpus -->
+          <g class="diag-node" id="dec-small" data-info="SMALL CORPUS — Under 5M vectors, pgvector with HNSW handles app-tier latency easily. You get hybrid SQL filters, transactional consistency, and zero new infrastructure. This is the sweet spot.">
+            <rect x="80" y="160" width="220" height="60" rx="6" fill="#0d1f17" stroke="#22c55e" stroke-width="1.5"/>
+            <text x="190" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">SMALL CORPUS</text>
+            <text x="190" y="205" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">pgvector wins</text>
+          </g>
+
+          <!-- Mid corpus -->
+          <g class="diag-node" id="dec-mid" data-info="MID CORPUS — Between 5M and 10M, the answer is 'it depends.' Run a benchmark: latency at p95, recall at k=10, and cost over a representative query mix. Often pgvector still wins if you have hybrid filter needs.">
+            <rect x="350" y="160" width="220" height="60" rx="6" fill="#1a1209" stroke="#fbbf24" stroke-width="1.5"/>
+            <text x="460" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="1">MID CORPUS</text>
+            <text x="460" y="205" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">benchmark both</text>
+          </g>
+
+          <!-- Large corpus -->
+          <g class="diag-node" id="dec-large" data-info="LARGE CORPUS — Over 10M vectors with high QPS, Mosaic AI Vector Search is purpose-built. UC governance comes for free, the index lives where the Delta source lives, and the service is tuned for sub-50ms p99 at scale.">
+            <rect x="620" y="160" width="220" height="60" rx="6" fill="#1f0d12" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="730" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" letter-spacing="1">LARGE CORPUS</text>
+            <text x="730" y="205" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">Mosaic AI wins</text>
+          </g>
+
+          <!-- Q2: hybrid filters? (only meaningful for mid) -->
+          <line x1="460" y1="220" x2="460" y2="265" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <g class="diag-node" id="dec-q2" data-info="Q2 · HYBRID FILTERS — Does the query mix vector similarity with SQL predicates? Tenant ID, time window, RLS, JOINs to other tables? If yes, pgvector lets these filter rows BEFORE the HNSW walk — using your GIN index. Mosaic AI Vector Search supports filters but cannot do arbitrary JOINs.">
+            <rect x="340" y="270" width="240" height="60" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="2"/>
+            <text x="460" y="295" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="1.5">QUESTION 2</text>
+            <text x="460" y="315" text-anchor="middle" font-family="Syne, sans-serif" font-size="13" fill="#e8edf5">Hybrid SQL filters?</text>
+          </g>
+
+          <!-- Branches from Q2 -->
+          <line x1="380" y1="330" x2="240" y2="375" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="540" y1="330" x2="680" y2="375" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <text x="300" y="355" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">YES · joins / RLS</text>
+          <text x="620" y="355" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7">NO · pure similarity</text>
+
+          <g class="diag-node" id="dec-pg" data-info="OUTCOME · pgvector — The hybrid filter advantage is decisive. Your GIN index on metadata prunes rows before HNSW runs. Cosine similarity, BM25, and SQL predicates all live in one query plan, one transaction, one set of GRANTs.">
+            <rect x="120" y="380" width="240" height="60" rx="6" fill="#0d1f17" stroke="#22c55e" stroke-width="2"/>
+            <text x="240" y="405" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1.5">▸ RECOMMEND</text>
+            <text x="240" y="425" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Lakebase + pgvector</text>
+          </g>
+
+          <g class="diag-node" id="dec-mosaic" data-info="OUTCOME · Mosaic AI Vector Search — At 5–10M with no hybrid-filter need, the dedicated service is simpler operationally. UC governance is automatic, index updates flow from Delta, and you don't manage HNSW parameters.">
+            <rect x="560" y="380" width="240" height="60" rx="6" fill="#1a1230" stroke="#a855f7" stroke-width="2"/>
+            <text x="680" y="405" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1.5">▸ RECOMMEND</text>
+            <text x="680" y="425" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Mosaic Vector Search</text>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Hover a node above</div>
+        <p id="decisionInfo">Three numbers (corpus size) and two architecture facts (hybrid filters, transactional consistency) drive the decision. Hover each box to see the reasoning behind the branch.</p>
+      </div>
+    </div>
+
+    <h3>The dimensions that pull the decision</h3>
+    <p>Corpus size is the headline number, but it's rarely the only one that matters. Three other dimensions usually pull the decision one way or the other:</p>
+    <ul>
+      <li><strong>Hybrid SQL filters.</strong> If a query looks like <em>"find the 10 most similar product descriptions, but only for tenant=42, in stock, from last 30 days, where the user has access via RLS"</em> — that's a SQL workload. pgvector wins because the filter and the similarity search happen in the same plan.</li>
+      <li><strong>Transactional consistency.</strong> If embeddings must be in the <em>same row</em> as the source document — committed in the same transaction, dropped in the same delete — pgvector is the only option. Mosaic Vector Search is eventually consistent with the Delta source.</li>
+      <li><strong>Co-location.</strong> If your app already has a Lakebase connection open, adding a <code>documents</code> table with an <code>embedding</code> column is <strong>zero new infrastructure</strong>.</li>
+    </ul>
+
+    <h3>When pgvector is the wrong call</h3>
+    <p>Be honest with the customer. Recommend Mosaic AI Vector Search when:</p>
+    <ul>
+      <li>The corpus is <strong>already in Delta</strong> and is updated by Spark jobs — let the index live where the data lives.</li>
+      <li>You need <strong>billion-scale vectors</strong> with sub-50ms p99 latency. Postgres is not the right substrate at that scale.</li>
+      <li>Governance is the primary driver — Mosaic Vector Search inherits Unity Catalog ACLs natively.</li>
+      <li>The team explicitly does <em>not</em> want to manage HNSW parameters and Postgres tuning.</li>
+    </ul>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 5.1</span>
+      Without looking, list three questions you'd ask a customer before recommending pgvector vs. Mosaic AI Vector Search. A passing answer touches: corpus size, whether they need transactional consistency, and whether they already have a Lakebase project in the architecture. If you can answer those without notes, move on.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 5.2 -->
+  <section class="topic" id="t52">
+    <div class="topic-banner">
+      <span class="topic-id">5.2</span>
+      <span class="line"></span>
+      <span class="type">Theory · Schema</span>
+    </div>
+    <h2>Schema design for embeddings — <em>indexes that matter</em></h2>
+
+    <h3>What pgvector adds to Postgres</h3>
+    <p><code>pgvector</code> is a Postgres extension that adds three things, and nothing else changes:</p>
+    <ul>
+      <li>A new column type — <code>vector(N)</code> — storing a fixed-dimension float array</li>
+      <li>Distance operators — <code>&lt;=&gt;</code> (cosine), <code>&lt;-&gt;</code> (L2), <code>&lt;#&gt;</code> (negative inner product)</li>
+      <li>Two index types — <strong>HNSW</strong> and <strong>IVFFlat</strong> — that approximate nearest-neighbor search</li>
+    </ul>
+    <p>Everything else in your <code>documents</code> table is just standard Postgres. That's the whole point: vector search is a column, not a service.</p>
+
+    <h3>HNSW vs. IVFFlat — the only choice that matters</h3>
+    <p>You will see both index types in pgvector documentation. For app workloads, <strong>always reach for HNSW first</strong>. The trade-off:</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>HNSW</th><th>IVFFlat</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Build time</strong></td><td>Higher — minutes to hours for millions of rows</td><td>Lower — usually faster to build</td></tr>
+          <tr><td><strong>Build memory</strong></td><td>Higher</td><td>Lower</td></tr>
+          <tr><td><strong>Recall at app latency</strong></td><td class="yes">Excellent</td><td>Mediocre — degrades fast as <code>lists</code> is wrong-sized</td></tr>
+          <tr><td><strong>Tuning at query time</strong></td><td><code>ef_search</code> — easy, per-query</td><td>None — index-level only</td></tr>
+          <tr><td><strong>Stable under inserts</strong></td><td class="yes">Yes — graph adapts</td><td class="no">No — quality drifts; needs rebuild</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The summary: <strong>IVFFlat was the sensible default in 2022; HNSW is the sensible default in 2026.</strong> Spend the build time once. Reap the recall and latency forever.</p>
+
+    <h3>HNSW parameters — what <code>m</code> and <code>ef_construction</code> actually do</h3>
+    <pre class="code-snip"><span class="kw">CREATE INDEX</span> idx_doc_hnsw <span class="kw">ON</span> documents
+  <span class="kw">USING</span> hnsw (embedding vector_cosine_ops)
+  <span class="kw">WITH</span> (m = <span class="nu">16</span>, ef_construction = <span class="nu">64</span>);</pre>
+    <p>These two numbers control the shape of the navigable graph that HNSW builds. The diagram below visualizes the trade-off — toggle the parameters to see how the graph density and search behavior change.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 5.2 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 5.2 · HNSW Graph — Trade-Off Visualizer</span>
+        <div class="stepper" id="hnswStepper">
+          <button class="active" data-mode="lo" onclick="setHnsw('lo')">m = 8</button>
+          <button data-mode="mid" onclick="setHnsw('mid')">m = 16</button>
+          <button data-mode="hi" onclick="setHnsw('hi')">m = 32</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 380" xmlns="http://www.w3.org/2000/svg" class="hnsw-svg" id="hnswSvg">
+          <!-- background label -->
+          <text x="460" y="26" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ HNSW NAVIGABLE GRAPH (top layer)</text>
+
+          <!-- Edges - Low (m=8) -->
+          <g id="edges-lo">
+            <line x1="200" y1="200" x2="320" y2="120" stroke="#4a5878" stroke-width="1"/>
+            <line x1="200" y1="200" x2="320" y2="280" stroke="#4a5878" stroke-width="1"/>
+            <line x1="320" y1="120" x2="460" y2="180" stroke="#4a5878" stroke-width="1"/>
+            <line x1="320" y1="280" x2="460" y2="180" stroke="#4a5878" stroke-width="1"/>
+            <line x1="460" y1="180" x2="600" y2="120" stroke="#4a5878" stroke-width="1"/>
+            <line x1="460" y1="180" x2="600" y2="240" stroke="#4a5878" stroke-width="1"/>
+            <line x1="600" y1="120" x2="720" y2="200" stroke="#4a5878" stroke-width="1"/>
+            <line x1="600" y1="240" x2="720" y2="200" stroke="#4a5878" stroke-width="1"/>
+          </g>
+
+          <!-- Edges - Mid (m=16) -->
+          <g id="edges-mid" style="display:none">
+            <line x1="200" y1="200" x2="320" y2="120" stroke="#00bfa5" stroke-width="1"/>
+            <line x1="200" y1="200" x2="320" y2="280" stroke="#00bfa5" stroke-width="1"/>
+            <line x1="200" y1="200" x2="460" y2="180" stroke="#00bfa5" stroke-width="1" opacity="0.6"/>
+            <line x1="320" y1="120" x2="460" y2="180" stroke="#00bfa5" stroke-width="1"/>
+            <line x1="320" y1="120" x2="600" y2="120" stroke="#00bfa5" stroke-width="1" opacity="0.6"/>
+            <line x1="320" y1="280" x2="460" y2="180" stroke="#00bfa5" stroke-width="1"/>
+            <line x1="320" y1="280" x2="600" y2="240" stroke="#00bfa5" stroke-width="1" opacity="0.6"/>
+            <line x1="460" y1="180" x2="600" y2="120" stroke="#00bfa5" stroke-width="1"/>
+            <line x1="460" y1="180" x2="600" y2="240" stroke="#00bfa5" stroke-width="1"/>
+            <line x1="460" y1="180" x2="720" y2="200" stroke="#00bfa5" stroke-width="1" opacity="0.6"/>
+            <line x1="600" y1="120" x2="720" y2="200" stroke="#00bfa5" stroke-width="1"/>
+            <line x1="600" y1="240" x2="720" y2="200" stroke="#00bfa5" stroke-width="1"/>
+          </g>
+
+          <!-- Edges - High (m=32) -->
+          <g id="edges-hi" style="display:none">
+            <line x1="200" y1="200" x2="320" y2="120" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="200" y1="200" x2="320" y2="280" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="200" y1="200" x2="460" y2="180" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="200" y1="200" x2="600" y2="120" stroke="#ff6b35" stroke-width="0.7" opacity="0.5"/>
+            <line x1="200" y1="200" x2="600" y2="240" stroke="#ff6b35" stroke-width="0.7" opacity="0.5"/>
+            <line x1="320" y1="120" x2="460" y2="180" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="320" y1="120" x2="600" y2="120" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="320" y1="120" x2="320" y2="280" stroke="#ff6b35" stroke-width="0.7" opacity="0.5"/>
+            <line x1="320" y1="280" x2="460" y2="180" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="320" y1="280" x2="600" y2="240" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="320" y1="280" x2="720" y2="200" stroke="#ff6b35" stroke-width="0.7" opacity="0.5"/>
+            <line x1="460" y1="180" x2="600" y2="120" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="460" y1="180" x2="600" y2="240" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="460" y1="180" x2="720" y2="200" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="600" y1="120" x2="600" y2="240" stroke="#ff6b35" stroke-width="0.7" opacity="0.5"/>
+            <line x1="600" y1="120" x2="720" y2="200" stroke="#ff6b35" stroke-width="1.2"/>
+            <line x1="600" y1="240" x2="720" y2="200" stroke="#ff6b35" stroke-width="1.2"/>
+          </g>
+
+          <!-- Nodes (vectors) -->
+          <g class="diag-node" data-info="ENTRY POINT — HNSW search starts at a designated entry node and walks the graph greedily, always moving to the neighbor closest to the query vector. With higher m, more neighbors means better recall but more comparisons per step.">
+            <circle cx="200" cy="200" r="14" fill="#1a2235" stroke="#fbbf24" stroke-width="2"/>
+            <text x="200" y="205" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24">e</text>
+          </g>
+          <g class="diag-node" data-info="DATA NODE — Each node represents one vector in your documents table. Edges connect to the m closest neighbors at this graph layer.">
+            <circle cx="320" cy="120" r="12" fill="#0b0f1a" stroke="#8899bb" stroke-width="1.5"/>
+          </g>
+          <g class="diag-node" data-info="DATA NODE — One vector. The HNSW graph has multiple layers; this diagram shows the densest top layer where the search starts.">
+            <circle cx="320" cy="280" r="12" fill="#0b0f1a" stroke="#8899bb" stroke-width="1.5"/>
+          </g>
+          <g class="diag-node" data-info="HUB NODE — Some vectors end up with many neighbors because they're geometrically central. The HNSW algorithm preserves these naturally; they make the graph navigable.">
+            <circle cx="460" cy="180" r="12" fill="#0b0f1a" stroke="#8899bb" stroke-width="1.5"/>
+          </g>
+          <g class="diag-node" data-info="DATA NODE — One vector in the corpus.">
+            <circle cx="600" cy="120" r="12" fill="#0b0f1a" stroke="#8899bb" stroke-width="1.5"/>
+          </g>
+          <g class="diag-node" data-info="DATA NODE — One vector in the corpus.">
+            <circle cx="600" cy="240" r="12" fill="#0b0f1a" stroke="#8899bb" stroke-width="1.5"/>
+          </g>
+          <g class="diag-node" data-info="QUERY ANSWER — The greedy walk arrives here when the query vector is closest to this point. With low m, the path may have to detour; with high m, the search reaches it more directly.">
+            <circle cx="720" cy="200" r="14" fill="#1a2235" stroke="#22c55e" stroke-width="2"/>
+            <text x="720" y="205" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">q</text>
+          </g>
+
+          <!-- Stat panel -->
+          <g id="hnsw-stats">
+            <rect x="20" y="320" width="880" height="48" rx="6" fill="#111827" stroke="#1e2d45" stroke-width="1"/>
+            <text x="40" y="340" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">CHARACTERISTICS</text>
+            <text x="40" y="358" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5" id="hnswStatLine">m=8 · sparse graph · fast build · low memory · recall ~88% · risk of getting stuck in local minima</text>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Toggle m above</div>
+        <p id="hnswInfo">m controls edges per node. Higher m = denser graph = better recall = more memory. Click the buttons to see the graph density change. Hover any node for detail.</p>
+      </div>
+    </div>
+
+    <p>You don't need to derive the algorithm to pick good values — you need a mental model:</p>
+    <ul>
+      <li><strong><code>m</code></strong> = number of edges per node in the graph. Higher <code>m</code> means more connections, higher recall, more memory, slower build. <strong><code>m = 16</code> is the right starting value</strong> for most app workloads. Bump to 32 only if recall benchmarks demand it.</li>
+      <li><strong><code>ef_construction</code></strong> = the size of the dynamic candidate list during graph construction. Higher means a better-quality graph at build time. <strong><code>ef_construction = 64</code> is sane</strong>; 128 is acceptable for a one-time bulk index.</li>
+      <li><strong><code>ef_search</code></strong> = the candidate list size <strong>at query time</strong>. This is the recall/latency dial you turn per query — not at index creation. Default 40. Set with <code>SET LOCAL hnsw.ef_search = 100;</code> inside a transaction.</li>
+    </ul>
+    <p>The mental model that helps: <strong><code>ef_construction</code> shapes the graph once. <code>ef_search</code> is how aggressively you walk it on each query.</strong> You will tune <code>ef_search</code> weekly. You will tune <code>m</code> once per project, if ever.</p>
+
+    <h3>Distance operators — pick one and stick with it</h3>
+    <p>pgvector exposes three. The choice is determined by your <strong>embedding model</strong>, not by preference:</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Operator</th><th>Distance</th><th>Index Opclass</th><th>When to Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>&lt;=&gt;</code></td><td>Cosine</td><td><code>vector_cosine_ops</code></td><td><strong>Default for text embeddings</strong> (BGE, OpenAI)</td></tr>
+          <tr><td><code>&lt;-&gt;</code></td><td>Euclidean (L2)</td><td><code>vector_l2_ops</code></td><td>When the model is normalized for L2</td></tr>
+          <tr><td><code>&lt;#&gt;</code></td><td>Negative inner product</td><td><code>vector_ip_ops</code></td><td>When you've already L2-normalized vectors</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>For <code>databricks-bge-large-en</code> and effectively every text embedding model on the Foundation Models API, <strong>use cosine</strong>. The index opclass must match the operator you use in queries — picking the wrong opclass means the index is silently bypassed and your query falls back to a sequential scan.</p>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ The silent opclass trap</span>
+      If you build the index with <code>vector_l2_ops</code> but query with <code>&lt;=&gt;</code>, the planner just skips the index. Latency drops 100× and you get no error. Always check <code>EXPLAIN</code> output the first time you run a vector query in a new project.
+    </div>
+
+    <h3>Why dimension matters: 1024 is not a magic number</h3>
+    <p>The <code>vector(N)</code> declaration must match your embedding model exactly:</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Model</th><th>Dimension</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>databricks-bge-large-en</code></td><td><strong>1024</strong></td><td>Default Databricks Foundation Models embedder</td></tr>
+          <tr><td><code>databricks-gte-large-en</code></td><td>1024</td><td>Alternative; similar quality</td></tr>
+          <tr><td>OpenAI <code>text-embedding-3-small</code></td><td>1536</td><td>If using external OpenAI</td></tr>
+          <tr><td>OpenAI <code>text-embedding-3-large</code></td><td>3072</td><td>High-quality, larger storage</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A 1024-dim float vector is 4 KB per row at full precision. A million rows ≈ 4 GB just for embeddings, before any Postgres overhead. Memory and storage planning matters at scale; a casual <code>vector(3072)</code> decision multiplies your storage line item by 3×.</p>
+
+    <h3>The auxiliary indexes you forget at your peril</h3>
+    <p>A vector-only schema will work, but it will not be the schema you wish you had once the corpus is real. The Module 5 lab has you create three indexes for a reason:</p>
+    <pre class="code-snip"><span class="kw">CREATE INDEX</span> idx_doc_hnsw <span class="kw">ON</span> documents
+  <span class="kw">USING</span> hnsw (embedding vector_cosine_ops)
+  <span class="kw">WITH</span> (m = <span class="nu">16</span>, ef_construction = <span class="nu">64</span>);
+
+<span class="kw">CREATE INDEX</span> idx_doc_tsv  <span class="kw">ON</span> documents <span class="kw">USING</span> GIN (tsv);
+<span class="kw">CREATE INDEX</span> idx_doc_meta <span class="kw">ON</span> documents <span class="kw">USING</span> GIN (metadata);</pre>
+    <ul>
+      <li><strong>HNSW</strong> on <code>embedding</code> — for vector similarity. Already covered.</li>
+      <li><strong>GIN</strong> on <code>tsv</code> (a generated <code>tsvector</code> column) — for keyword/BM25 search. Without this index, the BM25 half of every hybrid query becomes a table scan.</li>
+      <li><strong>GIN</strong> on <code>metadata</code> (JSONB) — for filter pushdown. When the query is <em>"top-10 by similarity, but only where <code>metadata-&gt;&gt;'tenant'</code> = '42'"</em>, you want this index pruning rows before HNSW runs.</li>
+    </ul>
+
+    <h3>The generated tsvector pattern</h3>
+    <p>The schema in the lab uses a <strong>generated column</strong> for the tsvector:</p>
+    <pre class="code-snip">tsv tsvector <span class="kw">GENERATED ALWAYS AS</span>
+    (<span class="fn">to_tsvector</span>(<span class="st">'english'</span>,
+       <span class="fn">coalesce</span>(title,<span class="st">''</span>) || <span class="st">' '</span> || <span class="fn">coalesce</span>(content,<span class="st">''</span>))) <span class="kw">STORED</span>,</pre>
+    <p>Three things to notice:</p>
+    <ol>
+      <li><code>GENERATED ALWAYS AS … STORED</code> means Postgres maintains the tsvector for you on every insert and update. You never compute it in application code.</li>
+      <li><code>coalesce(...,'')</code> prevents NULL fields from poisoning the concatenation. A NULL anywhere in <code>||</code> would produce a NULL tsvector, which silently disables BM25 for that row.</li>
+      <li><code>'english'</code> sets the text-search configuration — controls stemming and stop-words. For multilingual corpora, store the language in <code>metadata</code> and switch configurations per query.</li>
+    </ol>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 5.2</span>
+      Without looking: which HNSW parameter do you tune at index creation, and which do you tune per query? A passing answer: <code>m</code> and <code>ef_construction</code> are creation-time; <code>ef_search</code> is per-query. If you can also explain why the opclass must match the operator, you're set.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 5.3 -->
+  <section class="topic" id="t53">
+    <div class="topic-banner">
+      <span class="topic-id">5.3</span>
+      <span class="line"></span>
+      <span class="type">Theory · Retrieval</span>
+    </div>
+    <h2>Hybrid retrieval and <em>Reciprocal Rank Fusion</em></h2>
+
+    <h3>Why pure vector search isn't enough</h3>
+    <p>Embeddings capture <em>meaning</em>. They are excellent at "find me documents about returning damaged electronics" matching a doc titled "RMA process for defective devices" — even though they share no words. They are also famously bad at exact-match queries: a search for the SKU <code>LB-9047X</code> will not necessarily rank the doc that contains exactly <code>LB-9047X</code> first, because the embedding model has no special intuition about identifier strings.</p>
+    <p>The classic fix is BM25 — keyword search with TF-IDF weighting, implemented in Postgres via <code>tsvector</code> + <code>ts_rank</code>. BM25 is excellent at exact tokens and acronyms, mediocre at synonyms and paraphrase. <strong>Vector and BM25 fail in opposite directions.</strong> The fix is to run both and combine the rankings.</p>
+
+    <h3>Reciprocal Rank Fusion in one diagram</h3>
+    <p>RRF combines two ranked lists by ignoring the underlying scores entirely and using only the <strong>rank position</strong> of each document in each list. The formula:</p>
+    <pre class="code-snip"><span class="cm">// k = 60 by convention from the original paper</span>
+score(doc) = Σ over lists L  of  <span class="nu">1</span> / (k + rank_L(doc))</pre>
+    <p>The intuition: a document that appears in the top 3 of <em>both</em> lists scores higher than a document at rank 1 of only one list. The diagram below walks through a concrete example — step through it to see how the fusion works.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 5.3 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 5.3 · Reciprocal Rank Fusion — Step Through</span>
+        <div class="stepper" id="rrfStepper">
+          <button class="active" data-step="1" onclick="setRrf(1)">1 · Vector</button>
+          <button data-step="2" onclick="setRrf(2)">2 · BM25</button>
+          <button data-step="3" onclick="setRrf(3)">3 · Fuse</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 380" xmlns="http://www.w3.org/2000/svg" class="rrf-svg" id="rrfSvg">
+          <!-- Header -->
+          <text x="460" y="26" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ QUERY: "return policy electronics LB-9047X"</text>
+
+          <!-- VECTOR list -->
+          <g id="rrf-vec" class="diag-node" data-info="VECTOR LIST — Top results by cosine similarity. Notice doc B (about RMA) ranks first because its embedding is semantically close to 'return policy', even though the literal SKU isn't matched.">
+            <text x="180" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#00bfa5" letter-spacing="1.5">VECTOR · top 5</text>
+            <rect x="60" y="76" width="240" height="180" rx="4" fill="#0a1f1c" stroke="#00bfa5" stroke-width="1"/>
+            <text x="80" y="100" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">1. doc B · RMA process</text>
+            <text x="80" y="125" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">2. doc D · Defective devices</text>
+            <text x="80" y="150" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">3. doc A · Return window</text>
+            <text x="80" y="175" font-family="Syne, sans-serif" font-size="12" fill="#8899bb">4. doc E · Warranty terms</text>
+            <text x="80" y="200" font-family="Syne, sans-serif" font-size="12" fill="#8899bb">5. doc F · Shipping FAQ</text>
+            <text x="180" y="232" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">ranked by &lt;=&gt; distance</text>
+          </g>
+
+          <!-- BM25 list -->
+          <g id="rrf-bm25" class="diag-node" data-info="BM25 LIST — Top results by ts_rank. doc C ranks first because it contains the literal SKU 'LB-9047X' — vector missed it entirely, but the keyword index nailed it.">
+            <text x="460" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="1.5">BM25 · top 5</text>
+            <rect x="340" y="76" width="240" height="180" rx="4" fill="#1a1230" stroke="#a855f7" stroke-width="1"/>
+            <text x="360" y="100" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">1. doc C · SKU LB-9047X</text>
+            <text x="360" y="125" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">2. doc A · Return window</text>
+            <text x="360" y="150" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">3. doc B · RMA process</text>
+            <text x="360" y="175" font-family="Syne, sans-serif" font-size="12" fill="#8899bb">4. doc G · Electronics list</text>
+            <text x="360" y="200" font-family="Syne, sans-serif" font-size="12" fill="#8899bb">5. doc D · Defective devices</text>
+            <text x="460" y="232" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">ranked by ts_rank score</text>
+          </g>
+
+          <!-- RRF list -->
+          <g id="rrf-fused" class="diag-node" data-info="FUSED LIST — RRF computes 1/(60+rank) for each list and sums. doc B wins (high in both: 1/61 + 1/63). doc A is strong (1/63 + 1/62). doc C surfaces despite vector missing it. The fused ranking is robust to either retriever's blind spots.">
+            <text x="740" y="60" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="1.5">RRF FUSED · top 5</text>
+            <rect x="620" y="76" width="240" height="180" rx="4" fill="#1f1208" stroke="#ff6b35" stroke-width="1.5"/>
+            <text x="640" y="100" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">1. doc B · 0.0322</text>
+            <text x="640" y="125" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">2. doc A · 0.0320</text>
+            <text x="640" y="150" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">3. doc C · 0.0164</text>
+            <text x="640" y="175" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">4. doc D · 0.0317</text>
+            <text x="640" y="200" font-family="Syne, sans-serif" font-size="12" fill="#8899bb">5. doc E · 0.0156</text>
+            <text x="740" y="232" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">Σ 1/(60 + rank)</text>
+          </g>
+
+          <!-- Arrows from vec/bm25 -> RRF -->
+          <line id="rrf-arr1" x1="305" y1="166" x2="615" y2="166" stroke="#4a5878" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <line id="rrf-arr2" x1="585" y1="166" x2="615" y2="166" stroke="#4a5878" stroke-width="1.2" stroke-dasharray="4 4"/>
+
+          <!-- Calc box -->
+          <g id="rrf-calc">
+            <rect x="60" y="290" width="800" height="68" rx="6" fill="#111827" stroke="#1e2d45" stroke-width="1"/>
+            <text x="80" y="312" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">DOC B SCORE</text>
+            <text x="80" y="335" font-family="IBM Plex Mono, monospace" font-size="11" fill="#e8edf5" id="rrfCalcLine">1/(60 + 1) + 1/(60 + 3)  =  0.01639 + 0.01587  =  0.03226</text>
+            <text x="80" y="352" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">k = 60 · doc B at rank 1 in vector, rank 3 in BM25 · highest fused score wins</text>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Step through fusion</div>
+        <p id="rrfInfo">Click 1 → 2 → 3 to see how each ranked list contributes to the fused output. The takeaway: doc C surfaces in the top-3 even though vector missed it entirely, because BM25 ranked it #1.</p>
+      </div>
+    </div>
+
+    <h3>What hybrid retrieval looks like in SQL</h3>
+    <p>The Module 5 lab walks you through this query. Read it now so the lab makes sense later:</p>
+    <pre class="code-snip"><span class="kw">WITH</span> v <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id, <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> embedding &lt;=&gt; :qv) <span class="kw">AS</span> rk
+  <span class="kw">FROM</span> documents
+  <span class="kw">ORDER BY</span> embedding &lt;=&gt; :qv
+  <span class="kw">LIMIT</span> <span class="nu">50</span>
+),
+k <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id, <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span>
+    (<span class="kw">ORDER BY</span> <span class="fn">ts_rank</span>(tsv, <span class="fn">plainto_tsquery</span>(:q)) <span class="kw">DESC</span>) <span class="kw">AS</span> rk
+  <span class="kw">FROM</span> documents
+  <span class="kw">WHERE</span> tsv @@ <span class="fn">plainto_tsquery</span>(:q)
+  <span class="kw">LIMIT</span> <span class="nu">50</span>
+)
+<span class="kw">SELECT</span> d.id, d.title,
+       <span class="nu">1.0</span>/(<span class="nu">60</span> + v.rk) + <span class="nu">1.0</span>/(<span class="nu">60</span> + k.rk) <span class="kw">AS</span> rrf
+<span class="kw">FROM</span> documents d
+<span class="kw">LEFT JOIN</span> v <span class="kw">USING</span>(id)
+<span class="kw">LEFT JOIN</span> k <span class="kw">USING</span>(id)
+<span class="kw">WHERE</span> v.id <span class="kw">IS NOT NULL OR</span> k.id <span class="kw">IS NOT NULL</span>
+<span class="kw">ORDER BY</span> rrf <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="nu">10</span>;</pre>
+    <p>Three things to notice:</p>
+    <ol>
+      <li><strong>Two CTEs, both top-50.</strong> You retrieve 50 from each leg, not the final 10, so RRF has enough overlap to fuse meaningfully. 50 / 50 → 10 is a typical fanout.</li>
+      <li><strong><code>LEFT JOIN</code> both ways.</strong> A document that ranks high on vector but doesn't appear in BM25 should still surface — RRF handles this gracefully because the missing rank just contributes 0 to the score.</li>
+      <li><strong><code>ORDER BY rrf DESC</code>.</strong> The fused ranking is the final ranking. There is no further re-rank step (though you can add a cross-encoder re-rank on the top 10 if recall isn't enough — that's a Module 6 advanced topic).</li>
+    </ol>
+
+    <h3>Filters, tenancy, and RLS — the pgvector advantage made concrete</h3>
+    <p>The reason you'd choose pgvector over a dedicated vector service often comes down to <strong>arbitrary SQL predicates</strong>. Both CTEs above can take a <code>WHERE</code> clause that restricts to a tenant, language, recency window, or row-level security policy:</p>
+    <pre class="code-snip"><span class="kw">WITH</span> v <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id, <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> embedding &lt;=&gt; :qv) <span class="kw">AS</span> rk
+  <span class="kw">FROM</span> documents
+  <span class="kw">WHERE</span> metadata-&gt;&gt;<span class="st">'tenant_id'</span> = :tenant
+    <span class="kw">AND</span> metadata-&gt;&gt;<span class="st">'lang'</span> = <span class="st">'en'</span>
+    <span class="kw">AND</span> created_at &gt; <span class="fn">now</span>() - interval <span class="st">'90 days'</span>
+  <span class="kw">ORDER BY</span> embedding &lt;=&gt; :qv
+  <span class="kw">LIMIT</span> <span class="nu">50</span>
+),
+...</pre>
+    <p>The Postgres planner uses your <strong>GIN index on <code>metadata</code></strong> to prune rows <em>before</em> HNSW runs. This is the single most important reason to keep that index — without it, the filter happens after similarity, which is both slower and gives wrong top-K (because the most similar 50 might all be from another tenant).</p>
+
+    <h3>Tuning ef_search per query</h3>
+    <p>You can dial recall vs. latency at the query level by setting <code>hnsw.ef_search</code>:</p>
+    <pre class="code-snip"><span class="kw">BEGIN</span>;
+<span class="kw">SET LOCAL</span> hnsw.ef_search = <span class="nu">100</span>;   <span class="cm">-- raise from default 40 for higher recall</span>
+<span class="kw">WITH</span> v <span class="kw">AS</span> ( ... ) ...
+<span class="kw">COMMIT</span>;</pre>
+    <p>Use <code>SET LOCAL</code> so the change applies only inside the transaction. A typical pattern:</p>
+    <ul>
+      <li><strong>Latency-sensitive lookup</strong> (autocomplete, instant search): <code>ef_search = 20–40</code></li>
+      <li><strong>App-tier RAG</strong> (ChatGPT-style Q&amp;A): <code>ef_search = 60–100</code></li>
+      <li><strong>Offline / batch / re-ranking pipeline</strong>: <code>ef_search = 200+</code> or just bump to exact search</li>
+    </ul>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 5.3</span>
+      Without looking, write the RRF formula. A passing answer: <code>1 / (k + rank)</code> summed over lists, with k commonly = 60. If you can also explain <em>why</em> RRF doesn't try to normalize the underlying scores, you've got it: the cosine distance and BM25 score live on incomparable scales, but ranks are always comparable.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ WRAP-UP -->
+  <section class="topic" id="wrap">
+    <div class="wrap-up">
+      <h3>Module 5 · <em>theory complete</em></h3>
+      <p>You should now be able to handle the first ten minutes of any "should we use pgvector?" customer conversation:</p>
+      <ul>
+        <li>Recommend pgvector vs. Mosaic AI Vector Search using corpus size, hybrid-filter needs, transactional-consistency needs, and existing architecture (5.1)</li>
+        <li>Design a vector schema with HNSW + GIN indexes, pick <code>m</code> and <code>ef_construction</code> defensibly, and avoid the opclass mismatch trap (5.2)</li>
+        <li>Explain why hybrid retrieval beats pure vector, and write an RRF query that mixes vector and BM25 with arbitrary SQL filters (5.3)</li>
+      </ul>
+      <p>The Module 5 lab notebook puts every one of these in your hands. You'll create the <code>vector</code> extension, build the <code>documents</code> table on top of the Module 3 schema, generate embeddings via the Foundation Models API, run hybrid retrieval against real data, and wrap the whole thing in a <code>rag()</code> function that takes a question and returns a grounded answer.</p>
+
+      <h4 style="margin-top: 30px">▸ Common pitfalls to remember</h4>
+      <ul>
+        <li><strong>Wrong opclass on the HNSW index.</strong> Querying with <code>&lt;=&gt;</code> but the index uses <code>vector_l2_ops</code> — planner silently bypasses the index. Check <code>EXPLAIN</code> if latency suddenly drops.</li>
+        <li><strong>Forgetting the GIN index on metadata.</strong> Filters on <code>metadata-&gt;&gt;'tenant'</code> without it = full scan. The HNSW index alone does not help here.</li>
+        <li><strong>Using IVFFlat by default.</strong> It "works" on small datasets and looks reasonable, then quietly degrades as data shape changes. Reach for HNSW first.</li>
+        <li><strong>Hardcoding <code>ef_search</code> in your DDL.</strong> It's a query-time GUC, not an index parameter. Tune per query class, not globally.</li>
+        <li><strong>Computing the tsvector in application code.</strong> Use <code>GENERATED ALWAYS AS … STORED</code>. Hand-maintained tsvectors drift the moment a developer forgets.</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-note" style="margin-top: 36px">
+      <span class="callout-label">▸ Up Next</span>
+      <strong>Module 5 Lab</strong> — you'll create the pgvector extension on the project from Module 3, build the <code>documents</code> table with HNSW + GIN indexes, generate embeddings via <code>databricks-bge-large-en</code>, run an RRF hybrid retrieval against a real corpus, and verify that hybrid beats pure vector on a deliberately-constructed corner case (the SKU lookup from Diagram 5.3).
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ Progress bar ═══════════════
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+// ═══════════════ Diagram 5.1 — Decision tree hover ═══════════════
+const decisionData = {
+  'dec-q1': 'Q1 · CORPUSE SIZE — Below 5M, pgvector almost always wins. Above 10M, Mosaic AI Vector Search is purpose-built. Between, query patterns matter more than count.',
+  'dec-small': 'SMALL CORPUS (<5M) — pgvector with HNSW handles app-tier latency easily. Hybrid SQL filters, transactional consistency, zero new infrastructure. The sweet spot.',
+  'dec-mid': 'MID CORPUS (5M–10M) — Run a benchmark: latency at p95, recall at k=10, and cost over a representative query mix. Often pgvector still wins with hybrid-filter needs.',
+  'dec-large': 'LARGE CORPUS (>10M) — Mosaic AI Vector Search is purpose-built. UC governance comes for free, the index lives where the Delta source lives, sub-50ms p99 at scale.',
+  'dec-q2': 'Q2 · HYBRID FILTERS — Tenant ID, time window, RLS, JOINs to other tables? If yes, pgvector lets these filter rows BEFORE HNSW runs. Mosaic supports filters but not arbitrary JOINs.',
+  'dec-pg': 'OUTCOME · pgvector — Hybrid filter advantage is decisive. GIN index on metadata prunes before HNSW. Cosine, BM25, and SQL predicates in one plan, one transaction, one set of GRANTs.',
+  'dec-mosaic': 'OUTCOME · Mosaic AI Vector Search — At 5–10M without hybrid-filter need, the dedicated service is operationally simpler. UC governance automatic, index updates from Delta, no HNSW tuning.'
+};
+document.querySelectorAll('#decisionSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('decisionInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 5.2 — HNSW stepper ═══════════════
+const hnswStats = {
+  lo:  'm=8 · sparse graph · fast build · low memory · recall ~88% · risk of getting stuck in local minima',
+  mid: 'm=16 · balanced graph · standard default · recall ~96% · production-ready for almost all app workloads',
+  hi:  'm=32 · dense graph · slower build · higher memory · recall ~98% · usually overkill but useful for very high precision needs'
+};
+const hnswHints = {
+  lo:  'Lower m means fewer edges per node. Faster to build but the search may detour more before finding the answer. Recall suffers.',
+  mid: 'm=16 is the sweet spot. The graph has enough connectivity for high recall without paying the memory cost of m=32. Use this default.',
+  hi:  'Higher m gives the densest graph and best recall, but build time and memory grow. Reach for this only when m=16 benchmarks show insufficient recall.'
+};
+function setHnsw(mode) {
+  document.querySelectorAll('#hnswStepper button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('edges-lo').style.display  = mode === 'lo'  ? 'block' : 'none';
+  document.getElementById('edges-mid').style.display = mode === 'mid' ? 'block' : 'none';
+  document.getElementById('edges-hi').style.display  = mode === 'hi'  ? 'block' : 'none';
+  document.getElementById('hnswStatLine').textContent = hnswStats[mode];
+  document.getElementById('hnswInfo').textContent = hnswHints[mode];
+}
+document.querySelectorAll('#hnswSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('hnswInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 5.3 — RRF stepper ═══════════════
+const rrfHints = {
+  1: 'STEP 1 · VECTOR LIST — Top-50 by cosine similarity. doc B (RMA process) ranks #1 because it is semantically closest, even without literal keyword overlap. Notice doc C (the SKU) is missing entirely.',
+  2: 'STEP 2 · BM25 LIST — Top-50 by ts_rank. doc C (the SKU LB-9047X) ranks #1 here — vector missed it, but the keyword index nailed it. Both lists capture different aspects of relevance.',
+  3: 'STEP 3 · FUSE WITH RRF — Compute 1/(60+rank) for each list and sum. doc B wins (1/61 + 1/63 = 0.0322). Notice doc C surfaces in the top-3 despite being absent from vector — that is the fusion in action.'
+};
+function setRrf(step) {
+  document.querySelectorAll('#rrfStepper button').forEach(b => b.classList.toggle('active', +b.dataset.step === step));
+
+  // Show/hide list panels with opacity
+  document.getElementById('rrf-vec').style.opacity   = step >= 1 ? 1 : 0.25;
+  document.getElementById('rrf-bm25').style.opacity  = step >= 2 ? 1 : 0.25;
+  document.getElementById('rrf-fused').style.opacity = step >= 3 ? 1 : 0.25;
+  document.getElementById('rrf-arr1').style.opacity  = step >= 3 ? 1 : 0;
+  document.getElementById('rrf-arr2').style.opacity  = step >= 3 ? 1 : 0;
+  document.getElementById('rrf-calc').style.opacity  = step >= 3 ? 1 : 0.25;
+
+  document.getElementById('rrfInfo').textContent = rrfHints[step];
+}
+document.querySelectorAll('#rrfSvg .diag-node').forEach(n => {
+  n.addEventListener('mouseenter', () => {
+    const info = n.dataset.info;
+    if (info) document.getElementById('rrfInfo').textContent = info;
+  });
+});
+
+// initialize all diagrams
+setHnsw('lo');
+setRrf(1);
+</script>
+</body>
+</html>

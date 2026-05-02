@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 05 · Lab 5 — Build a Production RAG Pipeline on pgvector</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  --code-bg: #020509;
+  --code-text: #e8dcc4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 56px 48px 48px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 70% at 90% 30%, rgba(168,85,247,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 80%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.crumb .tag {
+  color: var(--accent-purple);
+  padding: 4px 12px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.06);
+  border-radius: 2px;
+}
+.crumb .tag.lab {
+  color: var(--accent-orange);
+  border-color: rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 5vw, 52px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-purple); }
+
+.lede {
+  font-size: 16.5px; color: var(--text-dim);
+  max-width: 740px; line-height: 1.75;
+  margin-bottom: 28px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 17px; font-weight: 500;
+  color: var(--accent-purple);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── PROGRESS TRACKER (sticky) ─── */
+.tracker {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,8,15,0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 48px;
+}
+.tracker-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
+}
+.tracker-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.steps {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.step-pill::before {
+  content: '○';
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.step-pill:hover {
+  border-color: var(--accent-purple);
+  color: var(--text);
+}
+.step-pill.done {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.4);
+  color: var(--accent-green);
+}
+.step-pill.done::before {
+  content: '✓';
+  color: var(--accent-green);
+}
+.step-pill.active {
+  background: rgba(168,85,247,0.1);
+  border-color: var(--accent-purple);
+  color: var(--text);
+}
+.tracker-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-purple);
+  white-space: nowrap;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 48px 100px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 12px 0 18px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 5px 0 5px 22px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  color: var(--accent-purple);
+  font-size: 16px;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  margin: 0 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  margin: 28px 0 12px;
+  color: var(--text);
+}
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 22px 0 10px;
+}
+
+/* ─── INTRO BLOCK ─── */
+.intro-block { margin-bottom: 56px; }
+
+/* ─── PREREQ BOX ─── */
+.prereq {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0 40px;
+}
+.prereq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 22px;
+}
+.prereq-card.need { border-left: 3px solid var(--accent-green); }
+.prereq-card.skip { border-left: 3px solid var(--text-muted); opacity: 0.85; }
+.prereq-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.prereq-card.need .prereq-title { color: var(--accent-green); }
+.prereq-card.skip .prereq-title { color: var(--text-muted); }
+.prereq-card ul { margin: 0; }
+.prereq-card li { padding: 4px 0 4px 20px; font-size: 13.5px; }
+.prereq-card.need li::before { content: '✓'; color: var(--accent-green); }
+.prereq-card.skip li::before { content: '×'; color: var(--text-muted); }
+
+/* ─── STEP CARD ─── */
+.step {
+  margin: 0 0 56px;
+  scroll-margin-top: 90px;
+}
+.step-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.step-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-purple);
+  padding: 4px 10px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.06);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  letter-spacing: -0.005em;
+  flex: 1;
+}
+.step-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.step-mark:hover { border-color: var(--accent-green); color: var(--text); }
+.step-mark.done {
+  background: rgba(34,197,94,0.08);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+/* ─── CODE CELL ─── */
+.cell {
+  margin: 16px 0 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.cell-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.cell-label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.cell-label::before { content: '▸'; color: var(--accent-orange); }
+.cell-lang {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  margin-left: 8px;
+}
+.cell-actions { display: flex; gap: 6px; }
+.copy-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 5px 11px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: var(--accent-orange);
+  color: #fff;
+  border-color: var(--accent-orange);
+}
+.copy-btn.copied {
+  background: var(--accent-green);
+  color: #fff;
+  border-color: var(--accent-green);
+}
+.cell pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--code-text);
+  white-space: pre;
+}
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.st { color: #c3e88d; }
+.cm { color: var(--text-muted); font-style: italic; }
+.nm { color: var(--accent-orange); }
+.nu { color: #f78c6c; }
+
+/* ─── EXPECTED OUTPUT BLOCK ─── */
+.expect {
+  margin: 0 0 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-teal);
+  background: var(--surface);
+}
+.expect-header {
+  padding: 8px 16px;
+  background: rgba(0,191,165,0.05);
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+}
+.expect pre {
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  overflow-x: auto;
+  white-space: pre;
+}
+.expect pre .ok-line { color: var(--accent-green); }
+
+/* ─── PROVE/IF-FAILS ─── */
+.proves {
+  margin: 12px 0 0;
+  padding: 12px 16px;
+  background: rgba(0,191,165,0.04);
+  border-left: 2px solid var(--accent-teal);
+  border-radius: 0 4px 4px 0;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.proves strong { color: var(--accent-teal); }
+
+/* ─── TROUBLESHOOTING TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 20px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 11px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.55;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+td code {
+  font-size: 11.5px;
+  padding: 0 5px;
+  background: var(--code-bg);
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.callout strong { color: var(--text); }
+.callout-note { background: rgba(74,158,255,0.05); border-left-color: var(--accent-blue); }
+.callout-warn { background: rgba(251,191,36,0.05); border-left-color: var(--accent-yellow); }
+.callout-success { background: rgba(34,197,94,0.05); border-left-color: var(--accent-green); }
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+.callout-note .callout-label { color: var(--accent-blue); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-success .callout-label { color: var(--accent-green); }
+
+/* ─── INTERACTIVE CHECKLIST ─── */
+.checklist-section {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 30px;
+  margin: 40px 0;
+}
+.checklist-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.checklist-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--text);
+}
+.checklist-title em { color: var(--accent-purple); }
+.checklist-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+.checklist-status.complete {
+  background: rgba(34,197,94,0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 200px 28px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.check-row:last-child { border-bottom: none; }
+.check-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.check-name { font-size: 14.5px; color: var(--text); }
+.check-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.check-detail {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: right;
+  padding-right: 8px;
+}
+.check-toggle {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  padding: 0;
+}
+.check-toggle:hover { border-color: var(--accent-green); color: var(--accent-green); }
+.check-toggle.checked {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #fff;
+}
+
+.checklist-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reset-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+
+/* ─── COMPLETION BANNER ─── */
+.done-banner {
+  margin-top: 56px;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(168,85,247,0.04) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.done-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.done-banner h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 24px;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+.done-banner h3 em { color: var(--accent-purple); }
+
+/* ─── SUB-STEP HEADER ─── */
+.substep {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  font-style: italic;
+  color: var(--text);
+  margin: 28px 0 8px;
+  padding: 6px 0 6px 14px;
+  border-left: 2px solid var(--accent-purple);
+}
+.substep span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-style: normal;
+  color: var(--accent-purple);
+  margin-right: 10px;
+  letter-spacing: 0.1em;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main, .tracker { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 28px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+  .prereq { grid-template-columns: 1fr; }
+  .check-row {
+    grid-template-columns: 1fr 28px;
+    grid-template-rows: auto auto;
+  }
+  .check-num { grid-column: 1; grid-row: 1; }
+  .check-detail { grid-column: 1; grid-row: 2; text-align: left; padding: 0; }
+  .check-toggle { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+  .step-banner { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 05</span>
+      <span>/</span>
+      <span class="tag lab">Lab 5</span>
+      <span>/</span>
+      <span>Hands-on · Production RAG on pgvector</span>
+    </div>
+    <h1>Build a Production RAG Pipeline<br><em>on pgvector</em></h1>
+    <p class="lede">Layer pgvector on top of your Module 3 project, embed a real corpus via the Foundation Models API, prove that hybrid retrieval beats pure vector on a SKU corner case, and wrap it all in a 40-line <code>rag()</code> function. By the end you will have a working RAG pipeline that runs entirely inside Databricks — no Pinecone, no Weaviate, no extra service.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">7</span><span class="meta-lbl">Steps</span></div>
+      <div class="meta-item"><span class="meta-val">~75 min</span><span class="meta-lbl">Duration</span></div>
+      <div class="meta-item"><span class="meta-val">6</span><span class="meta-lbl">Final Checks</span></div>
+      <div class="meta-item"><span class="meta-val">100%</span><span class="meta-lbl">Hands-On</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── STICKY PROGRESS TRACKER ── -->
+<div class="tracker" id="tracker">
+  <div class="tracker-inner">
+    <span class="tracker-label">Progress →</span>
+    <div class="steps">
+      <a href="#step1" class="step-pill" data-step="1">Step 1 · Reconnect</a>
+      <a href="#step2" class="step-pill" data-step="2">Step 2 · Schema</a>
+      <a href="#step3" class="step-pill" data-step="3">Step 3 · Embed</a>
+      <a href="#step4" class="step-pill" data-step="4">Step 4 · Vector</a>
+      <a href="#step5" class="step-pill" data-step="5">Step 5 · Hybrid (RRF)</a>
+      <a href="#step6" class="step-pill" data-step="6">Step 6 · rag()</a>
+      <a href="#step7" class="step-pill" data-step="7">Step 7 · Verify</a>
+    </div>
+    <span class="tracker-count" id="trackerCount">0 / 7</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- ─── INTRO ─── -->
+  <section class="intro-block">
+    <h2>Why this lab exists</h2>
+    <p>Module 5's three theory topics gave you the mental model: when to pick pgvector over Mosaic AI Vector Search (5.1), how to design the schema and pick HNSW parameters (5.2), and why hybrid retrieval with Reciprocal Rank Fusion beats pure vector (5.3). <strong>This lab makes each of those concrete.</strong> You will reconnect to the Module 3 project, install pgvector, build the documents schema, embed a real corpus, prove that hybrid wins on a deliberate corner case, and wrap it all in a <code>rag()</code> function.</p>
+    <p>Total runtime ~75 minutes, of which about 8 minutes is your hands on the keyboard and the rest is embedding API calls and index builds. Use the wait times to skim Module 5 theory if you haven't.</p>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Run mode</span>
+      <p>Do this lab in a <strong>Databricks notebook</strong> attached to a serverless cluster (or DBR 14+). All cells are Python except where SQL is explicitly called out via <code>%sql</code>. Copy each cell into your own notebook as you go — every code block on this page has a Copy button.</p>
+    </div>
+
+    <h3>Prerequisites</h3>
+    <div class="prereq">
+      <div class="prereq-card need">
+        <div class="prereq-title">▸ You need</div>
+        <ul>
+          <li><strong>Module 3 Lab 3 passed</strong> with all 6 checks green</li>
+          <li>The <code>lakebase-tutorial</code> project still exists (you left <code>CLEANUP=False</code>)</li>
+          <li>Foundation Models API enabled in your workspace (default)</li>
+          <li>An attached compute cluster (serverless recommended)</li>
+        </ul>
+      </div>
+      <div class="prereq-card skip">
+        <div class="prereq-title">▸ You do NOT need</div>
+        <ul>
+          <li>A new Lakebase project — we add to the existing one</li>
+          <li>A separate vector database — that's the whole point of Module 5</li>
+          <li>Documents prepared in advance — we ship a small corpus inline</li>
+          <li>Module 4 (synced tables) — though it doesn't hurt</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ Cost note</span>
+      <p>~30 embedding API calls + ~5 chat completions ≈ fractions of a cent. Lakebase compute is the same <code>CU_1</code> from Module 3. Step 7b includes optional cleanup. Most readers leave <code>CLEANUP_DOCS=False</code> so Module 6 can reuse the schema.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 1 -->
+  <section class="step" id="step1">
+    <div class="step-banner">
+      <span class="step-num">STEP 01</span>
+      <h2 class="step-title">Reconnect to the Module 3 project &amp; install pgvector</h2>
+      <button class="step-mark" data-step="1" onclick="markStep(1)">Mark done</button>
+    </div>
+    <p>Two jobs: re-establish the SQLAlchemy engine using the OAuth-refresh pattern from Module 3, then install the <code>vector</code> extension into the database. Both cells are idempotent.</p>
+
+    <div class="cell" id="cell-1">
+      <div class="cell-header">
+        <span class="cell-label">Cell 1 · install dependencies<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-1')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 1 — install dependencies (re-run if kernel restarted since Lab 3)</span>
+%pip install --quiet <span class="st">"databricks-sdk&gt;=0.30.0"</span> <span class="st">"psycopg[binary]"</span> sqlalchemy pgvector
+dbutils.library.<span class="fn">restartPython</span>()</pre>
+    </div>
+
+    <div class="cell" id="cell-2">
+      <div class="cell-header">
+        <span class="cell-label">Cell 2 · reconnect with auto-refreshing OAuth<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-2')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 2 — reconnect using the exact pattern from Module 3 Lab 3</span>
+<span class="kw">import</span> uuid
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+
+w = <span class="fn">WorkspaceClient</span>()
+
+TUTORIAL = {
+    <span class="st">"catalog"</span>:      <span class="st">"main"</span>,
+    <span class="st">"schema"</span>:       <span class="st">"lakebase_tutorial"</span>,
+    <span class="st">"project_name"</span>: <span class="st">"lakebase-tutorial"</span>,
+    <span class="st">"embed_model"</span>:  <span class="st">"databricks-bge-large-en"</span>,
+    <span class="st">"chat_model"</span>:   <span class="st">"databricks-meta-llama-3-3-70b-instruct"</span>,
+    <span class="st">"user"</span>:         w.current_user.<span class="fn">me</span>().user_name,
+    <span class="st">"host"</span>:         w.config.host,
+}
+
+project = w.database.<span class="fn">get_database_project</span>(TUTORIAL[<span class="st">"project_name"</span>])
+<span class="kw">assert</span> project.state == <span class="st">"READY"</span>, <span class="st">f"Project not READY: state=</span><span class="nm">{project.state}</span><span class="st">"</span>
+
+cred = w.database.<span class="fn">generate_database_credential</span>(
+    request_id=<span class="fn">str</span>(uuid.<span class="fn">uuid4</span>()),
+    instance_names=[project.name],
+)
+
+url = (
+    <span class="st">f"postgresql+psycopg://</span><span class="nm">{TUTORIAL['user']}</span><span class="st">:</span><span class="nm">{cred.token}</span><span class="st">"</span>
+    <span class="st">f"@</span><span class="nm">{project.read_write_dns}</span><span class="st">:5432/databricks_postgres"</span>
+    <span class="st">f"?sslmode=require"</span>
+)
+engine = <span class="fn">create_engine</span>(url, pool_pre_ping=<span class="kw">True</span>, pool_recycle=<span class="nu">1800</span>)
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    v = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT version()"</span>)).<span class="fn">scalar</span>()
+    <span class="fn">print</span>(<span class="st">f"✅ Reconnected to </span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">"</span>)
+    <span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{v.split(',')[0]}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Reconnected to lakebase-tutorial</span>
+   PostgreSQL 17.x on aarch64-unknown-linux-gnu</pre>
+    </div>
+
+    <div class="cell" id="cell-3">
+      <div class="cell-header">
+        <span class="cell-label">Cell 3 · enable pgvector<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-3')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 3 — enable pgvector</span>
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+    conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"CREATE EXTENSION IF NOT EXISTS vector"</span>))
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    ext = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        SELECT extname, extversion
+        FROM pg_extension
+        WHERE extname = 'vector'
+    """</span>)).<span class="fn">fetchone</span>()
+    <span class="fn">print</span>(<span class="st">f"✅ pgvector enabled"</span>)
+    <span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{ext.extname}</span><span class="st"> v</span><span class="nm">{ext.extversion}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ pgvector enabled</span>
+   vector v0.7.x</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the engine still works against the Module 3 project, and the <code>vector</code> extension is loaded into the <code>databricks_postgres</code> database. From this cell forward you can use <code>vector(N)</code> as a column type and the three pgvector distance operators.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>Project not READY: state=…</code></td><td>The Module 3 project was deleted or paused</td><td>Re-run Module 3 Lab Step 1 to re-provision; come back and continue here</td></tr>
+          <tr><td><code>password authentication failed</code></td><td>OAuth token expired between sessions</td><td>Re-run Cell 2 — <code>generate_database_credential</code> issues a fresh one</td></tr>
+          <tr><td><code>extension "vector" is not available</code></td><td>Stale Lakebase image in a non-GA region</td><td>Open a Databricks support ticket — pgvector is GA in all Lakebase Autoscaling regions</td></tr>
+          <tr><td><code>permission denied to create extension "vector"</code></td><td>Workspace identity lacks Postgres <code>SUPERUSER</code></td><td>Ask a workspace admin for <code>databricks_superuser</code>, or run Cell 3 once as the project owner</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 2 -->
+  <section class="step" id="step2">
+    <div class="step-banner">
+      <span class="step-num">STEP 02</span>
+      <h2 class="step-title">Build the documents schema</h2>
+      <button class="step-mark" data-step="2" onclick="markStep(2)">Mark done</button>
+    </div>
+    <p>The schema from Module 5 theory 5.2: a <code>vector(1024)</code> column for embeddings, a generated <code>tsvector</code> for BM25, JSONB metadata for filter pushdown, and three indexes (HNSW + 2× GIN). All three indexes are required for the hybrid retrieval planner to be happy.</p>
+
+    <div class="substep"><span>2a</span>Create the documents table</div>
+
+    <div class="cell" id="cell-4">
+      <div class="cell-header">
+        <span class="cell-label">Cell 4 · schema DDL<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-4')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 4 — schema DDL</span>
+DDL = <span class="st">"""
+CREATE TABLE IF NOT EXISTS documents (
+    id          BIGSERIAL PRIMARY KEY,
+    source      TEXT,
+    title       TEXT,
+    content     TEXT NOT NULL,
+    metadata    JSONB DEFAULT '{}'::jsonb,
+    embedding   vector(1024),
+    tsv         tsvector GENERATED ALWAYS AS
+                (to_tsvector('english',
+                    coalesce(title,'') || ' ' || coalesce(content,''))) STORED,
+    created_at  TIMESTAMPTZ DEFAULT now()
+);
+"""</span>
+
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+    conn.<span class="fn">execute</span>(<span class="fn">text</span>(DDL))
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    cols = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_name = 'documents'
+        ORDER BY ordinal_position
+    """</span>)).<span class="fn">fetchall</span>()
+    <span class="fn">print</span>(<span class="st">"✅ documents table created:"</span>)
+    <span class="kw">for</span> c <span class="kw">in</span> cols:
+        <span class="fn">print</span>(<span class="st">f"   · </span><span class="nm">{c.column_name:&lt;12}</span><span class="st"> </span><span class="nm">{c.data_type}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ documents table created:</span>
+   · id           bigint
+   · source       text
+   · title        text
+   · content      text
+   · metadata     jsonb
+   · embedding    USER-DEFINED
+   · tsv          tsvector
+   · created_at   timestamp with time zone</pre>
+    </div>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Note</span>
+      <p>The <code>USER-DEFINED</code> for the embedding column is just <code>information_schema</code> not knowing about pgvector's custom type — it's working correctly. <code>SELECT pg_typeof(embedding) FROM documents LIMIT 1</code> would show <code>vector</code>.</p>
+    </div>
+
+    <div class="substep"><span>2b</span>Add the three indexes</div>
+
+    <div class="cell" id="cell-5">
+      <div class="cell-header">
+        <span class="cell-label">Cell 5 · indexes (HNSW + 2× GIN)<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-5')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 5 — indexes (HNSW + 2× GIN)</span>
+INDEXES = <span class="st">"""
+CREATE INDEX IF NOT EXISTS idx_doc_hnsw ON documents
+  USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
+
+CREATE INDEX IF NOT EXISTS idx_doc_tsv  ON documents USING GIN (tsv);
+CREATE INDEX IF NOT EXISTS idx_doc_meta ON documents USING GIN (metadata);
+"""</span>
+
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+    <span class="kw">for</span> stmt <span class="kw">in</span> [s.<span class="fn">strip</span>() <span class="kw">for</span> s <span class="kw">in</span> INDEXES.<span class="fn">split</span>(<span class="st">";"</span>) <span class="kw">if</span> s.<span class="fn">strip</span>()]:
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(stmt))
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    idx = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        SELECT indexname, indexdef
+        FROM pg_indexes
+        WHERE tablename = 'documents'
+        ORDER BY indexname
+    """</span>)).<span class="fn">fetchall</span>()
+    <span class="fn">print</span>(<span class="st">"✅ indexes on documents:"</span>)
+    <span class="kw">for</span> i <span class="kw">in</span> idx:
+        defn = i.indexdef.<span class="fn">split</span>(<span class="st">"USING"</span>)[<span class="nu">1</span>].<span class="fn">strip</span>() <span class="kw">if</span> <span class="st">"USING"</span> <span class="kw">in</span> i.indexdef <span class="kw">else</span> i.indexdef
+        <span class="fn">print</span>(<span class="st">f"   · </span><span class="nm">{i.indexname:&lt;20}</span><span class="st"> USING </span><span class="nm">{defn[:60]}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ indexes on documents:</span>
+   · documents_pkey       USING btree (id)
+   · idx_doc_hnsw         USING hnsw (embedding vector_cosine_ops) WITH (m=...
+   · idx_doc_meta         USING gin (metadata)
+   · idx_doc_tsv          USING gin (tsv)</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> you have a <code>vector(1024)</code> column for cosine-similarity HNSW search, a generated <code>tsvector</code> for BM25 keyword search (Postgres maintains it on every insert/update — you never touch it), and a GIN index on metadata for filter pushdown. This is the schema 5.2 prescribed.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>type "vector" does not exist</code></td><td>Cell 3 was skipped or rolled back</td><td>Re-run Cell 3, then Cell 4</td></tr>
+          <tr><td><code>column "tsv" cannot be a generated column</code></td><td>Old Postgres version (&lt;12); should not happen on Lakebase</td><td>Verify <code>SELECT version()</code> shows Postgres 17</td></tr>
+          <tr><td>Mismatched-opclass warning on HNSW</td><td>Manual index creation with wrong opclass</td><td>Drop the index and re-run Cell 5; the DDL uses <code>vector_cosine_ops</code> deliberately</td></tr>
+          <tr><td><code>out of memory</code> building HNSW on large data</td><td>Default <code>maintenance_work_mem</code> too small</td><td>For &gt;1M rows: <code>SET maintenance_work_mem = '2GB'</code> before <code>CREATE INDEX</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 3 -->
+  <section class="step" id="step3">
+    <div class="step-banner">
+      <span class="step-num">STEP 03</span>
+      <h2 class="step-title">Embed and bulk-load a real corpus</h2>
+      <button class="step-mark" data-step="3" onclick="markStep(3)">Mark done</button>
+    </div>
+    <p>A small support-docs corpus (12 entries) covering returns, shipping, warranty, and one deliberate SKU lookup row that the hybrid retrieval test will hinge on. We embed in batches of 8 via the Foundation Models API and insert in a single transaction.</p>
+
+    <div class="cell" id="cell-6">
+      <div class="cell-header">
+        <span class="cell-label">Cell 6 · sample corpus (12 docs)<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-6')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 6 — sample corpus (12 docs)</span>
+<span class="kw">import</span> json
+
+DOCS = [
+    (<span class="st">"policy/returns.md"</span>, <span class="st">"Return Policy"</span>,
+     <span class="st">"Customers can return any unopened product within 30 days of delivery for a full refund. Opened electronics have a 14-day return window. Damaged items qualify for full refund regardless of timing."</span>,
+     {<span class="st">"category"</span>: <span class="st">"returns"</span>, <span class="st">"lang"</span>: <span class="st">"en"</span>}),
+
+    (<span class="st">"policy/rma.md"</span>, <span class="st">"RMA Process for Defective Devices"</span>,
+     <span class="st">"To return a malfunctioning device, request an RMA number from support. Pack the unit in original packaging if available. We pay return shipping for confirmed defects within the warranty window."</span>,
+     {<span class="st">"category"</span>: <span class="st">"returns"</span>, <span class="st">"lang"</span>: <span class="st">"en"</span>}),
+
+    (<span class="st">"policy/warranty.md"</span>, <span class="st">"Standard Warranty Terms"</span>,
+     <span class="st">"All electronics carry a 1-year limited warranty covering manufacturing defects. Extended warranty available at checkout. Warranty does not cover accidental damage, water damage, or unauthorized modifications."</span>,
+     {<span class="st">"category"</span>: <span class="st">"warranty"</span>, <span class="st">"lang"</span>: <span class="st">"en"</span>}),
+
+    (<span class="st">"catalog/sku-lb-9047x.md"</span>, <span class="st">"Product Sheet: SKU LB-9047X"</span>,
+     <span class="st">"The LB-9047X is a 24-inch curved monitor, 144Hz refresh rate. Replacement parts available for the LB-9047X under standard warranty. Common issues: stuck pixels (covered), backlight bleed (covered if reported in 30 days)."</span>,
+     {<span class="st">"category"</span>: <span class="st">"catalog"</span>, <span class="st">"sku"</span>: <span class="st">"LB-9047X"</span>, <span class="st">"lang"</span>: <span class="st">"en"</span>}),
+
+    (<span class="st">"policy/shipping.md"</span>, <span class="st">"Shipping FAQ"</span>,
+     <span class="st">"Standard shipping is 3-5 business days. Express shipping (1-2 days) available for $15 extra. Free shipping on orders over $99. We ship to all US states and Canada."</span>,
+     {<span class="st">"category"</span>: <span class="st">"shipping"</span>, <span class="st">"lang"</span>: <span class="st">"en"</span>}),
+
+    <span class="cm"># ... (7 more docs: electronics-list, setup, troubleshoot-display,</span>
+    <span class="cm">#      payment, account, privacy, contact — see lab markdown for full list)</span>
+]
+<span class="fn">print</span>(<span class="st">f"✅ </span><span class="nm">{len(DOCS)}</span><span class="st"> docs prepared (with one deliberate SKU row: LB-9047X)"</span>)</pre>
+    </div>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ The full corpus</span>
+      <p>For brevity we show the first 5 entries here. The full 12-doc corpus is in the lab markdown / Python notebook — copy it from there. The 12th doc covers contact channels; the 4th (LB-9047X product sheet) is the corner-case row Step 5 will use.</p>
+    </div>
+
+    <div class="cell" id="cell-7">
+      <div class="cell-header">
+        <span class="cell-label">Cell 7 · embed via Foundation Models + bulk-load<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-7')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 7 — embed via Foundation Models API and bulk-load</span>
+client = w.serving_endpoints.<span class="fn">get_open_ai_client</span>()
+
+<span class="kw">def</span> <span class="fn">embed</span>(texts, batch=<span class="nu">8</span>):
+    <span class="st">"""Embed a list of strings; returns a list of vectors (1024-dim)."""</span>
+    out = []
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">0</span>, <span class="fn">len</span>(texts), batch):
+        chunk = texts[i:i+batch]
+        r = client.embeddings.<span class="fn">create</span>(
+            model=TUTORIAL[<span class="st">"embed_model"</span>],
+            input=chunk,
+        )
+        out.<span class="fn">extend</span>(d.embedding <span class="kw">for</span> d <span class="kw">in</span> r.data)
+    <span class="kw">return</span> out
+
+<span class="cm"># Build the input strings: title + content gives the model both signals</span>
+inputs = [<span class="st">f"</span><span class="nm">{title}</span><span class="st">\n</span><span class="nm">{content}</span><span class="st">"</span> <span class="kw">for</span> (_, title, content, _) <span class="kw">in</span> DOCS]
+<span class="fn">print</span>(<span class="st">f"Embedding </span><span class="nm">{len(inputs)}</span><span class="st"> docs in batches of 8..."</span>)
+vectors = <span class="fn">embed</span>(inputs)
+<span class="fn">print</span>(<span class="st">f"✅ Got </span><span class="nm">{len(vectors)}</span><span class="st"> embeddings, each </span><span class="nm">{len(vectors[0])}</span><span class="st">-dim"</span>)
+
+<span class="cm"># Bulk-load in a single transaction</span>
+INSERT_SQL = <span class="st">"""
+INSERT INTO documents (source, title, content, metadata, embedding)
+VALUES (:source, :title, :content, :metadata, :embedding)
+ON CONFLICT DO NOTHING
+"""</span>
+
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+    <span class="kw">for</span> (source, title, content, meta), vec <span class="kw">in</span> <span class="fn">zip</span>(DOCS, vectors):
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(INSERT_SQL), {
+            <span class="st">"source"</span>:    source,
+            <span class="st">"title"</span>:     title,
+            <span class="st">"content"</span>:   content,
+            <span class="st">"metadata"</span>:  json.<span class="fn">dumps</span>(meta),
+            <span class="st">"embedding"</span>: <span class="fn">str</span>(vec),  <span class="cm"># pgvector accepts a string repr of a list</span>
+        })
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    n = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM documents"</span>)).<span class="fn">scalar</span>()
+    <span class="fn">print</span>(<span class="st">f"\n✅ </span><span class="nm">{n}</span><span class="st"> docs in the table"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>Embedding 12 docs in batches of 8...
+<span class="ok-line">✅ Got 12 embeddings, each 1024-dim</span>
+
+<span class="ok-line">✅ 12 docs in the table</span></pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the Foundation Models API endpoint is reachable, <code>databricks-bge-large-en</code> returns 1024-dim vectors that cleanly slot into your <code>vector(1024)</code> column, and bulk-load via SQLAlchemy <code>text()</code> parameters works with pgvector's string-list format. The HNSW index is incrementally maintained — no rebuild needed after these inserts.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>permission denied: cannot reach serving endpoint</code></td><td>Workspace lacks Foundation Models access</td><td>Ask admin to enable Foundation Models in Settings → Compute</td></tr>
+          <tr><td><code>Got 0 embeddings</code></td><td>API returned no data</td><td>Print <code>r</code> after the call; usually a token-limit issue, retry with shorter chunks</td></tr>
+          <tr><td><code>expected 1024 dimensions, got 768</code></td><td>Wrong embedding model</td><td>Confirm <code>TUTORIAL["embed_model"]</code> is <code>databricks-bge-large-en</code> (not the small variant)</td></tr>
+          <tr><td><code>invalid input syntax for type vector</code></td><td>Vector passed as Python list rather than <code>str(...)</code></td><td>The <code>str(vec)</code> in the INSERT is required — pgvector parses bracket-form strings</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 4 -->
+  <section class="step" id="step4">
+    <div class="step-banner">
+      <span class="step-num">STEP 04</span>
+      <h2 class="step-title">Pure vector retrieval (the baseline)</h2>
+      <button class="step-mark" data-step="4" onclick="markStep(4)">Mark done</button>
+    </div>
+    <p>Establish what pure vector search is good at — and where it breaks. The first query is a semantic question (vector wins). The second is a SKU lookup (vector misses).</p>
+
+    <div class="cell" id="cell-8">
+      <div class="cell-header">
+        <span class="cell-label">Cell 8 · pure vector retrieval helper<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-8')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 8 — pure vector retrieval</span>
+<span class="kw">def</span> <span class="fn">vector_search</span>(question, k=<span class="nu">5</span>):
+    qv = <span class="fn">embed</span>([question])[<span class="nu">0</span>]
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        rows = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+            SELECT id, title,
+                   embedding &lt;=&gt; CAST(:qv AS vector) AS distance
+            FROM documents
+            ORDER BY embedding &lt;=&gt; CAST(:qv AS vector)
+            LIMIT :k
+        """</span>), {<span class="st">"qv"</span>: <span class="fn">str</span>(qv), <span class="st">"k"</span>: k}).<span class="fn">fetchall</span>()
+    <span class="kw">return</span> rows
+
+<span class="fn">print</span>(<span class="st">"Q: How do I return a broken laptop?\n"</span>)
+<span class="kw">for</span> r <span class="kw">in</span> <span class="fn">vector_search</span>(<span class="st">"How do I return a broken laptop?"</span>, k=<span class="nu">5</span>):
+    <span class="fn">print</span>(<span class="st">f"   [</span><span class="nm">{r.distance:.4f}</span><span class="st">]  </span><span class="nm">{r.title}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (order may vary slightly)</div>
+<pre>Q: How do I return a broken laptop?
+
+   [0.3124]  RMA Process for Defective Devices
+   [0.3850]  Return Policy
+   [0.4192]  Standard Warranty Terms
+   [0.4671]  Troubleshooting Display Issues
+   [0.5012]  Electronics Category Definition</pre>
+    </div>
+
+    <p>The top hit (<em>RMA Process</em>) is correct — vector embeddings happily match "broken laptop" to "malfunctioning device" via meaning, not literal words. <strong>This is what pure vector is good at.</strong> Now find a query where it fails:</p>
+
+    <div class="cell" id="cell-9">
+      <div class="cell-header">
+        <span class="cell-label">Cell 9 · the corner case where pure vector misses<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-9')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 9 — find the corner case where pure vector misses</span>
+<span class="fn">print</span>(<span class="st">"Q: What's the warranty on the LB-9047X?\n"</span>)
+<span class="kw">for</span> r <span class="kw">in</span> <span class="fn">vector_search</span>(<span class="st">"What's the warranty on the LB-9047X?"</span>, k=<span class="nu">5</span>):
+    <span class="fn">print</span>(<span class="st">f"   [</span><span class="nm">{r.distance:.4f}</span><span class="st">]  </span><span class="nm">{r.title}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>Q: What's the warranty on the LB-9047X?
+
+   [0.4012]  Standard Warranty Terms
+   [0.4187]  RMA Process for Defective Devices
+   [0.4520]  Return Policy
+   [0.4881]  Electronics Category Definition
+   [0.5104]  Troubleshooting Display Issues</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the doc that <em>specifically mentions</em> LB-9047X (the product sheet) is missing from the top 5 — the embedding model has no special intuition about SKU strings, so it ranks generic warranty docs higher. This is exactly the corner case Module 5 theory 5.3 warned about. Pure vector excels at semantic queries and misses exact-match lookups (SKUs, error codes, names). The fix is hybrid retrieval — Step 5.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 5 -->
+  <section class="step" id="step5">
+    <div class="step-banner">
+      <span class="step-num">STEP 05</span>
+      <h2 class="step-title">Hybrid retrieval with Reciprocal Rank Fusion</h2>
+      <button class="step-mark" data-step="5" onclick="markStep(5)">Mark done</button>
+    </div>
+    <p>Run vector and BM25 in parallel, then fuse with RRF. Score formula: <code>1/(60+rank)</code> summed across both legs. The query plan uses HNSW for the v CTE and GIN-on-tsv for the k CTE — both indexes from Step 2 earn their keep.</p>
+
+    <div class="cell" id="cell-10">
+      <div class="cell-header">
+        <span class="cell-label">Cell 10 · hybrid retrieval with RRF<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-10')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 10 — hybrid retrieval with RRF</span>
+<span class="kw">def</span> <span class="fn">hybrid_search</span>(question, k=<span class="nu">5</span>, fanout=<span class="nu">50</span>):
+    qv = <span class="fn">embed</span>([question])[<span class="nu">0</span>]
+    SQL = <span class="st">"""
+    WITH v AS (
+      SELECT id, ROW_NUMBER() OVER (ORDER BY embedding &lt;=&gt; CAST(:qv AS vector)) AS rk
+      FROM documents
+      ORDER BY embedding &lt;=&gt; CAST(:qv AS vector)
+      LIMIT :fanout
+    ),
+    k AS (
+      SELECT id, ROW_NUMBER() OVER
+        (ORDER BY ts_rank(tsv, plainto_tsquery('english', :q)) DESC) AS rk
+      FROM documents
+      WHERE tsv @@ plainto_tsquery('english', :q)
+      LIMIT :fanout
+    )
+    SELECT d.id, d.title,
+           COALESCE(1.0/(60+v.rk), 0) AS v_score,
+           COALESCE(1.0/(60+k.rk), 0) AS k_score,
+           COALESCE(1.0/(60+v.rk), 0) + COALESCE(1.0/(60+k.rk), 0) AS rrf
+    FROM documents d
+    LEFT JOIN v USING(id)
+    LEFT JOIN k USING(id)
+    WHERE v.id IS NOT NULL OR k.id IS NOT NULL
+    ORDER BY rrf DESC
+    LIMIT :k
+    """</span>
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        rows = conn.<span class="fn">execute</span>(<span class="fn">text</span>(SQL), {
+            <span class="st">"qv"</span>: <span class="fn">str</span>(qv), <span class="st">"q"</span>: question, <span class="st">"k"</span>: k, <span class="st">"fanout"</span>: fanout
+        }).<span class="fn">fetchall</span>()
+    <span class="kw">return</span> rows
+
+<span class="fn">print</span>(<span class="st">"Q: What's the warranty on the LB-9047X?  (HYBRID)\n"</span>)
+<span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{'TITLE':&lt;40}</span><span class="st"> </span><span class="nm">{'VEC':&gt;8}</span><span class="st"> </span><span class="nm">{'BM25':&gt;8}</span><span class="st"> </span><span class="nm">{'RRF':&gt;8}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{'-'*40}</span><span class="st"> </span><span class="nm">{'-'*8}</span><span class="st"> </span><span class="nm">{'-'*8}</span><span class="st"> </span><span class="nm">{'-'*8}</span><span class="st">"</span>)
+<span class="kw">for</span> r <span class="kw">in</span> <span class="fn">hybrid_search</span>(<span class="st">"What's the warranty on the LB-9047X?"</span>, k=<span class="nu">5</span>):
+    <span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{r.title[:40]:&lt;40}</span><span class="st"> </span><span class="nm">{r.v_score:&gt;8.4f}</span><span class="st"> </span><span class="nm">{r.k_score:&gt;8.4f}</span><span class="st"> </span><span class="nm">{r.rrf:&gt;8.4f}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (numbers approximate)</div>
+<pre>Q: What's the warranty on the LB-9047X?  (HYBRID)
+
+   TITLE                                         VEC     BM25      RRF
+   ---------------------------------------- -------- -------- --------
+   <span class="ok-line">Product Sheet: SKU LB-9047X                0.0000   0.0164   0.0164</span>
+   Standard Warranty Terms                    0.0164   0.0161   0.0325
+   RMA Process for Defective Devices          0.0161   0.0159   0.0320
+   Electronics Category Definition            0.0156   0.0000   0.0156
+   Return Policy                              0.0159   0.0000   0.0159</pre>
+    </div>
+
+    <p>The product sheet for <code>LB-9047X</code> now surfaces because BM25 gave it rank 1 — vector totally missed it (<code>v_score = 0</code>), but the keyword leg caught it. <strong>This is the entire point of hybrid retrieval.</strong></p>
+
+    <p>For comparison, run a purely-semantic question — hybrid should still rank correctly without surprises:</p>
+
+    <div class="cell" id="cell-11">
+      <div class="cell-header">
+        <span class="cell-label">Cell 11 · verify hybrid is still good on semantic-only queries<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-11')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 11 — verify hybrid is still good on semantic-only queries</span>
+<span class="fn">print</span>(<span class="st">"Q: How do I return a broken laptop?  (HYBRID)\n"</span>)
+<span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{'TITLE':&lt;40}</span><span class="st"> </span><span class="nm">{'VEC':&gt;8}</span><span class="st"> </span><span class="nm">{'BM25':&gt;8}</span><span class="st"> </span><span class="nm">{'RRF':&gt;8}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{'-'*40}</span><span class="st"> </span><span class="nm">{'-'*8}</span><span class="st"> </span><span class="nm">{'-'*8}</span><span class="st"> </span><span class="nm">{'-'*8}</span><span class="st">"</span>)
+<span class="kw">for</span> r <span class="kw">in</span> <span class="fn">hybrid_search</span>(<span class="st">"How do I return a broken laptop?"</span>, k=<span class="nu">5</span>):
+    <span class="fn">print</span>(<span class="st">f"   </span><span class="nm">{r.title[:40]:&lt;40}</span><span class="st"> </span><span class="nm">{r.v_score:&gt;8.4f}</span><span class="st"> </span><span class="nm">{r.k_score:&gt;8.4f}</span><span class="st"> </span><span class="nm">{r.rrf:&gt;8.4f}</span><span class="st">"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>Q: How do I return a broken laptop?  (HYBRID)
+
+   TITLE                                         VEC     BM25      RRF
+   ---------------------------------------- -------- -------- --------
+   RMA Process for Defective Devices          0.0164   0.0159   0.0323
+   Return Policy                              0.0161   0.0164   0.0325
+   Standard Warranty Terms                    0.0159   0.0000   0.0159
+   ...</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> RRF fuses ranks, not raw scores. Documents that win on either leg surface; documents that win on both surface highest. Hybrid did not introduce noise on the semantic query — it just added the keyword channel for when meaning isn't enough. The query plan uses HNSW for the v CTE and the GIN-on-tsv index for the BM25 CTE — both indexes earn their keep.
+    </div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>function plainto_tsquery(unknown, text) does not exist</code></td><td>Postgres looking for the wrong arg signature</td><td>Use <code>plainto_tsquery('english', :q)</code> with the language argument — the SQL above is correct</td></tr>
+          <tr><td>BM25 returns nothing</td><td>The <code>tsv @@ plainto_tsquery(...)</code> filter eliminates everything</td><td>plainto stems and ANDs all tokens — try <code>websearch_to_tsquery</code> for fuzzier matching</td></tr>
+          <tr><td>HNSW not used in the v CTE plan</td><td>Wrong opclass on the index</td><td>Run <code>EXPLAIN ANALYZE</code> — if it says <code>Seq Scan</code>, drop and recreate the index from Cell 5</td></tr>
+          <tr><td>Slow query on a large corpus</td><td>Default <code>ef_search=40</code> too low</td><td>Add <code>SET LOCAL hnsw.ef_search = 100;</code> inside the transaction</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 6 -->
+  <section class="step" id="step6">
+    <div class="step-banner">
+      <span class="step-num">STEP 06</span>
+      <h2 class="step-title">Wrap it in a <code>rag()</code> function</h2>
+      <button class="step-mark" data-step="6" onclick="markStep(6)">Mark done</button>
+    </div>
+    <p>Embed the question → run hybrid retrieval → build a context block from the top-k → call the chat model with a system prompt that pins it to the retrieved evidence. ~40 lines, no framework.</p>
+
+    <div class="cell" id="cell-12">
+      <div class="cell-header">
+        <span class="cell-label">Cell 12 · end-to-end RAG function<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-12')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 12 — end-to-end RAG function</span>
+<span class="kw">def</span> <span class="fn">rag</span>(question: <span class="fn">str</span>, k: <span class="fn">int</span> = <span class="nu">4</span>) -&gt; <span class="fn">dict</span>:
+    <span class="st">"""Hybrid-retrieval RAG. Returns dict with answer + sources."""</span>
+    <span class="cm"># 1. Retrieve top-k via hybrid</span>
+    rows = <span class="fn">hybrid_search</span>(question, k=k)
+    <span class="kw">if not</span> rows:
+        <span class="kw">return</span> {<span class="st">"answer"</span>: <span class="st">"No relevant documents found."</span>, <span class="st">"sources"</span>: []}
+
+    <span class="cm"># 2. Build context block</span>
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        docs = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+            SELECT id, title, content, source
+            FROM documents WHERE id = ANY(:ids)
+        """</span>), {<span class="st">"ids"</span>: [r.id <span class="kw">for</span> r <span class="kw">in</span> rows]}).<span class="fn">fetchall</span>()
+        order = {r.id: i <span class="kw">for</span> i, r <span class="kw">in</span> <span class="fn">enumerate</span>(rows)}
+        docs = <span class="fn">sorted</span>(docs, key=<span class="kw">lambda</span> d: order[d.id])
+
+    context = <span class="st">"\n\n"</span>.<span class="fn">join</span>(
+        <span class="st">f"# </span><span class="nm">{d.title}</span><span class="st">\n[source: </span><span class="nm">{d.source}</span><span class="st">]\n</span><span class="nm">{d.content}</span><span class="st">"</span> <span class="kw">for</span> d <span class="kw">in</span> docs
+    )
+
+    <span class="cm"># 3. Call the chat model</span>
+    out = client.chat.completions.<span class="fn">create</span>(
+        model=TUTORIAL[<span class="st">"chat_model"</span>],
+        messages=[
+            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>:
+                <span class="st">"Answer the user's question using ONLY the provided context. "</span>
+                <span class="st">"If the answer isn't in the context, say so. Cite source paths "</span>
+                <span class="st">"in brackets when you use a fact."</span>},
+            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>:
+                <span class="st">f"Context:\n</span><span class="nm">{context}</span><span class="st">\n\nQuestion: </span><span class="nm">{question}</span><span class="st">"</span>}
+        ],
+        temperature=<span class="nu">0.1</span>,
+    )
+    <span class="kw">return</span> {
+        <span class="st">"answer"</span>:  out.choices[<span class="nu">0</span>].message.content,
+        <span class="st">"sources"</span>: [{<span class="st">"title"</span>: d.title, <span class="st">"source"</span>: d.source} <span class="kw">for</span> d <span class="kw">in</span> docs],
+    }</pre>
+    </div>
+
+    <div class="cell" id="cell-13">
+      <div class="cell-header">
+        <span class="cell-label">Cell 13 · try the SKU question that hybrid solved<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-13')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 13 — try the SKU question that hybrid solved</span>
+result = <span class="fn">rag</span>(<span class="st">"What's the warranty on the LB-9047X and what does it cover?"</span>)
+<span class="fn">print</span>(<span class="st">"ANSWER:"</span>)
+<span class="fn">print</span>(result[<span class="st">"answer"</span>])
+<span class="fn">print</span>(<span class="st">"\nSOURCES:"</span>)
+<span class="kw">for</span> s <span class="kw">in</span> result[<span class="st">"sources"</span>]:
+    <span class="fn">print</span>(<span class="st">f"   · </span><span class="nm">{s['title']:&lt;35}</span><span class="st"> [</span><span class="nm">{s['source']}</span><span class="st">]"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (chat model wording will vary)</div>
+<pre>ANSWER:
+The LB-9047X is covered under the standard 1-year limited warranty, which
+covers manufacturing defects [policy/warranty.md]. Common LB-9047X-specific
+issues that are covered include stuck pixels, and backlight bleed if reported
+within 30 days [catalog/sku-lb-9047x.md]. Replacement parts are available
+under the standard warranty [catalog/sku-lb-9047x.md]. The warranty does
+NOT cover accidental damage, water damage, or unauthorized modifications.
+
+<span class="ok-line">SOURCES:</span>
+   · Product Sheet: SKU LB-9047X         [catalog/sku-lb-9047x.md]
+   · Standard Warranty Terms             [policy/warranty.md]
+   · RMA Process for Defective Devices   [policy/rma.md]
+   · Return Policy                       [policy/returns.md]</pre>
+    </div>
+
+    <div class="cell" id="cell-14">
+      <div class="cell-header">
+        <span class="cell-label">Cell 14 · try a purely semantic question<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-14')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 14 — try a purely semantic question</span>
+result = <span class="fn">rag</span>(<span class="st">"Can I return something I already opened?"</span>)
+<span class="fn">print</span>(<span class="st">"ANSWER:"</span>)
+<span class="fn">print</span>(result[<span class="st">"answer"</span>])
+<span class="fn">print</span>(<span class="st">"\nSOURCES:"</span>)
+<span class="kw">for</span> s <span class="kw">in</span> result[<span class="st">"sources"</span>]:
+    <span class="fn">print</span>(<span class="st">f"   · </span><span class="nm">{s['title']:&lt;35}</span><span class="st"> [</span><span class="nm">{s['source']}</span><span class="st">]"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>ANSWER:
+Yes, but with restrictions. Opened electronics have a 14-day return window
+[policy/returns.md]. Damaged items qualify for a full refund regardless of
+whether they were opened [policy/returns.md]. For defective devices, you can
+request an RMA number — return shipping is paid for confirmed defects within
+the warranty window [policy/rma.md].
+
+<span class="ok-line">SOURCES:</span>
+   · Return Policy                       [policy/returns.md]
+   · RMA Process for Defective Devices   [policy/rma.md]
+   · Standard Warranty Terms             [policy/warranty.md]</pre>
+    </div>
+
+    <div class="proves">
+      <strong>What this proves:</strong> the entire RAG pipeline — embed, hybrid retrieve, fuse, generate — runs against one Lakebase project with one chat completion call. No external vector DB, no separate retrieval service, no glue code beyond what fits on this page. This is the architecture you'd ship to a customer.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ STEP 7 -->
+  <section class="step" id="step7">
+    <div class="step-banner">
+      <span class="step-num">STEP 07</span>
+      <h2 class="step-title">Verify and (optional) cleanup</h2>
+      <button class="step-mark" data-step="7" onclick="markStep(7)">Mark done</button>
+    </div>
+    <p>Run the 6-check verification. All ✅ means Module 5 is done and Module 6 can build directly on this schema.</p>
+
+    <div class="substep"><span>7a</span>Final checklist</div>
+
+    <div class="cell" id="cell-15">
+      <div class="cell-header">
+        <span class="cell-label">Cell 15 · final checks<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-15')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 15 — final checks</span>
+checks = []
+
+<span class="cm"># 1. pgvector extension installed</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        v = c.<span class="fn">execute</span>(<span class="fn">text</span>(
+            <span class="st">"SELECT extversion FROM pg_extension WHERE extname='vector'"</span>
+        )).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"pgvector extension"</span>, <span class="st">f"v</span><span class="nm">{v}</span><span class="st">"</span>, v <span class="kw">is not</span> <span class="kw">None</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"pgvector extension"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 2. documents table exists with all columns</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        cols = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+            SELECT count(*) FROM information_schema.columns
+            WHERE table_name='documents'
+        """</span>)).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"documents schema"</span>, <span class="st">f"</span><span class="nm">{cols}</span><span class="st"> cols"</span>, cols == <span class="nu">8</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"documents schema"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 3. all three indexes present</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        n = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+            SELECT count(*) FROM pg_indexes
+            WHERE tablename='documents'
+              AND indexname IN ('idx_doc_hnsw','idx_doc_tsv','idx_doc_meta')
+        """</span>)).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"3 required indexes"</span>, <span class="st">f"</span><span class="nm">{n}</span><span class="st">/3"</span>, n == <span class="nu">3</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"3 required indexes"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 4. corpus loaded (at least 12 docs with embeddings)</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> c:
+        n = c.<span class="fn">execute</span>(<span class="fn">text</span>(
+            <span class="st">"SELECT count(*) FROM documents WHERE embedding IS NOT NULL"</span>
+        )).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"corpus embedded"</span>, <span class="st">f"n=</span><span class="nm">{n}</span><span class="st">"</span>, n &gt;= <span class="nu">12</span>))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"corpus embedded"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 5. hybrid retrieval surfaces the SKU doc</span>
+<span class="kw">try</span>:
+    rows = <span class="fn">hybrid_search</span>(<span class="st">"What's the warranty on the LB-9047X?"</span>, k=<span class="nu">3</span>)
+    titles = [r.title <span class="kw">for</span> r <span class="kw">in</span> rows]
+    sku_in_top3 = <span class="fn">any</span>(<span class="st">"LB-9047X"</span> <span class="kw">in</span> t <span class="kw">for</span> t <span class="kw">in</span> titles)
+    checks.<span class="fn">append</span>((<span class="st">"hybrid finds SKU doc"</span>, <span class="fn">str</span>(titles[<span class="nu">0</span>])[:<span class="nu">30</span>], sku_in_top3))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"hybrid finds SKU doc"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 6. rag() returns a non-empty answer + sources</span>
+<span class="kw">try</span>:
+    r = <span class="fn">rag</span>(<span class="st">"How long is the warranty?"</span>)
+    ok = <span class="fn">len</span>(r[<span class="st">"answer"</span>]) &gt; <span class="nu">20</span> <span class="kw">and</span> <span class="fn">len</span>(r[<span class="st">"sources"</span>]) &gt; <span class="nu">0</span>
+    checks.<span class="fn">append</span>((<span class="st">"rag() end-to-end"</span>, <span class="st">f"</span><span class="nm">{len(r['sources'])}</span><span class="st"> src"</span>, ok))
+<span class="kw">except</span> <span class="fn">Exception</span> <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"rag() end-to-end"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># Print</span>
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+<span class="fn">print</span>(<span class="st">f"</span><span class="nm">{'CHECK':&lt;28}</span><span class="st"> </span><span class="nm">{'DETAIL':&lt;28}</span><span class="st"> STATUS"</span>)
+<span class="fn">print</span>(<span class="st">"-"</span> * <span class="nu">70</span>)
+<span class="kw">for</span> name, detail, ok <span class="kw">in</span> checks:
+    icon = <span class="st">"✅"</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="st">"❌"</span>
+    <span class="fn">print</span>(<span class="st">f"</span><span class="nm">{name:&lt;28}</span><span class="st"> </span><span class="nm">{str(detail)[:28]:&lt;28}</span><span class="st"> </span><span class="nm">{icon}</span><span class="st">"</span>)
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+passed = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> _, _, ok <span class="kw">in</span> checks <span class="kw">if</span> ok)
+total = <span class="fn">len</span>(checks)
+<span class="kw">if</span> passed == total:
+    <span class="fn">print</span>(<span class="st">f"\n🎯 ALL </span><span class="nm">{total}</span><span class="st"> CHECKS PASSED — Module 5 complete."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">f"\n⚠ </span><span class="nm">{passed}</span><span class="st">/</span><span class="nm">{total}</span><span class="st"> passed. Resolve the ❌ rows before Module 6."</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output (the success case)</div>
+<pre>======================================================================
+CHECK                        DETAIL                       STATUS
+----------------------------------------------------------------------
+<span class="ok-line">pgvector extension           v0.7.x                       ✅</span>
+<span class="ok-line">documents schema             8 cols                       ✅</span>
+<span class="ok-line">3 required indexes           3/3                          ✅</span>
+<span class="ok-line">corpus embedded              n=12                         ✅</span>
+<span class="ok-line">hybrid finds SKU doc         Product Sheet: SKU LB-9047X  ✅</span>
+<span class="ok-line">rag() end-to-end             4 src                        ✅</span>
+======================================================================
+
+<span class="ok-line">🎯 ALL 6 CHECKS PASSED — Module 5 complete.</span></pre>
+    </div>
+
+    <!-- ─── INTERACTIVE CHECKLIST ─── -->
+    <div class="checklist-section">
+      <div class="checklist-header">
+        <span class="checklist-title">Tap each check as Cell 15 prints <em>✅</em></span>
+        <span class="checklist-status" id="clStatus">0 / 6 complete</span>
+      </div>
+      <div class="check-row">
+        <span class="check-num">01</span>
+        <div>
+          <div class="check-name">pgvector extension</div>
+          <div class="check-desc">CREATE EXTENSION vector returned v0.7.x</div>
+        </div>
+        <span class="check-detail" id="d1">— pending —</span>
+        <button class="check-toggle" data-check="1" onclick="toggleCheck(1)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">02</span>
+        <div>
+          <div class="check-name">documents schema</div>
+          <div class="check-desc">8 columns including vector(1024) + tsv</div>
+        </div>
+        <span class="check-detail" id="d2">— pending —</span>
+        <button class="check-toggle" data-check="2" onclick="toggleCheck(2)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">03</span>
+        <div>
+          <div class="check-name">3 required indexes</div>
+          <div class="check-desc">idx_doc_hnsw + idx_doc_tsv + idx_doc_meta</div>
+        </div>
+        <span class="check-detail" id="d3">— pending —</span>
+        <button class="check-toggle" data-check="3" onclick="toggleCheck(3)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">04</span>
+        <div>
+          <div class="check-name">corpus embedded</div>
+          <div class="check-desc">n &gt;= 12 docs with non-NULL embedding</div>
+        </div>
+        <span class="check-detail" id="d4">— pending —</span>
+        <button class="check-toggle" data-check="4" onclick="toggleCheck(4)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">05</span>
+        <div>
+          <div class="check-name">hybrid finds SKU doc</div>
+          <div class="check-desc">"Product Sheet: SKU LB-9047X" in top 3</div>
+        </div>
+        <span class="check-detail" id="d5">— pending —</span>
+        <button class="check-toggle" data-check="5" onclick="toggleCheck(5)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">06</span>
+        <div>
+          <div class="check-name">rag() end-to-end</div>
+          <div class="check-desc">non-empty answer with cited sources</div>
+        </div>
+        <span class="check-detail" id="d6">— pending —</span>
+        <button class="check-toggle" data-check="6" onclick="toggleCheck(6)">○</button>
+      </div>
+
+      <div class="checklist-footer">
+        <span id="clMessage">▸ Run Cell 15. Tap each ✅ above as it appears.</span>
+        <button class="reset-btn" onclick="resetChecks()">RESET</button>
+      </div>
+    </div>
+
+    <div class="substep"><span>7b</span>Cleanup (optional)</div>
+
+    <div class="cell" id="cell-16">
+      <div class="cell-header">
+        <span class="cell-label">Cell 16 · cleanup<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-16')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 16 — cleanup</span>
+<span class="cm"># Set CLEANUP_DOCS = True ONLY if you want to wipe the documents table.</span>
+<span class="cm"># Module 6 layers agent memory NEXT TO this schema — most readers KEEP it.</span>
+CLEANUP_DOCS = <span class="kw">False</span>
+
+<span class="kw">if</span> CLEANUP_DOCS:
+    <span class="fn">print</span>(<span class="st">"Dropping documents table and indexes..."</span>)
+    <span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"DROP TABLE IF EXISTS documents CASCADE"</span>))
+    <span class="fn">print</span>(<span class="st">"✅ documents table removed. pgvector extension and project remain."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"⏸ Cleanup skipped. The documents table will be reused in Module 6."</span>)
+    <span class="fn">print</span>(<span class="st">f"   Project: </span><span class="nm">{TUTORIAL['project_name']}</span><span class="st">"</span>)
+    <span class="fn">print</span>(<span class="st">f"   Endpoint: </span><span class="nm">{project.read_write_dns}</span><span class="st">"</span>)
+    <span class="fn">print</span>()
+    <span class="fn">print</span>(<span class="st">"   To clean up later, set CLEANUP_DOCS=True and re-run this cell."</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ─── TROUBLESHOOTING REFERENCE ─── -->
+  <section>
+    <h2>Troubleshooting reference</h2>
+    <p>If your final checklist has any ❌ rows, find the row in the table below and apply the fix. Don't proceed to Module 6 with failing checks — agent memory in Module 6 reuses the same retrieval pattern you just built.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>❌ Row</th><th>Most common cause</th><th>Resolution path</th></tr></thead>
+        <tbody>
+          <tr><td><strong>pgvector extension</strong></td><td>Cell 3 was skipped</td><td>Re-run Cell 3, then continue from where you stopped</td></tr>
+          <tr><td><strong>documents schema</strong></td><td>Cell 4 failed silently with a transaction rollback</td><td>Re-run Cell 4; verify with <code>\d documents</code> in psql</td></tr>
+          <tr><td><strong>3 required indexes</strong></td><td>Cell 5 partial failure (e.g. out-of-memory on HNSW build)</td><td>Re-run Cell 5 one statement at a time; bump <code>maintenance_work_mem</code> for HNSW</td></tr>
+          <tr><td><strong>corpus embedded</strong></td><td>Foundation Models endpoint timeout</td><td>Re-run Cell 7 — <code>ON CONFLICT DO NOTHING</code> means it's safe to retry</td></tr>
+          <tr><td><strong>hybrid finds SKU doc</strong></td><td>Product-sheet doc didn't load, or BM25 isn't matching</td><td>Verify <code>SELECT count(*) FROM documents WHERE title LIKE '%LB-9047X%'</code> returns 1</td></tr>
+          <tr><td><strong>rag() end-to-end</strong></td><td>Chat-model endpoint not reachable, or empty context</td><td>Confirm <code>databricks-meta-llama-3-3-70b-instruct</code> is in your workspace's serving endpoints</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── DONE BANNER ─── -->
+  <section class="done-banner">
+    <h3>What you've <em>accomplished</em></h3>
+    <p>If your final cell printed <code>🎯 ALL 6 CHECKS PASSED</code>, you have done — for real, not in slides:</p>
+    <ul>
+      <li>✅ Activated pgvector on top of an existing Lakebase project</li>
+      <li>✅ Designed a production-grade <code>documents</code> table with HNSW + 2× GIN indexes</li>
+      <li>✅ Embedded a real corpus through the Databricks Foundation Models API</li>
+      <li>✅ Demonstrated where pure vector search fails (the SKU lookup) and why</li>
+      <li>✅ Implemented Reciprocal Rank Fusion in pure SQL — no application-side merge</li>
+      <li>✅ Wrapped it in a 40-line <code>rag()</code> function that calls a chat model with grounded context</li>
+    </ul>
+    <p>These six capabilities are the core of every retrieval workload you'll touch in Modules 6 and 7. Module 6 reuses the exact <code>documents</code> schema as the <em>long-term memory</em> of an AI agent — the agent writes its own conversation summaries into this table and retrieves them via the same hybrid search you just built. Module 7 wraps <code>rag()</code> into a Databricks App with a chat UI. <strong>Save this notebook somewhere you can find it again.</strong></p>
+
+    <div class="callout callout-success" style="margin-top: 24px;">
+      <span class="callout-label">▸ Module 5 complete</span>
+      <p>You finished three theory topics (5.1–5.3) and the hands-on lab. <strong>Next up: Module 6</strong> — <em>Lakebase as Memory Store for AI Agents.</em> You'll learn the four-layer agent memory model and extend the <code>documents</code> table with a <code>messages</code> companion to build a memory-aware agent loop that retrieves its own past summaries via the same hybrid pattern you just built.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ COPY BUTTONS ═══════════════
+function copyCell(cellId) {
+  const cell = document.getElementById(cellId);
+  const pre = cell.querySelector('pre');
+  const text = pre.innerText;
+  const btn = cell.querySelector('.copy-btn');
+
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.textContent = 'COPIED ✓';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = 'COPY';
+    }, 1800);
+  }).catch(() => {
+    btn.textContent = 'PRESS ⌘+C';
+    const range = document.createRange();
+    range.selectNode(pre);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    setTimeout(() => { btn.textContent = 'COPY'; }, 2200);
+  });
+}
+
+// ═══════════════ STEP TRACKER ═══════════════
+const STEP_KEY  = 'lakebase_lab5_steps';
+const CHECK_KEY = 'lakebase_lab5_checks';
+
+function loadSteps() {
+  try { return JSON.parse(localStorage.getItem(STEP_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveSteps(s) {
+  try { localStorage.setItem(STEP_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+function markStep(n) {
+  const steps = loadSteps();
+  steps[n] = !steps[n];
+  saveSteps(steps);
+  renderSteps();
+}
+
+function renderSteps() {
+  const steps = loadSteps();
+  const total = 7;
+  let done = 0;
+  for (let i = 1; i <= total; i++) {
+    const pill = document.querySelector(`.step-pill[data-step="${i}"]`);
+    const btn = document.querySelector(`.step-mark[data-step="${i}"]`);
+    if (steps[i]) {
+      done++;
+      if (pill) pill.classList.add('done');
+      if (btn) {
+        btn.classList.add('done');
+        btn.textContent = '✓ Done';
+      }
+    } else {
+      if (pill) pill.classList.remove('done');
+      if (btn) {
+        btn.classList.remove('done');
+        btn.textContent = 'Mark done';
+      }
+    }
+  }
+  const counter = document.getElementById('trackerCount');
+  if (counter) {
+    counter.textContent = `${done} / ${total}`;
+    counter.style.color = (done === total) ? 'var(--accent-green)' : 'var(--accent-purple)';
+  }
+}
+
+// Highlight active step on scroll
+function highlightActive() {
+  const sections = document.querySelectorAll('section.step');
+  const scrollY = window.scrollY + 200;
+  let active = null;
+  sections.forEach(s => {
+    if (s.offsetTop <= scrollY) active = s.id;
+  });
+  document.querySelectorAll('.step-pill').forEach(p => p.classList.remove('active'));
+  if (active) {
+    const n = active.replace('step', '');
+    const pill = document.querySelector(`.step-pill[data-step="${n}"]`);
+    if (pill && !pill.classList.contains('done')) pill.classList.add('active');
+  }
+}
+window.addEventListener('scroll', highlightActive);
+
+// ═══════════════ INTERACTIVE CHECKLIST ═══════════════
+const CHECK_DETAILS = {
+  1: 'v0.7.x',
+  2: '8 cols',
+  3: '3/3',
+  4: 'n=12',
+  5: 'Product Sheet: SKU LB-9047X',
+  6: '4 src'
+};
+
+function loadChecks() {
+  try { return JSON.parse(localStorage.getItem(CHECK_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveChecks(c) {
+  try { localStorage.setItem(CHECK_KEY, JSON.stringify(c)); } catch (e) {}
+}
+
+function toggleCheck(n) {
+  const checks = loadChecks();
+  checks[n] = !checks[n];
+  saveChecks(checks);
+  renderChecks();
+}
+
+function resetChecks() {
+  if (!confirm('Reset all checks?')) return;
+  saveChecks({});
+  renderChecks();
+}
+
+function renderChecks() {
+  const checks = loadChecks();
+  const total = 6;
+  let done = 0;
+  for (let i = 1; i <= total; i++) {
+    const btn = document.querySelector(`.check-toggle[data-check="${i}"]`);
+    const detail = document.getElementById('d' + i);
+    if (checks[i]) {
+      done++;
+      if (btn) {
+        btn.classList.add('checked');
+        btn.textContent = '✓';
+      }
+      if (detail) {
+        detail.textContent = CHECK_DETAILS[i];
+        detail.style.color = 'var(--accent-green)';
+      }
+    } else {
+      if (btn) {
+        btn.classList.remove('checked');
+        btn.textContent = '○';
+      }
+      if (detail) {
+        detail.textContent = '— pending —';
+        detail.style.color = 'var(--text-muted)';
+      }
+    }
+  }
+  const status = document.getElementById('clStatus');
+  const msg = document.getElementById('clMessage');
+  if (status) {
+    status.textContent = `${done} / ${total} complete`;
+    if (done === total) status.classList.add('complete');
+    else status.classList.remove('complete');
+  }
+  if (msg) {
+    if (done === 0) {
+      msg.textContent = '▸ Run Cell 15. Tap each ✅ above as it appears.';
+      msg.style.color = '';
+    } else if (done < total) {
+      msg.textContent = `▸ ${total - done} check${total - done === 1 ? '' : 's'} remaining. Keep going.`;
+      msg.style.color = '';
+    } else {
+      msg.textContent = '🎯 All checks complete — Module 5 done. Move on to Module 6.';
+      msg.style.color = 'var(--accent-green)';
+    }
+  }
+}
+
+// initial render
+renderSteps();
+renderChecks();
+highlightActive();
+</script>
+
+</body>
+</html>

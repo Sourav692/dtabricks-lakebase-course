@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 08 — Capstone: Build "AskMyOrders" End-to-End</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 64px 48px 56px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(255,107,53,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(168,85,247,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.crumb .tag {
+  color: var(--accent-orange);
+  padding: 4px 12px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.crumb .capstone {
+  color: var(--accent-yellow);
+  padding: 4px 12px;
+  border: 1px solid rgba(251,191,36,0.4);
+  background: rgba(251,191,36,0.07);
+  border-radius: 2px;
+}
+.crumb .sep { color: var(--text-muted); }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-orange); }
+
+.lede {
+  font-size: 17px; color: var(--text-dim);
+  max-width: 760px; line-height: 1.75;
+  margin-bottom: 32px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px; font-weight: 500;
+  color: var(--accent-teal);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 48px 100px;
+}
+
+/* ─── TOC ─── */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 22px 28px;
+  margin-bottom: 56px;
+}
+.toc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin-bottom: 12px;
+}
+.toc ol { list-style: none; counter-reset: toc; }
+.toc li {
+  counter-increment: toc;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px;
+}
+.toc li:last-child { border-bottom: none; }
+.toc li::before {
+  content: counter(toc, decimal-leading-zero);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--accent-orange);
+  margin-right: 10px;
+}
+.toc a {
+  color: var(--text);
+  text-decoration: none;
+  flex: 1;
+  font-size: 14.5px;
+}
+.toc a:hover { color: var(--accent-orange); }
+.toc .dur {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ─── TOPIC SECTIONS ─── */
+.topic { margin-bottom: 80px; }
+.topic-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 28px;
+  padding: 16px 20px;
+  background: linear-gradient(90deg, rgba(255,107,53,0.08) 0%, transparent 80%);
+  border-left: 3px solid var(--accent-orange);
+  border-radius: 0 6px 6px 0;
+}
+.topic-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--accent-orange);
+  letter-spacing: 0.1em;
+}
+.topic-banner .line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+}
+.topic-banner .type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.topic h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.topic h2 em { color: var(--accent-orange); font-style: italic; }
+.topic h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  margin: 32px 0 14px;
+  color: var(--accent-teal);
+  letter-spacing: 0.01em;
+}
+.topic p {
+  margin-bottom: 16px;
+  color: var(--text);
+  font-size: 15.5px;
+}
+.topic ul, .topic ol {
+  margin: 14px 0 22px 24px;
+  color: var(--text);
+}
+.topic ul li, .topic ol li {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+.topic strong { color: var(--accent-yellow); font-weight: 500; }
+.topic em { color: var(--text-dim); }
+code {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1.5px 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  color: var(--accent-purple);
+}
+
+/* ─── CALLOUTS ─── */
+.callout {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 14.5px;
+}
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+.callout-note {
+  background: rgba(74,158,255,0.06);
+  border-color: var(--accent-blue);
+}
+.callout-note .callout-label { color: var(--accent-blue); }
+.callout-warn {
+  background: rgba(251,191,36,0.06);
+  border-color: var(--accent-yellow);
+}
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-success {
+  background: rgba(34,197,94,0.06);
+  border-color: var(--accent-green);
+}
+.callout-success .callout-label { color: var(--accent-green); }
+
+/* ─── DIAGRAM CONTAINER ─── */
+.diagram {
+  margin: 32px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.diagram-header {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface2);
+}
+.diagram-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--accent-orange);
+  text-transform: uppercase;
+}
+.diagram-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.diagram-stage {
+  padding: 24px 18px;
+  display: flex; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(168,85,247,0.04) 0%, transparent 70%);
+}
+.diagram-info {
+  padding: 16px 22px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  min-height: 70px;
+}
+.diagram-info-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin-bottom: 6px;
+}
+.diagram-info p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ─── DIAGRAM SVG common ─── */
+.arch-svg, .phase-svg, .agent-svg, .checkpoint-svg {
+  width: 100%; max-width: 920px; height: auto;
+}
+.diag-node {
+  cursor: pointer;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.diag-node:hover { filter: brightness(1.25); }
+.diag-node.dimmed { opacity: 0.3; }
+.diag-node text { pointer-events: none; }
+
+/* ─── PHASE CARDS ─── */
+.phase-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin: 28px 0;
+}
+.phase-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+}
+.phase-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent-orange);
+}
+.phase-card.p2::before { background: var(--accent-blue); }
+.phase-card.p3::before { background: var(--accent-purple); }
+.phase-card.p4::before { background: var(--accent-yellow); }
+.phase-card.p5::before { background: var(--accent-green); }
+.phase-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--accent-orange);
+  text-transform: uppercase;
+}
+.phase-card.p2 .phase-num { color: var(--accent-blue); }
+.phase-card.p3 .phase-num { color: var(--accent-purple); }
+.phase-card.p4 .phase-num { color: var(--accent-yellow); }
+.phase-card.p5 .phase-num { color: var(--accent-green); }
+.phase-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  font-style: italic;
+  margin: 6px 0 4px;
+  color: var(--text);
+}
+.phase-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.phase-card ul {
+  margin: 8px 0 8px 18px;
+}
+.phase-card ul li {
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: var(--text-dim);
+}
+.phase-card .modules {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+/* ─── TABLES ─── */
+.tbl-wrap {
+  margin: 22px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th, td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+thead th {
+  background: var(--surface2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  font-weight: 500;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(168,85,247,0.04); }
+td code { font-size: 11.5px; }
+
+/* ─── CODE BLOCKS ─── */
+.code-block {
+  margin: 22px 0;
+  background: #060810;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.code-header {
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.code-header .lang { color: var(--accent-purple); }
+pre {
+  padding: 16px 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text);
+  overflow-x: auto;
+}
+pre .kw { color: var(--accent-purple); }
+pre .fn { color: var(--accent-blue); }
+pre .st { color: var(--accent-green); }
+pre .nm { color: var(--accent-yellow); }
+pre .nu { color: var(--accent-orange); }
+pre .cm { color: var(--text-muted); font-style: italic; }
+
+/* ─── CHECKPOINT GRID ─── */
+.checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+.check {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-green);
+  border-radius: 4px;
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  font-size: 13.5px;
+}
+.check-num {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--accent-green);
+  font-size: 12px;
+}
+
+/* ─── WRAP-UP ─── */
+.wrap-up {
+  margin-top: 80px;
+  padding: 36px 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.wrap-up::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wrap-up h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 26px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.wrap-up h3 em { color: var(--accent-orange); }
+
+/* ─── PROGRESS BAR ─── */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--accent-orange);
+  z-index: 1000;
+  transition: width 0.1s;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 30px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 08</span>
+      <span class="sep">/</span>
+      <span class="capstone">◆ Capstone</span>
+      <span class="sep">/</span>
+      <span>Build "AskMyOrders" End-to-End</span>
+    </div>
+    <h1>The <em>Capstone</em><br>Build "AskMyOrders" End-to-End</h1>
+    <p class="lede">Modules 1 through 7 each delivered one capability. Module 8 is where they stop being seven separate ideas and start being one product. You will build an internal AI-powered customer support app that exercises every concept from the roadmap — in exactly one place.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">5</span><span class="meta-lbl">Phases</span></div>
+      <div class="meta-item"><span class="meta-val">~4h</span><span class="meta-lbl">Total Build</span></div>
+      <div class="meta-item"><span class="meta-val">Advanced</span><span class="meta-lbl">Level</span></div>
+      <div class="meta-item"><span class="meta-val">4</span><span class="meta-lbl">Interactive Diagrams</span></div>
+      <div class="meta-item"><span class="meta-val">M1 → M7</span><span class="meta-lbl">Modules Used</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ───── TABLE OF CONTENTS ───── -->
+  <div class="toc">
+    <div class="toc-label">▸ On this page</div>
+    <ol>
+      <li><a href="#t81">The Capstone Scenario — Northwind Goods</a><span class="dur">~10 min</span></li>
+      <li><a href="#t82">The System Architecture — Four Layers, One Stack</a><span class="dur">~15 min</span></li>
+      <li><a href="#t83">The Five Phases — How the Build Decomposes</a><span class="dur">~25 min</span></li>
+      <li><a href="#t84">The Agent Loop — The Piece Worth Seeing in Full</a><span class="dur">~15 min</span></li>
+      <li><a href="#t85">Definition of Done — The 9 Checkpoints</a><span class="dur">~10 min</span></li>
+      <li><a href="#wrap">Stretch Goals &amp; Module 8 Wrap-Up</a><span class="dur">~5 min</span></li>
+    </ol>
+  </div>
+
+  <!-- ────────── INTRO ────────── -->
+  <section class="topic">
+    <h3 style="margin-top:0">What this module gives you</h3>
+    <p>Modules 1 through 7 each delivered one capability. <strong>Module 8 is where they stop being seven separate ideas and start being one product.</strong> You will build "AskMyOrders" — an internal AI-powered support app for a fictional retailer, <em>Northwind Goods</em> — that exercises every concept from the roadmap in exactly one place.</p>
+    <p>By the end of this module, you can walk a customer through the complete reference architecture for a Lakebase-backed AI app, point at every component, and say <em>"I built this. It works. Here's what it cost."</em> That conviction is what closes design reviews.</p>
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Prerequisite Check</span>
+      You should have completed <strong>Modules 1 through 7</strong> end-to-end. Specifically: a working Lakebase project from Module 3, a synced table from Module 4, a <code>pgvector</code> schema from Module 5, an agent memory layer from Module 6, and the OBO connection pattern from Module 7. The capstone reuses every one of those artefacts.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 8.1 -->
+  <section class="topic" id="t81">
+    <div class="topic-banner">
+      <span class="topic-id">8.1</span>
+      <span class="line"></span>
+      <span class="type">Theory · Scenario</span>
+    </div>
+    <h2>The capstone scenario — <em>Northwind Goods</em></h2>
+
+    <h3>The customer in the story</h3>
+    <p><strong>You are the lead engineer at "Northwind Goods,"</strong> a fictional mid-market retailer running on Databricks. Customer support agents currently jump between five tools every shift:</p>
+    <ul>
+      <li>A ticketing system</li>
+      <li>A customer database</li>
+      <li>A returns portal</li>
+      <li>A knowledge wiki</li>
+      <li>Slack</li>
+    </ul>
+    <p>Leadership wants <strong>one app</strong>: an AI assistant that answers customer questions using internal docs, knows the customer's order history, remembers prior conversations, and lets the agent record resolutions back to the data platform.</p>
+
+    <h3>Why this scenario, specifically</h3>
+    <p>This is — almost word-for-word — the scenario customers describe in real RSA conversations. Build it once for yourself; reuse the patterns forever. Every architectural choice maps to a decision you will help a real customer make in the next 90 days.</p>
+
+    <h3>What you will produce</h3>
+    <p>By the end of the capstone you will have, in your own workspace:</p>
+    <ul>
+      <li>A <strong>working Databricks App</strong> at a real URL, signed in via workspace OAuth</li>
+      <li>A <strong>Lakebase project</strong> with <code>main</code> and <code>dev</code> branches</li>
+      <li><strong>Synced UC tables</strong> carrying customer/order data into the app</li>
+      <li>A <strong>RAG knowledge base</strong> with HNSW + GIN indexes over support docs</li>
+      <li>An <strong>agent loop with memory</strong> demonstrating cross-session recall</li>
+      <li><strong>Lakehouse Sync</strong> streaming app-side resolutions back to Delta</li>
+      <li>A <strong>DBSQL dashboard</strong> on top of the Delta resolution stream</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 8.2 -->
+  <section class="topic" id="t82">
+    <div class="topic-banner">
+      <span class="topic-id">8.2</span>
+      <span class="line"></span>
+      <span class="type">Theory · Architecture</span>
+    </div>
+    <h2>System architecture — <em>four layers</em>, one stack</h2>
+
+    <h3>The reference model</h3>
+    <p>Every Lakebase-backed AI app you will ever architect with a customer fits this four-layer model. Memorize it. The capstone is one concrete instantiation. Hover any block in the diagram below to see what it does and which earlier module owns it.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 8.1 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 8.1 · AskMyOrders System Architecture</span>
+        <span class="diagram-hint">Hover any node to inspect</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 540" xmlns="http://www.w3.org/2000/svg" class="arch-svg" id="archSvg">
+          <defs>
+            <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8899bb"/>
+            </marker>
+          </defs>
+
+          <!-- Layer labels (left) -->
+          <text x="20" y="60" font-family="IBM Plex Mono, monospace" font-size="9" fill="#6b7a99" letter-spacing="2">USER</text>
+          <text x="20" y="170" font-family="IBM Plex Mono, monospace" font-size="9" fill="#6b7a99" letter-spacing="2">APP</text>
+          <text x="20" y="320" font-family="IBM Plex Mono, monospace" font-size="9" fill="#6b7a99" letter-spacing="2">DATA</text>
+          <text x="20" y="490" font-family="IBM Plex Mono, monospace" font-size="9" fill="#6b7a99" letter-spacing="2">LAKEHOUSE</text>
+
+          <!-- USER LAYER -->
+          <g class="diag-node" data-info="USER LAYER · Support agent — A real human in a browser, signed in via workspace OAuth (Module 2.5). The OAuth token they get is what scopes every database connection downstream. RLS and Postgres GRANTs key off this identity.">
+            <rect x="370" y="35" width="180" height="55" rx="6" fill="#1a2235" stroke="#4a9eff" stroke-width="2"/>
+            <text x="460" y="58" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" font-style="italic" fill="#e8edf5">Support Agent</text>
+            <text x="460" y="76" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="1">workspace OAuth</text>
+          </g>
+          <line x1="460" y1="90" x2="460" y2="135" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <text x="475" y="115" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">HTTPS · OBO</text>
+
+          <!-- APP LAYER -->
+          <g class="diag-node" data-info="APP LAYER · Streamlit on Databricks Apps (Module 7) — Two-pane UI: a chat panel on the left and a customer-context panel on the right. Every request opens a per-user engine, never a global one — that's the connection-pooling trap from Module 7.3.">
+            <rect x="180" y="140" width="560" height="90" rx="6" fill="#0e1422" stroke="#a855f7" stroke-width="2"/>
+            <text x="460" y="166" text-anchor="middle" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#e8edf5">Streamlit · Databricks Apps</text>
+
+            <!-- Chat panel -->
+            <rect x="220" y="180" width="200" height="38" rx="3" fill="#1a2235" stroke="#a855f7" stroke-width="1"/>
+            <text x="320" y="204" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7">Chat UI + tools</text>
+
+            <!-- Context panel -->
+            <rect x="500" y="180" width="200" height="38" rx="3" fill="#1a2235" stroke="#a855f7" stroke-width="1"/>
+            <text x="600" y="204" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7">Customer context</text>
+          </g>
+
+          <!-- App → Data arrows -->
+          <line x1="320" y1="230" x2="270" y2="280" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="460" y1="230" x2="460" y2="280" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="600" y1="230" x2="650" y2="280" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
+
+          <text x="245" y="262" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">psycopg</text>
+          <text x="430" y="262" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7">pgvector</text>
+          <text x="635" y="262" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">FM API</text>
+
+          <!-- DATA LAYER -->
+          <g class="diag-node" data-info="DATA LAYER · Lakebase (askmyorders project) — One Postgres holds it all: synced operational data, vectorized knowledge base, agent memory, and resolution writes. Modules 3, 4, 5, 6 stack inside this single rectangle.">
+            <rect x="120" y="280" width="680" height="160" rx="6" fill="#0e1422" stroke="#22c55e" stroke-width="2"/>
+            <text x="460" y="304" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" font-style="italic" fill="#22c55e">Lakebase · askmyorders project</text>
+          </g>
+
+          <!-- Synced tables -->
+          <g class="diag-node" data-info="SYNCED TABLES (Module 4.2) — customers_synced and orders_synced are continuously hydrated from main.gold.* Delta. Reads at app latency (sub-30ms). The CDC pipeline replaces what would otherwise be a reverse-ETL stack.">
+            <rect x="150" y="320" width="180" height="48" rx="3" fill="#1a2235" stroke="#4a9eff" stroke-width="1.4"/>
+            <text x="240" y="340" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#4a9eff">customers_synced</text>
+            <text x="240" y="358" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#4a9eff">orders_synced</text>
+          </g>
+
+          <!-- KB / Memory -->
+          <g class="diag-node" data-info="VECTOR + MEMORY (Modules 5, 6) — kb_documents holds embedded support docs with HNSW + GIN indexes. sessions, messages, and episodes form the four-layer memory model from Module 6 — all in the same Postgres.">
+            <rect x="370" y="320" width="180" height="48" rx="3" fill="#1a2235" stroke="#a855f7" stroke-width="1.4"/>
+            <text x="460" y="340" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">kb_documents</text>
+            <text x="460" y="358" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">sessions · episodes</text>
+          </g>
+
+          <!-- Resolutions -->
+          <g class="diag-node" data-info="RESOLUTIONS (Phase 5) — Every saved resolution gets a row here. This is the only table the agent WRITES to — the rest is read-only from the app's perspective. Lakehouse Sync picks rows up from here and ships them to Delta.">
+            <rect x="590" y="320" width="180" height="48" rx="3" fill="#1a2235" stroke="#fbbf24" stroke-width="1.4"/>
+            <text x="680" y="340" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">resolutions</text>
+            <text x="680" y="358" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">writes only</text>
+          </g>
+
+          <!-- UC banner inside Lakebase -->
+          <rect x="150" y="390" width="620" height="38" rx="3" fill="#0a0e18" stroke="#243550" stroke-width="1" stroke-dasharray="4 3"/>
+          <text x="460" y="414" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb" letter-spacing="1.5">▸ Registered in Unity Catalog as askmyorders_db (Module 3.4)</text>
+
+          <!-- Down to Lakehouse: synced + lakehouse sync -->
+          <line x1="240" y1="440" x2="240" y2="475" stroke="#4a9eff" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <line x1="680" y1="440" x2="680" y2="475" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrA)"/>
+          <text x="160" y="460" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff">▲ synced ▲</text>
+          <text x="612" y="460" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">▼ LH sync ▼</text>
+
+          <!-- LAKEHOUSE LAYER -->
+          <g class="diag-node" data-info="LAKEHOUSE LAYER · Unity Catalog + Delta — Source of truth for customers/orders (gold), and the analytical sink for resolutions (silver). The same governance layer covers both directions of data flow.">
+            <rect x="120" y="475" width="680" height="50" rx="6" fill="#0e1422" stroke="#00bfa5" stroke-width="2"/>
+
+            <rect x="150" y="488" width="180" height="26" rx="3" fill="#1a2235" stroke="#00bfa5" stroke-width="1"/>
+            <text x="240" y="505" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#00bfa5">main.gold.*</text>
+
+            <rect x="590" y="488" width="180" height="26" rx="3" fill="#1a2235" stroke="#00bfa5" stroke-width="1"/>
+            <text x="680" y="505" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#00bfa5">main.silver.support_resolutions</text>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Component detail</div>
+        <p id="archInfo">Hover any block to see what it does and which Module owns it. The four layers — User, App, Data, Lakehouse — separate cleanly: every concept from Modules 1–7 lives in exactly one layer.</p>
+      </div>
+    </div>
+
+    <h3>Concept-to-layer mapping</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Concept</th><th>Where it came from</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>User</td><td>Workspace OAuth, OBO identity</td><td>Module 2.5, Module 7.2</td></tr>
+          <tr><td>App</td><td>Streamlit, per-request engine factory</td><td>Module 7.3</td></tr>
+          <tr><td>App</td><td>Agent loop, tool calls</td><td>Module 6</td></tr>
+          <tr><td>Data</td><td>Lakebase project, branches</td><td>Module 1, Module 3</td></tr>
+          <tr><td>Data</td><td>UC catalog registration</td><td>Module 3.4</td></tr>
+          <tr><td>Data</td><td>Synced tables (Delta → Lakebase)</td><td>Module 4.2</td></tr>
+          <tr><td>Data</td><td>pgvector + HNSW + GIN</td><td>Module 5.2</td></tr>
+          <tr><td>Data</td><td>Memory layers (sessions, episodes)</td><td>Module 6</td></tr>
+          <tr><td>Lakehouse</td><td>Lakehouse Sync (Lakebase → Delta)</td><td>Module 4.3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-success">
+      <span class="callout-label">▸ Why this matters</span>
+      Every concept appears in <em>exactly one place</em>. That is the test of a good architecture: no duplicated responsibilities, no overlapping stores. If a customer asks "where does X live?" — you answer in one sentence.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 8.3 -->
+  <section class="topic" id="t83">
+    <div class="topic-banner">
+      <span class="topic-id">8.3</span>
+      <span class="line"></span>
+      <span class="type">Theory · Build Plan</span>
+    </div>
+    <h2>The five phases — <em>how the build decomposes</em></h2>
+
+    <h3>Phase progression</h3>
+    <p>The build decomposes into five phases of roughly 45 minutes each. The phases are deliberately layered: each one assumes the previous is working. <strong>Do not skip ahead</strong> — phase 4's agent will not work without phase 3's RAG, which will not work without phase 2's data, which will not work without phase 1's project. Hover any phase below to see what each one delivers.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 8.2 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 8.2 · The Five-Phase Build Pipeline</span>
+        <span class="diagram-hint">Hover any phase to inspect</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 270" xmlns="http://www.w3.org/2000/svg" class="phase-svg" id="phaseSvg">
+          <defs>
+            <marker id="arrP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5878"/>
+            </marker>
+          </defs>
+
+          <text x="460" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ START → end-to-end working app</text>
+
+          <!-- Phase nodes -->
+          <g class="diag-node" data-info="PHASE 01 · Foundation &amp; Provisioning (~30 min · M1 + M2 + M3) — Stand up the Lakebase project, create main + dev branches, register in Unity Catalog, apply DDL for operational tables and the memory/KB schema. The gate for everything that follows.">
+            <rect x="20" y="80" width="160" height="100" rx="6" fill="#1a2235" stroke="#ff6b35" stroke-width="2"/>
+            <text x="100" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="1.5">PHASE 01</text>
+            <text x="100" y="128" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">Foundation</text>
+            <text x="100" y="146" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">&amp; Provisioning</text>
+            <text x="100" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">~30 min · M1·M2·M3</text>
+          </g>
+
+          <line x1="180" y1="130" x2="208" y2="130" stroke="#4a5878" stroke-width="1.5" marker-end="url(#arrP)"/>
+
+          <g class="diag-node" data-info="PHASE 02 · Hydrate from the Lakehouse (~45 min · M4) — Create CONTINUOUS synced tables from main.gold.customers and main.gold.orders. Add B-tree + BRIN indexes. Verify Delta-to-Lakebase propagation in seconds. Sub-30ms reads at the app side.">
+            <rect x="210" y="80" width="160" height="100" rx="6" fill="#1a2235" stroke="#4a9eff" stroke-width="2"/>
+            <text x="290" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a9eff" letter-spacing="1.5">PHASE 02</text>
+            <text x="290" y="128" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">Hydrate from</text>
+            <text x="290" y="146" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">the Lakehouse</text>
+            <text x="290" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">~45 min · M4</text>
+          </g>
+
+          <line x1="370" y1="130" x2="398" y2="130" stroke="#4a5878" stroke-width="1.5" marker-end="url(#arrP)"/>
+
+          <g class="diag-node" data-info="PHASE 03 · Build the Knowledge Base (~60 min · M5) — Chunk support docs, embed via FM API, bulk-load with HNSW + GIN. Implement retrieve(query, k=5) using Reciprocal Rank Fusion. Smoke test with a real policy lookup.">
+            <rect x="400" y="80" width="160" height="100" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="2"/>
+            <text x="480" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="1.5">PHASE 03</text>
+            <text x="480" y="128" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">Knowledge</text>
+            <text x="480" y="146" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">Base (RAG)</text>
+            <text x="480" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">~60 min · M5</text>
+          </g>
+
+          <line x1="560" y1="130" x2="588" y2="130" stroke="#4a5878" stroke-width="1.5" marker-end="url(#arrP)"/>
+
+          <g class="diag-node" data-info="PHASE 04 · Agent with Memory (~60 min · M6 + M5) — Build the AgentMemory class. Define three tools: retrieve, get_orders, recall. Wire the agent loop. Test cross-session memory: preference set in session 1 must surface in session 2.">
+            <rect x="590" y="80" width="160" height="100" rx="6" fill="#1a2235" stroke="#fbbf24" stroke-width="2"/>
+            <text x="670" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="1.5">PHASE 04</text>
+            <text x="670" y="128" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">Agent</text>
+            <text x="670" y="146" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">with Memory</text>
+            <text x="670" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">~60 min · M6+M5</text>
+          </g>
+
+          <line x1="750" y1="130" x2="778" y2="130" stroke="#4a5878" stroke-width="1.5" marker-end="url(#arrP)"/>
+
+          <g class="diag-node" data-info="PHASE 05 · Ship as App + Close the Loop (~45 min · M7 + M4-reverse) — Wrap the agent in Streamlit. Use the per-request OBO engine. Deploy: databricks apps deploy. Configure Lakehouse Sync for resolutions. Build the DBSQL dashboard.">
+            <rect x="780" y="80" width="120" height="100" rx="6" fill="#1a2235" stroke="#22c55e" stroke-width="2"/>
+            <text x="840" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1.5">PHASE 05</text>
+            <text x="840" y="128" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">Ship</text>
+            <text x="840" y="146" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">as App</text>
+            <text x="840" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">~45 min · M7+M4</text>
+          </g>
+
+          <!-- Bottom modules ribbon -->
+          <text x="100" y="210" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">project + branches</text>
+          <text x="100" y="225" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">+ DDL + UC</text>
+          <text x="290" y="210" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">synced tables</text>
+          <text x="290" y="225" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">+ indexes</text>
+          <text x="480" y="210" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">embeddings</text>
+          <text x="480" y="225" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">+ hybrid search</text>
+          <text x="670" y="210" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">tool-using loop</text>
+          <text x="670" y="225" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">+ episodes</text>
+          <text x="840" y="210" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">deploy + LH Sync</text>
+          <text x="840" y="225" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">+ dashboard</text>
+
+          <line x1="20" y1="248" x2="900" y2="248" stroke="#1e2d45" stroke-width="1"/>
+          <text x="460" y="263" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#6b7a99" letter-spacing="2">EACH PHASE BUILDS ON THE PREVIOUS · DO NOT SKIP AHEAD</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Phase detail</div>
+        <p id="phaseInfo">Hover any phase block to see what it delivers, how long it takes, and which Module's concepts it exercises. Phases are sequential — each builds on the previous.</p>
+      </div>
+    </div>
+
+    <h3>The phases at a glance</h3>
+    <div class="phase-cards">
+      <div class="phase-card p1">
+        <div class="phase-num">PHASE 01 · ~30 min</div>
+        <div class="phase-name">Foundation &amp; Provisioning</div>
+        <div class="phase-time">M1 · M2 · M3</div>
+        <ul>
+          <li>Project <code>askmyorders</code> · CU_1 · 7-day retention</li>
+          <li>Branch <code>dev</code> off <code>main</code></li>
+          <li>DDL: <code>customers</code>, <code>orders</code>, <code>returns</code>, <code>resolutions</code></li>
+          <li>Vector ext + KB/memory tables</li>
+          <li>Register UC catalog <code>askmyorders_db</code></li>
+        </ul>
+        <div class="modules">Proves: production-shaped project from scratch in 30 min</div>
+      </div>
+
+      <div class="phase-card p2">
+        <div class="phase-num">PHASE 02 · ~45 min</div>
+        <div class="phase-name">Hydrate from the Lakehouse</div>
+        <div class="phase-time">M4 · Synced Tables</div>
+        <ul>
+          <li>Synced <code>customers_synced</code> from <code>main.gold.customers</code></li>
+          <li>Synced <code>orders_synced</code> with PK + timeseries</li>
+          <li>B-tree on <code>customer_id</code>, BRIN on <code>placed_at</code></li>
+          <li>Verify sub-30 ms row reads</li>
+        </ul>
+        <div class="modules">Proves: Lakebase reads at app latency from Delta</div>
+      </div>
+
+      <div class="phase-card p3">
+        <div class="phase-num">PHASE 03 · ~60 min</div>
+        <div class="phase-name">Build the Knowledge Base</div>
+        <div class="phase-time">M5 · pgvector + RRF</div>
+        <ul>
+          <li>Chunk docs (~500 tok, 50 overlap)</li>
+          <li>Embed via <code>databricks-bge-large-en</code></li>
+          <li>HNSW <code>(m=16, ef=64)</code> + GIN tsvector</li>
+          <li><code>retrieve(query, k=5)</code> via RRF</li>
+        </ul>
+        <div class="modules">Proves: real vector store · hybrid retrieval works</div>
+      </div>
+
+      <div class="phase-card p4">
+        <div class="phase-num">PHASE 04 · ~60 min</div>
+        <div class="phase-name">Agent with Memory</div>
+        <div class="phase-time">M6 · Four-layer memory</div>
+        <ul>
+          <li>Implement <code>AgentMemory</code> class</li>
+          <li>Three tools: <code>retrieve</code> · <code>get_orders</code> · <code>recall</code></li>
+          <li>Loop: recall → retrieve → LLM → tool → log</li>
+          <li>End-of-session episode summary + embed</li>
+          <li>Cross-session recall test</li>
+        </ul>
+        <div class="modules">Proves: durable cross-session memory works</div>
+      </div>
+
+      <div class="phase-card p5">
+        <div class="phase-num">PHASE 05 · ~45 min</div>
+        <div class="phase-name">Ship as App + Close Loop</div>
+        <div class="phase-time">M7 + M4-reverse</div>
+        <ul>
+          <li>Streamlit two-pane UI · OBO engine</li>
+          <li><code>app.yaml</code> binds Lakebase project</li>
+          <li><code>databricks apps deploy</code></li>
+          <li>Lakehouse Sync · resolutions → silver</li>
+          <li>DBSQL dashboard with 3 tiles</li>
+        </ul>
+        <div class="modules">Proves: end-to-end loop closed</div>
+      </div>
+    </div>
+
+    <h3>Reference: project directory layout</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span>askmyorders/</span>
+        <span class="lang">Project Tree</span>
+      </div>
+<pre>askmyorders/
+├── notebooks/
+│   ├── 01_provision.py        <span class="cm"># Phase 1: project + branches + DDL</span>
+│   ├── 02_sync_tables.py      <span class="cm"># Phase 2: synced tables + indexes</span>
+│   ├── 03_build_kb.py         <span class="cm"># Phase 3: chunk, embed, index</span>
+│   └── 04_agent_smoke_test.py <span class="cm"># Phase 4: agent loop validation</span>
+├── app/
+│   ├── app.py                 <span class="cm"># Phase 5: Streamlit entrypoint</span>
+│   ├── agent.py               <span class="cm"># agent loop + tool definitions</span>
+│   ├── memory.py              <span class="cm"># AgentMemory class</span>
+│   ├── retrieve.py            <span class="cm"># hybrid RAG function</span>
+│   ├── db.py                  <span class="cm"># per-request OBO engine factory</span>
+│   ├── requirements.txt
+│   └── app.yaml               <span class="cm"># Databricks App manifest</span>
+├── sql/
+│   ├── schema.sql             <span class="cm"># operational + memory + KB DDL</span>
+│   └── lakehouse_sync.sql     <span class="cm"># resolutions → Delta</span>
+└── README.md</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 8.4 -->
+  <section class="topic" id="t84">
+    <div class="topic-banner">
+      <span class="topic-id">8.4</span>
+      <span class="line"></span>
+      <span class="type">Theory · Code Walk</span>
+    </div>
+    <h2>The agent loop — <em>the piece worth seeing in full</em></h2>
+
+    <h3>Why this function matters</h3>
+    <p>The five phases mostly reuse code patterns from earlier modules. The one piece worth studying in full is <code>run_turn</code> — because it is where memory, retrieval, tool use, and the LLM compose into a single function. Every customer asks "but how does it actually work end-to-end?" The answer is forty lines of Python, and they sit here.</p>
+
+    <h3>What <code>run_turn</code> does, conceptually</h3>
+    <p>For every user message, the agent runs through five steps in order. The diagram below shows the flow. Hover any node to see what each step is doing under the hood.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 8.3 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 8.3 · The run_turn Agent Loop</span>
+        <span class="diagram-hint">Hover any step to inspect</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 360" xmlns="http://www.w3.org/2000/svg" class="agent-svg" id="agentSvg">
+          <defs>
+            <marker id="arrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8899bb"/>
+            </marker>
+          </defs>
+
+          <text x="460" y="24" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="2">▸ INPUT — user_msg, sid, user_id</text>
+
+          <!-- Step 1 Recall -->
+          <g class="diag-node" data-info="STEP 1 · Recall — Embed the user's message and search the episodes table for the top-3 long-term memories from this user. Returns 3-sentence summaries from prior sessions. Cost: one vector search, one round trip.">
+            <rect x="50" y="60" width="160" height="80" rx="6" fill="#1a2235" stroke="#fbbf24" stroke-width="2"/>
+            <text x="130" y="84" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="1.5">STEP 01</text>
+            <text x="130" y="106" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" font-style="italic" fill="#e8edf5">Recall</text>
+            <text x="130" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">episodes · top-3</text>
+          </g>
+          <line x1="210" y1="100" x2="245" y2="100" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrG)"/>
+
+          <!-- Step 2 Build context -->
+          <g class="diag-node" data-info="STEP 2 · Build context — Compose the message list: system prompt (with recalled episodes embedded) + last 10 messages of this session + the new user message. mem.add_message persists the user turn.">
+            <rect x="250" y="60" width="160" height="80" rx="6" fill="#1a2235" stroke="#4a9eff" stroke-width="2"/>
+            <text x="330" y="84" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a9eff" letter-spacing="1.5">STEP 02</text>
+            <text x="330" y="106" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" font-style="italic" fill="#e8edf5">Build context</text>
+            <text x="330" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">sys + 10 msgs</text>
+          </g>
+          <line x1="410" y1="100" x2="445" y2="100" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrG)"/>
+
+          <!-- Step 3 LLM -->
+          <g class="diag-node" data-info="STEP 3 · LLM call — Call Foundation Models (Llama 3.3 70B) with the messages and the three tool schemas. Temperature 0.1 for deterministic tool selection.">
+            <rect x="450" y="60" width="160" height="80" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="2"/>
+            <text x="530" y="84" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="1.5">STEP 03</text>
+            <text x="530" y="106" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" font-style="italic" fill="#e8edf5">LLM call</text>
+            <text x="530" y="126" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">+ tool schemas</text>
+          </g>
+
+          <!-- Decision diamond -->
+          <line x1="610" y1="100" x2="645" y2="100" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrG)"/>
+          <g class="diag-node" data-info="DECISION · Did the LLM ask for tools? — If msg.tool_calls is empty: we have a final answer, persist it and return. Otherwise loop back: execute every tool, append results, call LLM again. Cap at 4 iterations.">
+            <polygon points="730,60 810,100 730,140 650,100" fill="#1a2235" stroke="#22c55e" stroke-width="2"/>
+            <text x="730" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e">tool</text>
+            <text x="730" y="108" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e">calls?</text>
+          </g>
+
+          <!-- Yes branch (tools) -->
+          <line x1="730" y1="140" x2="730" y2="190" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrG)"/>
+          <text x="745" y="170" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24">yes</text>
+
+          <!-- Step 4 Tools -->
+          <g class="diag-node" data-info="STEP 4 · Execute tools — For each tool_call: dispatch to the matching Python function (retrieve, get_orders, or recall), capture the JSON result, append as a tool message, and log the call into the tool_calls audit table.">
+            <rect x="610" y="195" width="240" height="70" rx="6" fill="#1a2235" stroke="#fbbf24" stroke-width="2"/>
+            <text x="730" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="1.5">STEP 04 · loop</text>
+            <text x="730" y="240" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" font-style="italic" fill="#e8edf5">Execute tools</text>
+            <text x="730" y="256" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">retrieve · get_orders · recall</text>
+          </g>
+
+          <!-- Loop back arrow -->
+          <path d="M 610 230 L 530 230 L 530 145" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrG)"/>
+          <text x="465" y="234" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">loop · max 4×</text>
+
+          <!-- No branch (final) -->
+          <line x1="810" y1="100" x2="855" y2="100" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrG)"/>
+          <text x="800" y="50" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e">no</text>
+
+          <!-- Step 5 Persist & return -->
+          <g class="diag-node" data-info="STEP 5 · Persist &amp; return — No more tool calls means the LLM produced a final answer. Persist it as the assistant message and return to the UI. The response surfaces in Streamlit; the row is durable in Postgres.">
+            <rect x="610" y="290" width="240" height="55" rx="6" fill="#1a2235" stroke="#22c55e" stroke-width="2"/>
+            <text x="730" y="313" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1.5">STEP 05</text>
+            <text x="730" y="334" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" font-style="italic" fill="#e8edf5">Persist · Return to UI</text>
+          </g>
+
+          <!-- Connect tool branch back / final answer down -->
+          <line x1="855" y1="100" x2="855" y2="318" stroke="#22c55e" stroke-width="1.5"/>
+          <line x1="855" y1="318" x2="850" y2="318" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrG)"/>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Step detail</div>
+        <p id="agentInfo">Hover any node to see what each step is doing. Steps 3 and 4 form a loop — the LLM may call tools repeatedly (capped at 4 iterations) until it has enough context to answer.</p>
+      </div>
+    </div>
+
+    <h3>The skeleton you write</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <span>app/agent.py</span>
+        <span class="lang">Python</span>
+      </div>
+<pre><span class="kw">def</span> <span class="fn">run_turn</span>(engine, embed_fn, llm, sid, user_id, user_msg):
+    mem = <span class="fn">AgentMemory</span>(engine, embed_fn)
+
+    <span class="cm"># 1. Recall long-term episodes</span>
+    episodes = mem.<span class="fn">recall</span>(user_id, user_msg, k=<span class="nu">3</span>)
+    epi = <span class="st">"\n"</span>.<span class="fn">join</span>(<span class="st">f"- </span><span class="nm">{e.summary}</span><span class="st">"</span> <span class="kw">for</span> e <span class="kw">in</span> episodes)
+
+    <span class="cm"># 2. Build messages from history + system prompt</span>
+    history = mem.<span class="fn">recent_messages</span>(sid, n=<span class="nu">10</span>)
+    messages = [
+        {<span class="st">"role"</span>: <span class="st">"system"</span>,
+         <span class="st">"content"</span>: <span class="st">f"You are a Northwind support assistant.\nKnown:\n</span><span class="nm">{epi}</span><span class="st">"</span>},
+        *[{<span class="st">"role"</span>: m.role, <span class="st">"content"</span>: m.content} <span class="kw">for</span> m <span class="kw">in</span> history],
+        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: user_msg},
+    ]
+    mem.<span class="fn">add_message</span>(sid, <span class="st">"user"</span>, user_msg)
+
+    <span class="cm"># 3. Tool-using loop (max 4 iterations)</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">4</span>):
+        out = llm.chat.completions.<span class="fn">create</span>(
+            model=<span class="st">"databricks-meta-llama-3-3-70b-instruct"</span>,
+            messages=messages, tools=TOOLS, temperature=<span class="nu">0.1</span>,
+        )
+        msg = out.choices[<span class="nu">0</span>].message
+        <span class="kw">if not</span> msg.tool_calls:
+            mem.<span class="fn">add_message</span>(sid, <span class="st">"assistant"</span>, msg.content)
+            <span class="kw">return</span> msg.content
+        <span class="cm"># ... handle tool calls, log, append to messages ...</span></pre>
+    </div>
+
+    <h3>The three tools, declared as JSON schemas</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Tool</th><th>Backed by</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>retrieve</code></td><td>pgvector + GIN (Phase 3)</td><td>Search the support knowledge base</td></tr>
+          <tr><td><code>get_orders</code></td><td><code>orders_synced</code> (Phase 2)</td><td>Look up a customer's recent orders</td></tr>
+          <tr><td><code>recall</code></td><td><code>episodes</code> table (Phase 4)</td><td>Search long-term agent memory</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-success">
+      <span class="callout-label">▸ Key insight</span>
+      All three tools hit <em>the same Postgres</em>. A customer would otherwise have stitched together a vector DB, an OLTP, and a memory store from three vendors. Lakebase collapses that into one connection string.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 8.5 -->
+  <section class="topic" id="t85">
+    <div class="topic-banner">
+      <span class="topic-id">8.5</span>
+      <span class="line"></span>
+      <span class="type">Theory · Acceptance Test</span>
+    </div>
+    <h2>Definition of Done — <em>the 9 checkpoints</em></h2>
+
+    <h3>The acceptance test</h3>
+    <p>The capstone is complete when <strong>all nine</strong> of the following are true. Treat this as your acceptance test — you can demo to a customer once every box is ticked. Hover any checkpoint below to see why it matters and which earlier module's promise it validates.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 8.4 ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 8.4 · The 9 Definition-of-Done Checkpoints</span>
+        <span class="diagram-hint">Hover any check to inspect</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 920 380" xmlns="http://www.w3.org/2000/svg" class="checkpoint-svg" id="checkSvg">
+
+          <text x="460" y="24" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="2">▸ ALL 9 CHECKS GREEN = CAPSTONE COMPLETE</text>
+
+          <!-- Row 1 -->
+          <g class="diag-node" data-info="CHECK 1 · Project + branches — Validates Module 1 (vocabulary) and Module 3 (provisioning). You can demonstrate copy-on-write isolation by switching between main and dev. The branch is the killer demo for governance reviews.">
+            <rect x="40" y="60" width="270" height="60" rx="4" fill="#1a2235" stroke="#22c55e" stroke-width="1.5"/>
+            <text x="60" y="84" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">✓ 01</text>
+            <text x="100" y="84" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">Project + main &amp; dev branches</text>
+            <text x="60" y="104" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">M1 · M3 — vocabulary &amp; provisioning</text>
+          </g>
+
+          <g class="diag-node" data-info="CHECK 2 · UC catalog visible — Validates Module 3.4. Lakebase is registered in Unity Catalog. Tables show up in DBSQL and Catalog Explorer with lineage and GRANT support — the governance-equivalence promise made real.">
+            <rect x="325" y="60" width="270" height="60" rx="4" fill="#1a2235" stroke="#22c55e" stroke-width="1.5"/>
+            <text x="345" y="84" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">✓ 02</text>
+            <text x="385" y="84" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">UC catalog · DBSQL visible</text>
+            <text x="345" y="104" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">M3.4 — catalog registration</text>
+          </g>
+
+          <g class="diag-node" data-info="CHECK 3 · Synced tables fresh — Validates Module 4.2. Two synced tables are live, propagation under ~10s. This is the synced-table latency claim, measured by you, on your data — not a slide.">
+            <rect x="610" y="60" width="270" height="60" rx="4" fill="#1a2235" stroke="#22c55e" stroke-width="1.5"/>
+            <text x="630" y="84" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">✓ 03</text>
+            <text x="670" y="84" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">Synced tables · ~10s freshness</text>
+            <text x="630" y="104" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">M4.2 — Delta to Lakebase CDC</text>
+          </g>
+
+          <!-- Row 2 -->
+          <g class="diag-node" data-info="CHECK 4 · KB + hybrid retrieval — Validates Module 5. At least 200 chunks indexed, 3 test queries succeed via RRF (vector + BM25). The hybrid claim is concrete: pure vector misses some queries that hybrid catches.">
+            <rect x="40" y="135" width="270" height="60" rx="4" fill="#1a2235" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="60" y="159" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">✓ 04</text>
+            <text x="100" y="159" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">KB · hybrid retrieval works</text>
+            <text x="60" y="179" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">M5 — pgvector + RRF</text>
+          </g>
+
+          <g class="diag-node" data-info="CHECK 5 · Cross-session memory — Validates Module 6. Set 'I prefer email replies' in session 1; close it; new session — the agent recalls the preference. This is the headline feature for any AI app conversation.">
+            <rect x="325" y="135" width="270" height="60" rx="4" fill="#1a2235" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="345" y="159" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">✓ 05</text>
+            <text x="385" y="159" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">Cross-session memory recall</text>
+            <text x="345" y="179" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">M6 — episodic memory</text>
+          </g>
+
+          <g class="diag-node" data-info="CHECK 6 · Both tools used — Validates that the agent loop actually composes RAG and operational lookup. At least one turn must invoke retrieve() AND get_orders() — proving the agent uses what's available, not just one tool.">
+            <rect x="610" y="135" width="270" height="60" rx="4" fill="#1a2235" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="630" y="159" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">✓ 06</text>
+            <text x="670" y="159" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">Agent uses both tools</text>
+            <text x="630" y="179" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">M6 — tool composition</text>
+          </g>
+
+          <!-- Row 3 -->
+          <g class="diag-node" data-info="CHECK 7 · App deployed + OBO works — Validates Module 7. App accessible at a real URL. Two different users see different data because the OBO token scopes every connection. This is the trap from M7.4 verified to be avoided.">
+            <rect x="40" y="210" width="270" height="60" rx="4" fill="#1a2235" stroke="#fbbf24" stroke-width="1.5"/>
+            <text x="60" y="234" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">✓ 07</text>
+            <text x="100" y="234" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">App deployed · OBO scoped</text>
+            <text x="60" y="254" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">M7 — Apps + OBO</text>
+          </g>
+
+          <g class="diag-node" data-info="CHECK 8 · Lakehouse Sync running — Validates Module 4.3 (reverse direction). Resolutions written by the app appear in main.silver.support_resolutions. The full operational-to-analytics loop is closed without reverse-ETL.">
+            <rect x="325" y="210" width="270" height="60" rx="4" fill="#1a2235" stroke="#fbbf24" stroke-width="1.5"/>
+            <text x="345" y="234" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">✓ 08</text>
+            <text x="385" y="234" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">Lakehouse Sync streaming</text>
+            <text x="345" y="254" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">M4.3 — Lakebase to Delta</text>
+          </g>
+
+          <g class="diag-node" data-info="CHECK 9 · DBSQL dashboard built — Validates that the analytics loop is consumable. At least three tiles on main.silver.support_resolutions: count by day, top categories, average resolution time. Now leadership has a KPI surface.">
+            <rect x="610" y="210" width="270" height="60" rx="4" fill="#1a2235" stroke="#fbbf24" stroke-width="1.5"/>
+            <text x="630" y="234" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">✓ 09</text>
+            <text x="670" y="234" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">DBSQL dashboard · 3 tiles</text>
+            <text x="630" y="254" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">DBSQL — analytics surface</text>
+          </g>
+
+          <!-- Bottom banner -->
+          <rect x="40" y="305" width="840" height="50" rx="4" fill="#0e1422" stroke="#22c55e" stroke-width="2" stroke-dasharray="4 3"/>
+          <text x="460" y="330" text-anchor="middle" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#22c55e">All 9 green → demo-ready · ship-ready · customer-ready</text>
+          <text x="460" y="346" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1.5">EVERY CHECK VALIDATES A DIFFERENT MODULE'S PROMISE</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Checkpoint detail</div>
+        <p id="checkInfo">Hover any check to see why it matters and which earlier module's promise it validates. Don't claim to a customer you've built the reference architecture if any of these is missing.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ Non-negotiable</span>
+      Don't claim to a customer you've built the reference architecture if any of these is missing. Each one validates a different module's promise — gaps will surface in the customer's PoC, not yours.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ WRAP-UP -->
+  <section class="topic" id="wrap">
+    <div class="topic-banner">
+      <span class="topic-id">8.6</span>
+      <span class="line"></span>
+      <span class="type">Wrap-Up · Stretch Goals</span>
+    </div>
+    <h2>Stretch goals &amp; <em>module 8 wrap-up</em></h2>
+
+    <h3>Stretch goals for the truly committed</h3>
+    <p>Each of these extends the build with a real-world hardening step you will see customers ask for. Pick at least one before moving to Module 9.</p>
+    <ul>
+      <li><strong>HA on production primary</strong> — simulate a failover and confirm the app reconnects transparently</li>
+      <li><strong>Read replica</strong> — route customer-context panel reads to the replica; writes stay on primary</li>
+      <li><strong>Point-in-time restore</strong> — corrupt a row deliberately, branch from 5 minutes ago, verify recovery</li>
+      <li><strong>Inbound Private Link</strong> — if your workspace is in a VPC, measure latency vs. public endpoint</li>
+      <li><strong>MLflow Tracing</strong> — wire spans around <code>run_turn</code> to capture every agent trajectory for offline evaluation</li>
+      <li><strong>Row-level security</strong> — add RLS on <code>orders_synced</code> so agents only see customers in their assigned region</li>
+    </ul>
+
+    <h3>Common pitfalls — what compounds at the capstone scale</h3>
+    <p>The capstone is also the place where pitfalls from earlier modules compound. Be alert for:</p>
+    <ul>
+      <li><strong>Forgetting <code>CLEANUP=False</code></strong> at the end of earlier labs — you'll have re-provisioned three times by Phase 3</li>
+      <li><strong>A global SQLAlchemy engine in the App</strong> — the connection-pooling trap from Module 7. Two users, one identity, security incident</li>
+      <li><strong>Synced table without a primary key</strong> on the source — the pipeline will refuse to start (Module 4.2)</li>
+      <li><strong>HNSW index built before bulk insert</strong> — slow. Build the index <em>after</em> the load, with <code>maintenance_work_mem</code> raised (Module 5.2)</li>
+      <li><strong>Skipping the cross-session memory test</strong> — without it, you can't prove memory persists, and "memory" was the headline feature</li>
+    </ul>
+
+    <div class="wrap-up">
+      <h3>Module 8 — <em>complete</em></h3>
+      <p>You finished all five phases and validated against the 9-checkpoint Definition of Done. You now have:</p>
+      <ul>
+        <li>A <strong>working AI-powered support app</strong>, deployed on Databricks Apps, backed by Lakebase as the operational + memory + vector store, with Delta sources and analytics targets.</li>
+        <li><strong>Hands-on conviction.</strong> You can lead a customer through the same architecture without bluffing — you've personally exercised every capability: branching, sync, RAG, memory, OBO, Lakehouse Sync.</li>
+        <li><strong>A reusable reference build.</strong> Every customer scenario that looks remotely like "an AI app over our data" now starts with you saying <em>"I built one of these last week, here's the repo."</em></li>
+      </ul>
+      <p style="margin-top: 18px;"><strong>Next up: Module 9</strong> — the RSA Toolkit, where you turn the build into the conversation.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // progress bar
+  const bar = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    bar.style.width = pct + '%';
+  });
+
+  // smooth nav
+  document.querySelectorAll('.toc a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // ============ Diagram 8.1 — Architecture ============
+  const archInfo = document.getElementById('archInfo');
+  document.querySelectorAll('#archSvg .diag-node').forEach(node => {
+    const update = () => {
+      if (node.dataset.info) archInfo.textContent = node.dataset.info;
+    };
+    node.addEventListener('mouseenter', update);
+    node.addEventListener('click', update);
+  });
+
+  // ============ Diagram 8.2 — Phases ============
+  const phaseInfo = document.getElementById('phaseInfo');
+  document.querySelectorAll('#phaseSvg .diag-node').forEach(node => {
+    const update = () => {
+      if (node.dataset.info) phaseInfo.textContent = node.dataset.info;
+    };
+    node.addEventListener('mouseenter', update);
+    node.addEventListener('click', update);
+  });
+
+  // ============ Diagram 8.3 — Agent loop ============
+  const agentInfo = document.getElementById('agentInfo');
+  document.querySelectorAll('#agentSvg .diag-node').forEach(node => {
+    const update = () => {
+      if (node.dataset.info) agentInfo.textContent = node.dataset.info;
+    };
+    node.addEventListener('mouseenter', update);
+    node.addEventListener('click', update);
+  });
+
+  // ============ Diagram 8.4 — Checkpoints ============
+  const checkInfo = document.getElementById('checkInfo');
+  document.querySelectorAll('#checkSvg .diag-node').forEach(node => {
+    const update = () => {
+      if (node.dataset.info) checkInfo.textContent = node.dataset.info;
+    };
+    node.addEventListener('mouseenter', update);
+    node.addEventListener('click', update);
+  });
+</script>
+
+</body>
+</html>

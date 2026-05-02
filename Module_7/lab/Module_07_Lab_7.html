@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 07 · Lab 7 — Powering a Databricks App with Lakebase, End-to-End</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  --code-bg: #020509;
+  --code-text: #e8dcc4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 56px 48px 48px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 70% at 90% 30%, rgba(255,107,53,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 80%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.crumb .tag {
+  color: var(--accent-orange);
+  padding: 4px 12px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+}
+.crumb .tag.lab {
+  color: var(--accent-teal);
+  border-color: rgba(0,191,165,0.3);
+  background: rgba(0,191,165,0.06);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 5vw, 52px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-orange); }
+
+.lede {
+  font-size: 16.5px; color: var(--text-dim);
+  max-width: 740px; line-height: 1.75;
+  margin-bottom: 28px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 17px; font-weight: 500;
+  color: var(--accent-orange);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── PROGRESS TRACKER (sticky) ─── */
+.tracker {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,8,15,0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 48px;
+}
+.tracker-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
+}
+.tracker-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.steps {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.step-pill::before {
+  content: '○';
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.step-pill:hover {
+  border-color: var(--accent-orange);
+  color: var(--text);
+}
+.step-pill.done {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.4);
+  color: var(--accent-green);
+}
+.step-pill.done::before {
+  content: '✓';
+  color: var(--accent-green);
+}
+.step-pill.active {
+  background: rgba(255,107,53,0.1);
+  border-color: var(--accent-orange);
+  color: var(--text);
+}
+.tracker-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-orange);
+  white-space: nowrap;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 48px 100px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 12px 0 18px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 5px 0 5px 22px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  color: var(--accent-orange);
+  font-size: 16px;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  margin: 0 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  margin: 28px 0 12px;
+  color: var(--text);
+}
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 22px 0 10px;
+}
+
+/* ─── INTRO BLOCK ─── */
+.intro-block { margin-bottom: 56px; }
+
+/* ─── PREREQ BOX ─── */
+.prereq {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0 40px;
+}
+.prereq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 22px;
+}
+.prereq-card.need { border-left: 3px solid var(--accent-green); }
+.prereq-card.skip { border-left: 3px solid var(--text-muted); opacity: 0.85; }
+.prereq-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.prereq-card.need .prereq-title { color: var(--accent-green); }
+.prereq-card.skip .prereq-title { color: var(--text-muted); }
+.prereq-card ul { margin: 0; }
+.prereq-card li { padding: 4px 0 4px 20px; font-size: 13.5px; }
+.prereq-card.need li::before { content: '✓'; color: var(--accent-green); }
+.prereq-card.skip li::before { content: '×'; color: var(--text-muted); }
+
+/* ─── STEP CARD ─── */
+.step {
+  margin: 0 0 56px;
+  scroll-margin-top: 90px;
+}
+.step-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.step-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-orange);
+  padding: 4px 10px;
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  letter-spacing: -0.005em;
+  flex: 1;
+}
+.step-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.step-mark:hover { border-color: var(--accent-green); color: var(--text); }
+.step-mark.done {
+  background: rgba(34,197,94,0.08);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+/* ─── CODE CELL ─── */
+.cell {
+  margin: 16px 0 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.cell-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.cell-label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.cell-label::before { content: '▸'; color: var(--accent-orange); }
+.cell-lang {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  margin-left: 8px;
+}
+.cell-actions { display: flex; gap: 6px; }
+.copy-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 5px 11px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: var(--accent-orange);
+  color: #fff;
+  border-color: var(--accent-orange);
+}
+.copy-btn.copied {
+  background: var(--accent-green);
+  color: #fff;
+  border-color: var(--accent-green);
+}
+.cell pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--code-text);
+  white-space: pre;
+}
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.st { color: #c3e88d; }
+.cm { color: var(--text-muted); font-style: italic; }
+.nm { color: var(--accent-orange); }
+.nu { color: #f78c6c; }
+
+/* ─── EXPECTED OUTPUT BLOCK ─── */
+.expect {
+  margin: 0 0 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-teal);
+  background: var(--surface);
+}
+.expect-header {
+  padding: 8px 16px;
+  background: rgba(0,191,165,0.05);
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+}
+.expect pre {
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  overflow-x: auto;
+  white-space: pre;
+}
+.expect pre .ok-line { color: var(--accent-green); }
+
+/* ─── PROVE/IF-FAILS ─── */
+.proves {
+  margin: 12px 0 0;
+  padding: 12px 16px;
+  background: rgba(0,191,165,0.04);
+  border-left: 2px solid var(--accent-teal);
+  border-radius: 0 4px 4px 0;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.proves strong { color: var(--accent-teal); }
+
+/* ─── TROUBLESHOOTING TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 20px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 11px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.55;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+td code {
+  font-size: 11.5px;
+  padding: 0 5px;
+  background: var(--code-bg);
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.callout strong { color: var(--text); }
+.callout-note { background: rgba(74,158,255,0.05); border-left-color: var(--accent-blue); }
+.callout-warn { background: rgba(251,191,36,0.05); border-left-color: var(--accent-yellow); }
+.callout-success { background: rgba(34,197,94,0.05); border-left-color: var(--accent-green); }
+.callout-trap { background: rgba(239,68,68,0.06); border-left-color: var(--accent-red); }
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+.callout-note .callout-label { color: var(--accent-blue); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-success .callout-label { color: var(--accent-green); }
+.callout-trap .callout-label { color: var(--accent-red); }
+
+/* ─── INTERACTIVE CHECKLIST ─── */
+.checklist-section {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 30px;
+  margin: 40px 0;
+}
+.checklist-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.checklist-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--text);
+}
+.checklist-title em { color: var(--accent-orange); }
+.checklist-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+.checklist-status.complete {
+  background: rgba(34,197,94,0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 200px 28px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.check-row:last-child { border-bottom: none; }
+.check-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.check-name { font-size: 14.5px; color: var(--text); }
+.check-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.check-detail {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: right;
+  padding-right: 8px;
+}
+.check-toggle {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  padding: 0;
+}
+.check-toggle:hover { border-color: var(--accent-green); color: var(--accent-green); }
+.check-toggle.checked {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #fff;
+}
+
+.checklist-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reset-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+
+/* ─── COMPLETION BANNER ─── */
+.done-banner {
+  margin-top: 56px;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(255,107,53,0.04) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.done-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(255,107,53,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.done-banner h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 24px;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+.done-banner h3 em { color: var(--accent-orange); }
+
+/* ─── SUB-STEP HEADER ─── */
+.substep {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  font-style: italic;
+  color: var(--text);
+  margin: 28px 0 8px;
+  padding: 6px 0 6px 14px;
+  border-left: 2px solid var(--accent-orange);
+}
+.substep span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-style: normal;
+  color: var(--accent-orange);
+  margin-right: 10px;
+  letter-spacing: 0.1em;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main, .tracker { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 28px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+  .prereq { grid-template-columns: 1fr; }
+  .check-row {
+    grid-template-columns: 1fr 28px;
+    grid-template-rows: auto auto;
+  }
+  .check-num { grid-column: 1; grid-row: 1; }
+  .check-detail { grid-column: 1; grid-row: 2; text-align: left; padding: 0; }
+  .check-toggle { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+  .step-banner { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 07</span>
+      <span>/</span>
+      <span class="tag lab">Lab 7</span>
+      <span>/</span>
+      <span>Hands-on · Apps + Lakebase OBO Deploy</span>
+    </div>
+    <h1>Powering a Databricks App<br><em>with Lakebase</em></h1>
+    <p class="lede">Take the operational store from Module 3 and ship it as a real Databricks App. Write the <code>app.yaml</code>. Build the per-request engine factory. Add an RLS policy. Deploy. Then verify with a teammate that two different workspace identities produce two different views — the trap-killer step every Lakebase-app PR review must pass.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">8</span><span class="meta-lbl">Steps</span></div>
+      <div class="meta-item"><span class="meta-val">~90 min</span><span class="meta-lbl">Duration</span></div>
+      <div class="meta-item"><span class="meta-val">6</span><span class="meta-lbl">Final Checks</span></div>
+      <div class="meta-item"><span class="meta-val">100%</span><span class="meta-lbl">Hands-On</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── STICKY PROGRESS TRACKER ── -->
+<div class="tracker" id="tracker">
+  <div class="tracker-inner">
+    <span class="tracker-label">Progress →</span>
+    <div class="steps">
+      <a href="#step1" class="step-pill" data-step="1">Step 1 · Setup</a>
+      <a href="#step2" class="step-pill" data-step="2">Step 2 · Scaffold</a>
+      <a href="#step3" class="step-pill" data-step="3">Step 3 · db.py</a>
+      <a href="#step4" class="step-pill" data-step="4">Step 4 · app.py</a>
+      <a href="#step5" class="step-pill" data-step="5">Step 5 · app.yaml</a>
+      <a href="#step6" class="step-pill" data-step="6">Step 6 · RLS</a>
+      <a href="#step7" class="step-pill" data-step="7">Step 7 · Deploy</a>
+      <a href="#step8" class="step-pill" data-step="8">Step 8 · Verify</a>
+    </div>
+    <span class="tracker-count" id="trackerCount">0 / 8</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- ─── INTRO ─── -->
+  <section class="intro-block">
+    <h2>Why this lab exists</h2>
+    <p>Module 7's four theory topics gave you the mental model: why Apps + Lakebase eliminates the seam tax (7.1), how the OBO runtime contract works (7.2), the connection-pool trap and the two correct patterns (7.3), and the four shapes most apps fall into (7.4). <strong>This lab makes each of those concrete.</strong> You will reuse the Module 3 project, scaffold a real app directory, write Pattern 1 in <code>db.py</code>, add an RLS policy that gives OBO something to enforce, deploy with the <code>databricks</code> CLI, and finish with the two-user verification step that catches the trap on every code review.</p>
+    <p>Total runtime ~90 minutes. About 15 minutes is your hands on the keyboard; the rest is the deploy build and the two-user demo. <strong>Do not skip Step 8</strong> — the trap is silent in dev; the verification is what catches it.</p>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Run mode</span>
+      <p>Do this lab in a <strong>Databricks notebook</strong> attached to a serverless cluster (or DBR 14+). All cells are Python except where shell calls go to the <code>databricks</code> CLI. Step 7 runs a real deploy that takes 2–4 minutes and produces a live URL.</p>
+    </div>
+
+    <h3>Prerequisites</h3>
+    <div class="prereq">
+      <div class="prereq-card need">
+        <div class="prereq-title">▸ You need</div>
+        <ul>
+          <li><strong>Module 3 Lab 3 passed</strong> with <code>CLEANUP=False</code></li>
+          <li><strong>The <code>orders</code> table</strong> from Module 3 still alive</li>
+          <li><strong>Databricks CLI v0.220+</strong> on the cluster (or use Cell 8b SDK fallback)</li>
+          <li><strong>A teammate with workspace access</strong> for Step 8's verification</li>
+          <li>Apps API enabled in this workspace</li>
+        </ul>
+      </div>
+      <div class="prereq-card skip">
+        <div class="prereq-title">▸ You do NOT need</div>
+        <ul>
+          <li>A new Lakebase project — we reuse Module 3's</li>
+          <li>Module 4 (synced tables independent of OBO)</li>
+          <li>Module 5 (vectors independent of OBO)</li>
+          <li>Module 6 strictly required — chat tab is optional</li>
+          <li>An external IdP — workspace OAuth is the only auth</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ Cost note</span>
+      <p>Databricks Apps runtime is billed by hour while running. This lab leaves the app deployed at the end so you can demo it; Step 8d's cleanup tears it down. Lakebase compute is the same <code>CU_1</code> from Module 3.</p>
+    </div>
+
+    <div class="callout callout-trap">
+      <span class="callout-label">⚠ The trap, restated</span>
+      <p>The pool trap from theory 7.3 is the single most damaging pattern in real-world Lakebase apps. It is <strong>silent in dev</strong> — only one developer testing means only one identity in the engine, and everything looks correct. It surfaces in production the moment a second user logs in. <strong>Step 8 is the trap-killer.</strong> You and a teammate verify side-by-side that two identities produce two views. Skip it and you ship the bug.</p>
+    </div>
+  </section>
+
+<section class="step" id="step1">
+    <div class="step-banner">
+      <span class="step-num">STEP 01</span>
+      <h2 class="step-title">Reconnect &amp; verify the Apps tooling</h2>
+      <button class="step-mark" data-step="1" onclick="markStep(1)">Mark done</button>
+    </div>
+    <p>Three jobs: re-establish the SQLAlchemy engine on the Module 3 project (notebook side, for schema and RLS work), verify the <code>databricks</code> CLI is installed and authenticated, and confirm Databricks Apps is available in this workspace. All idempotent.</p>
+
+    <div class="cell" id="cell-1">
+      <div class="cell-header">
+        <span class="cell-label">Cell 1 · install dependencies<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-1')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 1 — install dependencies (re-run if the kernel restarted)</span>
+%pip install --quiet <span class="st">"databricks-sdk>=0.30.0"</span> <span class="st">"psycopg[binary]"</span> sqlalchemy
+dbutils.library.<span class="fn">restartPython</span>()</pre>
+    </div>
+
+    <div class="cell" id="cell-2">
+      <div class="cell-header">
+        <span class="cell-label">Cell 2 · reconnect, then verify CLI + Apps<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-2')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 2 — reconnect to Module 3 project + verify tooling</span>
+<span class="kw">import</span> os, uuid, json, subprocess
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+
+w = <span class="fn">WorkspaceClient</span>()
+
+TUTORIAL = {
+    <span class="st">"project_name"</span>: <span class="st">"lakebase-tutorial"</span>,
+    <span class="st">"app_name"</span>:     <span class="st">"lakebase-orders"</span>,
+    <span class="st">"user"</span>:         w.current_user.<span class="fn">me</span>().user_name,
+    <span class="st">"host"</span>:         w.config.host,
+}
+
+<span class="cm"># 1. Project from Module 3 still alive?</span>
+existing = {p.name: p <span class="kw">for</span> p <span class="kw">in</span> w.database.<span class="fn">list_database_projects</span>()}
+<span class="kw">if</span> TUTORIAL[<span class="st">"project_name"</span>] <span class="kw">not in</span> existing:
+    <span class="kw">raise</span> <span class="fn">RuntimeError</span>(
+        <span class="fn">f</span><span class="st">"Project '{TUTORIAL['project_name']}' not found. "</span>
+        <span class="fn">f</span><span class="st">"Run Module 3 Lab 3 first (with CLEANUP=False)."</span>
+    )
+project = existing[TUTORIAL[<span class="st">"project_name"</span>]]
+<span class="kw">assert</span> project.state == <span class="st">"READY"</span>
+
+<span class="cm"># 2. Open an engine for schema work in this notebook</span>
+cred = w.database.<span class="fn">generate_database_credential</span>(
+    request_id=<span class="fn">str</span>(uuid.<span class="fn">uuid4</span>()),
+    instance_names=[project.name],
+)
+url = (
+    <span class="fn">f</span><span class="st">"postgresql+psycopg://{TUTORIAL['user']}:{cred.token}"</span>
+    <span class="fn">f</span><span class="st">"@{project.read_write_dns}:5432/databricks_postgres?sslmode=require"</span>
+)
+engine = <span class="fn">create_engine</span>(url, pool_pre_ping=<span class="kw">True</span>, pool_recycle=<span class="nu">1800</span>)
+
+<span class="cm"># 3. orders table from Module 3 still alive?</span>
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    n_orders = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM orders"</span>)).<span class="fn">scalar</span>()
+
+<span class="cm"># 4. Databricks CLI?</span>
+<span class="kw">try</span>:
+    out = subprocess.<span class="fn">run</span>([<span class="st">"databricks"</span>, <span class="st">"--version"</span>],
+                         capture_output=<span class="kw">True</span>, text=<span class="kw">True</span>, timeout=<span class="nu">10</span>)
+    cli_ok, cli_ver = out.returncode == <span class="nu">0</span>, (out.stdout <span class="kw">or</span> out.stderr).<span class="fn">strip</span>()
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    cli_ok, cli_ver = <span class="kw">False</span>, <span class="fn">str</span>(e)[:<span class="nu">60</span>]
+
+<span class="cm"># 5. Apps API?</span>
+<span class="kw">try</span>:
+    apps = <span class="fn">list</span>(w.apps.<span class="fn">list</span>())
+    apps_ok = <span class="kw">True</span>
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    apps_ok, apps = <span class="kw">False</span>, []
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"PROJECT '{TUTORIAL['project_name']}'  state={project.state}"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"   Endpoint:    {project.read_write_dns}"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"   orders rows: {n_orders}"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"   CLI:         {cli_ver if cli_ok else 'unavailable'}"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"   Apps API:    {'available' if apps_ok else 'unavailable'}"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">PROJECT 'lakebase-tutorial'  state=READY</span>
+   Endpoint:    instance-a3f9e1c4-rw.cloud.databricks.com
+   orders rows: 5
+   CLI:         Databricks CLI v0.225.0
+   Apps API:    available</pre>
+    </div>
+
+    <div class="proves"><strong>What this proves:</strong> the Module 3 project is alive, OAuth still works, you have a writable engine, the CLI is reachable, and the workspace has Apps enabled. All five must be green before continuing.</div>
+
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>Project 'lakebase-tutorial' not found</code></td><td>Module 3 cleanup ran</td><td>Re-run Module 3 Lab 3 with <code>CLEANUP=False</code></td></tr>
+          <tr><td><code>relation "orders" does not exist</code></td><td>Module 3 schema dropped</td><td>Re-run Module 3 Lab 3, Step 3</td></tr>
+          <tr><td>CLI shows <code>unavailable</code></td><td>Not in cluster's PATH</td><td>Use Cell 8b (SDK fallback) instead of Cell 8</td></tr>
+          <tr><td>Apps API: <code>unavailable</code></td><td>Apps not enabled in workspace</td><td>Ask your admin to enable Databricks Apps; this lab cannot proceed without it</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="step" id="step2">
+    <div class="step-banner">
+      <span class="step-num">STEP 02</span>
+      <h2 class="step-title">Scaffold the app directory</h2>
+      <button class="step-mark" data-step="2" onclick="markStep(2)">Mark done</button>
+    </div>
+    <p>Lay down the four files that make a Databricks App: <code>app.yaml</code> (manifest), <code>app.py</code> (Streamlit entrypoint), <code>db.py</code> (the per-request engine factory), <code>requirements.txt</code> (deps). We write them into the notebook workspace so the deploy step can pick them up.</p>
+
+    <div class="cell" id="cell-3">
+      <div class="cell-header">
+        <span class="cell-label">Cell 3 · create app/ directory<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-3')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 3 — create the app/ directory tree</span>
+APP_DIR = <span class="fn">f</span><span class="st">"/Workspace/Users/{TUTORIAL['user']}/lakebase-orders-app"</span>
+
+os.<span class="fn">makedirs</span>(APP_DIR, exist_ok=<span class="kw">True</span>)
+<span class="kw">for</span> f <span class="kw">in</span> [<span class="st">"app.yaml"</span>, <span class="st">"app.py"</span>, <span class="st">"db.py"</span>, <span class="st">"requirements.txt"</span>]:
+    p = <span class="fn">f</span><span class="st">"{APP_DIR}/{f}"</span>
+    <span class="kw">if not</span> os.path.<span class="fn">exists</span>(p):
+        <span class="fn">open</span>(p, <span class="st">"w"</span>).<span class="fn">close</span>()
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"App directory ready: {APP_DIR}"</span>)
+<span class="fn">print</span>(<span class="st">"Files:"</span>)
+<span class="kw">for</span> f <span class="kw">in</span> <span class="fn">sorted</span>(os.<span class="fn">listdir</span>(APP_DIR)):
+    size = os.path.<span class="fn">getsize</span>(<span class="fn">f</span><span class="st">"{APP_DIR}/{f}"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="st">"   {f:&lt;22} ({size} B)"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">App directory ready: /Workspace/Users/you@co.com/lakebase-orders-app</span>
+Files:
+   app.py                 (0 B)
+   app.yaml               (0 B)
+   db.py                  (0 B)
+   requirements.txt       (0 B)</pre>
+    </div>
+
+    <div class="proves"><strong>What this proves:</strong> you have a writable directory in the workspace and the four files exist as placeholders. Cells 4–6 fill them in.</div>
+  </section>
+
+  <section class="step" id="step3">
+    <div class="step-banner">
+      <span class="step-num">STEP 03</span>
+      <h2 class="step-title">Write <code>db.py</code> — the per-request engine factory</h2>
+      <button class="step-mark" data-step="3" onclick="markStep(3)">Mark done</button>
+    </div>
+    <p>This is <strong>Pattern 1 from theory 7.3</strong>. Every request creates a fresh engine from the OBO env vars the runtime injects. Per-request cost is one TLS + one auth round-trip (~30–80ms). Easy to review. Almost impossible to misuse.</p>
+
+    <h4>What to look for in this file</h4>
+    <ul>
+      <li><code>get_engine()</code> reads env vars on every call — never cached</li>
+      <li>No module-level <code>engine = create_engine(...)</code> — that's the trap</li>
+      <li><code>current_user()</code> reads from <code>PGUSER</code> only, never from session state</li>
+    </ul>
+
+    <div class="cell" id="cell-4">
+      <div class="cell-header">
+        <span class="cell-label">Cell 4 · write db.py<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-4')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 4 — write db.py (per-request engine factory)</span>
+DB_PY = <span class="st">'''"""</span>
+<span class="st">db.py — per-request engine factory.</span>
+
+<span class="st">Pattern 1 from Module 7 theory 7.3:</span>
+<span class="st">- A fresh SQLAlchemy engine is built on EVERY request from the OBO env vars</span>
+<span class="st">  the Apps runtime injects (PGUSER, DATABRICKS_TOKEN, PGHOST, PGDATABASE).</span>
+<span class="st">- This guarantees alice's queries run as alice and bob's as bob.</span>
+<span class="st">- Cost: ~30-80ms per request for the TLS + auth round-trip.</span>
+
+<span class="st">DO NOT cache the engine globally. The whole reason this works correctly is</span>
+<span class="st">that each request rebuilds it from the (request-scoped) env vars.</span>
+<span class="st">"""</span>
+<span class="st">import os</span>
+<span class="st">from sqlalchemy import create_engine</span>
+<span class="st">from sqlalchemy.engine import Engine</span>
+
+
+<span class="st">def get_engine() -> Engine:</span>
+<span class="st">    """Build a per-request engine from the current OBO env vars."""</span>
+<span class="st">    user  = os.environ["PGUSER"]</span>
+<span class="st">    token = os.environ["DATABRICKS_TOKEN"]</span>
+<span class="st">    host  = os.environ["PGHOST"]</span>
+<span class="st">    db    = os.environ["PGDATABASE"]</span>
+<span class="st">    url = (</span>
+<span class="st">        f"postgresql+psycopg://{user}:{token}"</span>
+<span class="st">        f"@{host}:5432/{db}?sslmode=require"</span>
+<span class="st">    )</span>
+<span class="st">    return create_engine(url, pool_pre_ping=True, pool_size=2)</span>
+
+
+<span class="st">def current_user() -> str:</span>
+<span class="st">    """The end user this request is running as."""</span>
+<span class="st">    return os.environ["PGUSER"]</span>
+<span class="st">'''</span>
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="fn">f</span><span class="st">"{APP_DIR}/db.py"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(DB_PY)
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"Wrote db.py ({len(DB_PY)} B)"</span>)
+<span class="fn">print</span>(<span class="st">"Key thing to notice: get_engine() reads env vars EVERY call."</span>)
+<span class="fn">print</span>(<span class="st">"Never wrap this in @st.cache_resource — that's the trap from 7.3."</span>)</pre>
+    </div>
+
+    <div class="proves"><strong>What this proves:</strong> <code>db.py</code> exists, contains a function-only API, and has no global engine. The static check in Cell 10 verifies these properties automatically — but reading the file with your own eyes is what builds the muscle memory to spot the trap on a real PR.</div>
+  </section>
+
+  <section class="step" id="step4">
+    <div class="step-banner">
+      <span class="step-num">STEP 04</span>
+      <h2 class="step-title">Write <code>app.py</code> — the Streamlit UI</h2>
+      <button class="step-mark" data-step="4" onclick="markStep(4)">Mark done</button>
+    </div>
+    <p>The UI has three tabs:</p>
+    <ul>
+      <li><strong>My Orders</strong> — shows rows for the logged-in user. The query has <em>no <code>WHERE</code> clause</em> — RLS does the filtering.</li>
+      <li><strong>Identity Check</strong> — shows <code>current_user</code>, <code>PGUSER</code>, and the count of rows visible. <strong>This is the panel you and your teammate compare in Step 8.</strong></li>
+      <li><strong>Chat (M6)</strong> — uses Module 6 agent memory if present; otherwise shows a stub. Keeps the lab runnable for people who haven't done Module 6 yet.</li>
+    </ul>
+
+    <div class="cell" id="cell-5">
+      <div class="cell-header">
+        <span class="cell-label">Cell 5 · write app.py<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-5')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 5 — write app.py (Streamlit entrypoint)</span>
+APP_PY = <span class="st">r'''"""</span>
+<span class="st">app.py — Streamlit UI for Lakebase Orders.</span>
+
+<span class="st">Demonstrates the OBO pattern from Module 7 theory:</span>
+<span class="st">- Every connection runs as the end user (current_user resolves to alice/bob).</span>
+<span class="st">- The orders query has NO WHERE clause — RLS filters by current_user.</span>
+<span class="st">- The Identity Check tab shows you what's actually happening on the connection.</span>
+<span class="st">"""</span>
+<span class="st">import os</span>
+<span class="st">import streamlit as st</span>
+<span class="st">from sqlalchemy import text</span>
+<span class="st">from db import get_engine, current_user</span>
+
+<span class="st">st.set_page_config(page_title="Lakebase Orders", layout="wide")</span>
+
+<span class="st">st.sidebar.title("Lakebase Orders")</span>
+<span class="st">st.sidebar.caption(f"Signed in as **{current_user()}**")</span>
+<span class="st">st.sidebar.markdown("---")</span>
+<span class="st">st.sidebar.markdown(</span>
+<span class="st">    "Module 7 lab demo — Apps + Lakebase + OBO. "</span>
+<span class="st">    "Open this app from a teammate's account "</span>
+<span class="st">    "to verify identity flows correctly."</span>
+<span class="st">)</span>
+
+<span class="st">tab_orders, tab_id, tab_chat = st.tabs(["My Orders", "Identity Check", "Chat (M6)"])</span>
+
+
+<span class="st"># Tab 1 — My Orders</span>
+<span class="st">with tab_orders:</span>
+<span class="st">    st.header("My orders")</span>
+<span class="st">    st.caption(</span>
+<span class="st">        "The query below is `SELECT * FROM orders` — no WHERE clause. "</span>
+<span class="st">        "RLS rewrites it to filter by `current_user`."</span>
+<span class="st">    )</span>
+<span class="st">    with get_engine().connect() as conn:</span>
+<span class="st">        rows = conn.execute(text("""</span>
+<span class="st">            SELECT id, sku, qty, total_cents, placed_at</span>
+<span class="st">            FROM orders ORDER BY placed_at DESC LIMIT 50</span>
+<span class="st">        """)).fetchall()</span>
+<span class="st">    if not rows:</span>
+<span class="st">        st.info("No orders visible to you. Check the Identity tab.")</span>
+<span class="st">    else:</span>
+<span class="st">        st.dataframe([dict(r._mapping) for r in rows],</span>
+<span class="st">                     use_container_width=True, hide_index=True)</span>
+<span class="st">        st.caption(f"Showing {len(rows)} order(s) for {current_user()}.")</span>
+
+
+<span class="st"># Tab 2 — Identity Check (the demo panel for Step 8 verification)</span>
+<span class="st">with tab_id:</span>
+<span class="st">    st.header("Identity check")</span>
+<span class="st">    st.caption(</span>
+<span class="st">        "PGUSER (env var) and current_user (Postgres) must agree. "</span>
+<span class="st">        "If they differ, you have shipped the trap from theory 7.3."</span>
+<span class="st">    )</span>
+<span class="st">    with get_engine().connect() as conn:</span>
+<span class="st">        pg_current_user = conn.execute(text("SELECT current_user")).scalar()</span>
+<span class="st">        pg_session_user = conn.execute(text("SELECT session_user")).scalar()</span>
+<span class="st">        n_visible       = conn.execute(text("SELECT count(*) FROM orders")).scalar()</span>
+
+<span class="st">    col1, col2 = st.columns(2)</span>
+<span class="st">    with col1:</span>
+<span class="st">        st.metric("PGUSER (env var)", os.environ.get("PGUSER", "-"))</span>
+<span class="st">        st.metric("current_user (Postgres)", pg_current_user)</span>
+<span class="st">        st.metric("session_user (Postgres)", pg_session_user)</span>
+<span class="st">    with col2:</span>
+<span class="st">        st.metric("Orders visible to me", n_visible)</span>
+<span class="st">        st.metric("PGHOST", os.environ.get("PGHOST", "-"))</span>
+
+<span class="st">    if os.environ.get("PGUSER") == pg_current_user:</span>
+<span class="st">        st.success("OBO is working. Connection authenticated as the end user.")</span>
+<span class="st">    else:</span>
+<span class="st">        st.error("MISMATCH. Check db.py — likely a global engine was cached.")</span>
+
+
+<span class="st"># Tab 3 — Chat (uses Module 6 agent memory if available)</span>
+<span class="st">with tab_chat:</span>
+<span class="st">    st.header("Chat about your orders")</span>
+<span class="st">    with get_engine().connect() as conn:</span>
+<span class="st">        m6 = conn.execute(text("""</span>
+<span class="st">            SELECT count(*) FROM information_schema.tables</span>
+<span class="st">            WHERE table_name IN ('sessions', 'messages', 'episodes')</span>
+<span class="st">        """)).scalar()</span>
+<span class="st">    if m6 != 3:</span>
+<span class="st">        st.info("Module 6 memory tables not found. Skipping chat.")</span>
+<span class="st">    else:</span>
+<span class="st">        if "msgs" not in st.session_state:</span>
+<span class="st">            st.session_state["msgs"] = []</span>
+<span class="st">        for m in st.session_state["msgs"]:</span>
+<span class="st">            with st.chat_message(m["role"]): st.write(m["content"])</span>
+<span class="st">        prompt = st.chat_input("Ask about your orders...")</span>
+<span class="st">        if prompt:</span>
+<span class="st">            st.session_state["msgs"].append({"role":"user","content":prompt})</span>
+<span class="st">            with st.chat_message("user"): st.write(prompt)</span>
+<span class="st">            with st.chat_message("assistant"):</span>
+<span class="st">                reply = f"You asked: {prompt!r}. Stub reply (real M6+M7 build calls run_turn)."</span>
+<span class="st">                st.write(reply)</span>
+<span class="st">                st.session_state["msgs"].append({"role":"assistant","content":reply})</span>
+<span class="st">'''</span>
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="fn">f</span><span class="st">"{APP_DIR}/app.py"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(APP_PY)
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"Wrote app.py ({len(APP_PY)} B)"</span>)
+<span class="fn">print</span>(<span class="st">"Tabs: My Orders | Identity Check | Chat (M6 optional)"</span>)
+<span class="fn">print</span>(<span class="st">"The Identity Check tab is what you verify in Step 8."</span>)</pre>
+    </div>
+
+    <div class="proves"><strong>What this proves:</strong> the UI is written. Two structural things to internalize: (1) <strong>no <code>WHERE</code> clause anywhere in the orders query</strong> — RLS does the filtering. (2) <strong>Every tab calls <code>get_engine()</code> again</strong> — the engine rebuilds from env vars on every interaction.</div>
+  </section>
+
+  <section class="step" id="step5">
+    <div class="step-banner">
+      <span class="step-num">STEP 05</span>
+      <h2 class="step-title">Write <code>app.yaml</code> &amp; <code>requirements.txt</code></h2>
+      <button class="step-mark" data-step="5" onclick="markStep(5)">Mark done</button>
+    </div>
+    <p>The manifest is the only place you bind the Lakebase project. <strong>Notice: no secrets, no passwords, no DB connection string</strong> — everything is identity-driven through the resource binding.</p>
+
+    <div class="cell" id="cell-6">
+      <div class="cell-header">
+        <span class="cell-label">Cell 6 · write app.yaml + requirements.txt<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-6')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 6 — write app.yaml + requirements.txt</span>
+APP_YAML = <span class="fn">f</span><span class="st">'''command: ["streamlit", "run", "app.py"]</span>
+
+<span class="st">env:</span>
+<span class="st">  - name: PGHOST</span>
+<span class="st">    valueFrom: {TUTORIAL["project_name"]}</span>
+<span class="st">  - name: PGDATABASE</span>
+<span class="st">    value: databricks_postgres</span>
+
+<span class="st">resources:</span>
+<span class="st">  - name: {TUTORIAL["project_name"]}</span>
+<span class="st">    description: "Module 3 Lakebase project — operational store"</span>
+<span class="st">    database:</span>
+<span class="st">      instance_name: {TUTORIAL["project_name"]}</span>
+<span class="st">      permission: CAN_USE</span>
+<span class="st">'''</span>
+
+REQS_TXT = <span class="st">'''streamlit&gt;=1.32.0</span>
+<span class="st">sqlalchemy&gt;=2.0.0</span>
+<span class="st">psycopg[binary]&gt;=3.1.0</span>
+<span class="st">'''</span>
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="fn">f</span><span class="st">"{APP_DIR}/app.yaml"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(APP_YAML)
+<span class="kw">with</span> <span class="fn">open</span>(<span class="fn">f</span><span class="st">"{APP_DIR}/requirements.txt"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(REQS_TXT)
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"Wrote app.yaml ({len(APP_YAML)} B)"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"Wrote requirements.txt ({len(REQS_TXT)} B)"</span>)
+<span class="fn">print</span>()
+<span class="fn">print</span>(<span class="st">"-"</span> * <span class="nu">60</span>)
+<span class="fn">print</span>(<span class="st">"app.yaml content (note: no passwords, no secrets):"</span>)
+<span class="fn">print</span>(<span class="st">"-"</span> * <span class="nu">60</span>)
+<span class="fn">print</span>(APP_YAML)</pre>
+    </div>
+
+    <div class="proves"><strong>What this proves:</strong> the manifest carries a single resource binding (<code>valueFrom: lakebase-tutorial</code>) and zero credentials. The runtime fills in <code>PGHOST</code>, <code>PGUSER</code>, <code>DATABRICKS_TOKEN</code> per-request from the binding. <strong>If you ever find a <code>password:</code>, <code>secret:</code>, or <code>token:</code> field in this file on a code review, the OBO contract is being bypassed.</strong></div>
+  </section>
+
+  <section class="step" id="step6">
+    <div class="step-banner">
+      <span class="step-num">STEP 06</span>
+      <h2 class="step-title">Add an RLS policy to <code>orders</code></h2>
+      <button class="step-mark" data-step="6" onclick="markStep(6)">Mark done</button>
+    </div>
+    <p>Right now the <code>orders</code> table from Module 3 has no RLS — every connection sees every row. That works in dev (one user) but defeats the entire point of OBO. Add a policy so <code>current_user</code> actually has something to enforce, then verify it works on the notebook side before deploying.</p>
+    <p><strong>The policy.</strong> Each user sees only the orders whose <code>user_email</code> matches their workspace identity. We backfill some rows for you and add two for a fictional second user (<code>demo-other@example.com</code>) so the demo has variety.</p>
+
+    <div class="cell" id="cell-7">
+      <div class="cell-header">
+        <span class="cell-label">Cell 7 · add user_email + RLS policy<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-7')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 7 — add user_email column, seed, and apply RLS</span>
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+    <span class="cm"># 1. Add user_email column if missing (idempotent)</span>
+    conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        ALTER TABLE orders
+        ADD COLUMN IF NOT EXISTS user_email TEXT
+    """</span>))
+
+    <span class="cm"># 2. Backfill 3 rows to the current user</span>
+    conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        UPDATE orders SET user_email = :me
+        WHERE id IN (SELECT id FROM orders ORDER BY id LIMIT 3)
+          AND (user_email IS NULL OR user_email = '')
+    """</span>), {<span class="st">"me"</span>: TUTORIAL[<span class="st">"user"</span>]})
+
+    <span class="cm"># 3. Add 2 rows for a fictional second user</span>
+    conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        INSERT INTO orders (sku, qty, total_cents, user_email)
+        VALUES
+            ('LB-9047X', 2, 18000, 'demo-other@example.com'),
+            ('LB-1234',  1,  4500, 'demo-other@example.com')
+        ON CONFLICT DO NOTHING
+    """</span>))
+
+    <span class="cm"># 4. RLS policy</span>
+    conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"DROP POLICY IF EXISTS orders_self ON orders"</span>))
+    conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        CREATE POLICY orders_self ON orders
+            USING (user_email = current_user)
+    """</span>))
+    conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"ALTER TABLE orders ENABLE ROW LEVEL SECURITY"</span>))
+
+<span class="cm"># Verify on the notebook side: current_user IS your email,</span>
+<span class="cm"># so you should see only the rows you own.</span>
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    visible = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM orders"</span>)).<span class="fn">scalar</span>()
+    by_user = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+        SELECT user_email, count(*) AS n
+        FROM orders GROUP BY user_email ORDER BY n DESC
+    """</span>)).<span class="fn">fetchall</span>()
+
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"RLS policy 'orders_self' active on `orders`"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"   Rows visible to YOU ({TUTORIAL['user']}): {visible}"</span>)
+<span class="fn">print</span>(<span class="st">"Distribution across users in the underlying table:"</span>)
+<span class="kw">for</span> row <span class="kw">in</span> by_user:
+    marker = <span class="st">" &lt;- YOU"</span> <span class="kw">if</span> row.user_email == TUTORIAL[<span class="st">"user"</span>] <span class="kw">else</span> <span class="st">""</span>
+    <span class="fn">print</span>(<span class="fn">f</span><span class="st">"   {(row.user_email or '(NULL)'):&lt;32} {row.n}{marker}"</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">RLS policy 'orders_self' active on `orders`</span>
+   Rows visible to YOU (you@co.com): 3
+Distribution across users in the underlying table:
+   you@co.com                       3 &lt;- YOU
+   demo-other@example.com           2</pre>
+    </div>
+
+    <div class="proves"><strong>What this proves:</strong> RLS is enforcing on this very notebook session. The table has 5 rows total but you see 3, because the notebook itself runs as your identity — the same model the App will use. <strong>No <code>WHERE</code> clause</strong> in the app's query is doing this work; RLS is. Now we have a real test for Step 8: a teammate logging in should see <em>0</em> rows (since they're not <code>demo-other@example.com</code>) and you should still see 3.</div>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Why this design</span>
+      <p>The check <code>user_email = current_user</code> works because Lakebase's OBO contract makes <code>current_user</code> at the Postgres level resolve to the workspace identity behind the connection. There is nothing in the app code, no session cookie, and no application user table involved. <strong>Postgres knows who you are because the connection itself is authenticated as you.</strong></p>
+    </div>
+  </section>
+
+  <section class="step" id="step7">
+    <div class="step-banner">
+      <span class="step-num">STEP 07</span>
+      <h2 class="step-title">Deploy the app</h2>
+      <button class="step-mark" data-step="7" onclick="markStep(7)">Mark done</button>
+    </div>
+    <p>Two ways: (a) the <code>databricks</code> CLI from a notebook shell cell, or (b) the SDK's Apps API. Both end with the same artifact — a running app at a URL the workspace surfaces. Use the CLI when available; fall back to the SDK if not.</p>
+
+    <div class="substep"><span>7a</span>Deploy via the Databricks CLI (preferred)</div>
+
+    <div class="cell" id="cell-8">
+      <div class="cell-header">
+        <span class="cell-label">Cell 8 · deploy via CLI<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-8')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 8 — deploy via the Databricks CLI</span>
+deploy_cmd = (
+    <span class="fn">f</span><span class="st">"databricks apps deploy "</span>
+    <span class="fn">f</span><span class="st">"--source-code-path {APP_DIR} "</span>
+    <span class="fn">f</span><span class="st">"{TUTORIAL['app_name']}"</span>
+)
+
+<span class="fn">print</span>(<span class="st">"Running:"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"  $ {deploy_cmd}"</span>)
+<span class="fn">print</span>()
+<span class="fn">print</span>(<span class="st">"This takes 2–4 minutes the first time (image build + container start)."</span>)
+<span class="fn">print</span>(<span class="st">"Subsequent deploys are faster (~30–60s)."</span>)
+<span class="fn">print</span>()
+
+<span class="kw">try</span>:
+    out = subprocess.<span class="fn">run</span>(
+        deploy_cmd.<span class="fn">split</span>(),
+        capture_output=<span class="kw">True</span>, text=<span class="kw">True</span>, timeout=<span class="nu">600</span>
+    )
+    <span class="fn">print</span>(<span class="st">"STDOUT:"</span>, out.stdout)
+    <span class="kw">if</span> out.stderr: <span class="fn">print</span>(<span class="st">"STDERR:"</span>, out.stderr)
+    <span class="kw">if</span> out.returncode != <span class="nu">0</span>:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="st">"Exit code {out.returncode} — check stderr above. Try Cell 8b."</span>)
+<span class="kw">except</span> <span class="fn">FileNotFoundError</span>:
+    <span class="fn">print</span>(<span class="st">"`databricks` CLI not found on this cluster. Use Cell 8b instead."</span>)
+<span class="kw">except</span> subprocess.<span class="fn">TimeoutExpired</span>:
+    <span class="fn">print</span>(<span class="st">"Deploy timed out at 10 min. Check the Apps UI manually."</span>)</pre>
+    </div>
+
+    <div class="substep"><span>7b</span>Deploy via the SDK (fallback if the CLI is unavailable)</div>
+
+    <div class="cell" id="cell-8b">
+      <div class="cell-header">
+        <span class="cell-label">Cell 8b · deploy via SDK<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-8b')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 8b — deploy via the SDK (fallback)</span>
+<span class="kw">from</span> databricks.sdk.service.apps <span class="kw">import</span> App, AppResource, AppResourceDatabase
+
+<span class="kw">try</span>:
+    app_obj = w.apps.<span class="fn">create_and_wait</span>(
+        app=<span class="fn">App</span>(
+            name=TUTORIAL[<span class="st">"app_name"</span>],
+            description=<span class="st">"Module 7 lab — Lakebase Orders demo"</span>,
+            resources=[
+                <span class="fn">AppResource</span>(
+                    name=TUTORIAL[<span class="st">"project_name"</span>],
+                    description=<span class="st">"Module 3 Lakebase project"</span>,
+                    database=<span class="fn">AppResourceDatabase</span>(
+                        instance_name=TUTORIAL[<span class="st">"project_name"</span>],
+                        permission=<span class="st">"CAN_USE"</span>,
+                    ),
+                )
+            ],
+        )
+    )
+    <span class="fn">print</span>(<span class="fn">f</span><span class="st">"App created: {app_obj.name}"</span>)
+
+    deployment = w.apps.<span class="fn">deploy_and_wait</span>(
+        app_name=TUTORIAL[<span class="st">"app_name"</span>],
+        source_code_path=APP_DIR,
+    )
+    <span class="fn">print</span>(<span class="fn">f</span><span class="st">"Deployed.  state={deployment.status.state}"</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="st">"   URL: {app_obj.url}"</span>)
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    msg = <span class="fn">str</span>(e)
+    <span class="kw">if</span> <span class="st">"already exists"</span> <span class="kw">in</span> msg <span class="kw">or</span> <span class="st">"ALREADY_EXISTS"</span> <span class="kw">in</span> msg:
+        <span class="cm"># App already exists — just redeploy</span>
+        deployment = w.apps.<span class="fn">deploy_and_wait</span>(
+            app_name=TUTORIAL[<span class="st">"app_name"</span>],
+            source_code_path=APP_DIR,
+        )
+        <span class="fn">print</span>(<span class="fn">f</span><span class="st">"Redeployed existing app.  state={deployment.status.state}"</span>)
+    <span class="kw">else</span>:
+        <span class="kw">raise</span></pre>
+    </div>
+
+    <div class="substep"><span>7c</span>Surface the URL for you and your teammate</div>
+
+    <div class="cell" id="cell-9">
+      <div class="cell-header">
+        <span class="cell-label">Cell 9 · print the app URL<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-9')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 9 — surface the app URL</span>
+app = w.apps.<span class="fn">get</span>(name=TUTORIAL[<span class="st">"app_name"</span>])
+state = app.compute_status.state <span class="kw">if</span> app.compute_status <span class="kw">else</span> <span class="st">"unknown"</span>
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"  APP NAME: {app.name}"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"  STATE:    {state}"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"  URL:      {app.url}"</span>)
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+<span class="fn">print</span>()
+<span class="fn">print</span>(<span class="st">"Open the URL in your browser — sign in with workspace SSO."</span>)
+<span class="fn">print</span>(<span class="st">"Send the URL to a teammate; they sign in with THEIR workspace identity."</span>)
+<span class="fn">print</span>(<span class="st">"You should each see different orders + different identity values."</span>)
+<span class="fn">print</span>(<span class="st">"That's what Step 8 verifies."</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>======================================================================
+  APP NAME: lakebase-orders
+  STATE:    RUNNING
+  URL:      https://lakebase-orders-1234567890.aws.databricksapps.com
+======================================================================
+
+Open the URL in your browser — sign in with workspace SSO.
+Send the URL to a teammate; they sign in with THEIR workspace identity.
+You should each see different orders + different identity values.
+That's what Step 8 verifies.</pre>
+    </div>
+
+    <div class="proves"><strong>What this proves:</strong> the deploy succeeded, the app is in <code>RUNNING</code> state, and a workspace URL is live. The URL is the artifact you'll send to your teammate in Step 8.</div>
+  </section>
+
+  <section class="step" id="step8">
+    <div class="step-banner">
+      <span class="step-num">STEP 08</span>
+      <h2 class="step-title">The two-user verification (the trap-killer)</h2>
+      <button class="step-mark" data-step="8" onclick="markStep(8)">Mark done</button>
+    </div>
+    <p>This is the single most important step in Module 7. <strong>The connection-pool trap from theory 7.3 is silent in dev.</strong> It only manifests when a second identity hits the app. Don't skip this.</p>
+
+    <div class="substep"><span>8a</span>What you do</div>
+    <ol>
+      <li>Open the app URL (printed by Cell 9) in your browser. Click the <strong>Identity Check</strong> tab.</li>
+      <li>Read off three values: <code>PGUSER</code> (env), <code>current_user</code> (Postgres), and <code>Orders visible to me</code>.</li>
+      <li>Send the same URL to your teammate. They click <strong>Identity Check</strong> in their own browser.</li>
+      <li>Compare. <strong>All three values must differ between you and your teammate.</strong></li>
+    </ol>
+
+    <div class="substep"><span>8b</span>What you should see</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>What</th><th>YOU should see</th><th>YOUR TEAMMATE should see</th></tr></thead>
+        <tbody>
+          <tr><td><code>PGUSER</code></td><td>your email</td><td>their email</td></tr>
+          <tr><td><code>current_user</code> (Postgres)</td><td>your email</td><td>their email</td></tr>
+          <tr><td>Orders visible</td><td>3 (rows you backfilled)</td><td>0 (no rows for their email)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-trap">
+      <span class="callout-label">⚠ If your teammate's panel shows YOUR identity</span>
+      <p>You have shipped the trap. Re-check <code>db.py</code> — most likely a global <code>engine = create_engine(...)</code> got introduced somewhere outside <code>get_engine()</code>, or a <code>@st.cache_resource</code> decorator landed on the wrong function. Re-run Cell 4 to overwrite, then redeploy with Cell 8.</p>
+    </div>
+
+    <div class="substep"><span>8c</span>Programmatic checklist</div>
+    <p>The next cell runs the six static and runtime checks any Lakebase-app PR should pass before merge.</p>
+
+    <div class="cell" id="cell-10">
+      <div class="cell-header">
+        <span class="cell-label">Cell 10 · final pass/fail<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-10')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 10 — final pass/fail checklist</span>
+checks = []
+
+<span class="cm"># 1. App exists and is running</span>
+<span class="kw">try</span>:
+    a = w.apps.<span class="fn">get</span>(name=TUTORIAL[<span class="st">"app_name"</span>])
+    state = a.compute_status.state <span class="kw">if</span> a.compute_status <span class="kw">else</span> <span class="st">"unknown"</span>
+    ok = state <span class="kw">in</span> (<span class="st">"RUNNING"</span>, <span class="st">"ACTIVE"</span>)
+    checks.<span class="fn">append</span>((<span class="st">"App deployed and running"</span>, state, ok))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"App deployed and running"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 2. RLS policy exists</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        n = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+            SELECT count(*) FROM pg_policies
+            WHERE tablename='orders' AND policyname='orders_self'
+        """</span>)).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"RLS policy 'orders_self'"</span>, <span class="fn">f</span><span class="st">"{n} found"</span>, n == <span class="nu">1</span>))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"RLS policy 'orders_self'"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 3. RLS enabled on table</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        enabled = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+            SELECT relrowsecurity FROM pg_class WHERE relname='orders'
+        """</span>)).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">"RLS enabled on orders"</span>, <span class="st">"yes"</span> <span class="kw">if</span> enabled <span class="kw">else</span> <span class="st">"no"</span>, <span class="fn">bool</span>(enabled)))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"RLS enabled on orders"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 4. RLS demonstrably filters: more users in DB than the notebook sees</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        mine = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"SELECT count(*) FROM orders"</span>)).<span class="fn">scalar</span>()
+        all_users = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">"""
+            SELECT count(DISTINCT user_email) FROM orders
+        """</span>)).<span class="fn">scalar</span>()
+    ok = mine &gt; <span class="nu">0</span> <span class="kw">and</span> all_users &gt;= <span class="nu">2</span>
+    checks.<span class="fn">append</span>((<span class="st">"RLS filters notebook session"</span>,
+                   <span class="fn">f</span><span class="st">"{mine} visible, {all_users} users"</span>, ok))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"RLS filters notebook session"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 5. db.py uses Pattern 1 (no global engine, no @st.cache_resource)</span>
+<span class="kw">try</span>:
+    src = <span class="fn">open</span>(<span class="fn">f</span><span class="st">"{APP_DIR}/db.py"</span>).<span class="fn">read</span>()
+    has_factory = <span class="st">"def get_engine"</span> <span class="kw">in</span> src
+    no_global   = <span class="st">"engine = create_engine"</span> <span class="kw">not in</span> src.<span class="fn">split</span>(<span class="st">"def get_engine"</span>)[<span class="nu">0</span>]
+    no_cache    = <span class="st">"@st.cache_resource"</span> <span class="kw">not in</span> src
+    ok = has_factory <span class="kw">and</span> no_global <span class="kw">and</span> no_cache
+    checks.<span class="fn">append</span>((<span class="st">"db.py uses Pattern 1 (no global)"</span>,
+                   <span class="st">"factory only"</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="st">"issue"</span>, ok))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"db.py uses Pattern 1 (no global)"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 6. app.yaml has no secrets</span>
+<span class="kw">try</span>:
+    src = <span class="fn">open</span>(<span class="fn">f</span><span class="st">"{APP_DIR}/app.yaml"</span>).<span class="fn">read</span>().<span class="fn">lower</span>()
+    has_secret = <span class="fn">any</span>(t <span class="kw">in</span> src <span class="kw">for</span> t <span class="kw">in</span> [<span class="st">"password:"</span>, <span class="st">"secret:"</span>, <span class="st">"token:"</span>])
+    checks.<span class="fn">append</span>((<span class="st">"app.yaml has no secrets"</span>,
+                   <span class="st">"clean"</span> <span class="kw">if not</span> has_secret <span class="kw">else</span> <span class="st">"found secret"</span>,
+                   <span class="kw">not</span> has_secret))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">"app.yaml has no secrets"</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># Print</span>
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="st">"{'CHECK':&lt;38} {'DETAIL':&lt;22} STATUS"</span>)
+<span class="fn">print</span>(<span class="st">"-"</span> * <span class="nu">70</span>)
+<span class="kw">for</span> name, detail, ok <span class="kw">in</span> checks:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="st">"{name:&lt;38} {str(detail)[:22]:&lt;22} {'PASS' if ok else 'FAIL'}"</span>)
+<span class="fn">print</span>(<span class="st">"="</span> * <span class="nu">70</span>)
+passed = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> _, _, ok <span class="kw">in</span> checks <span class="kw">if</span> ok)
+total = <span class="fn">len</span>(checks)
+<span class="kw">if</span> passed == total:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="st">"\nALL {total} CHECKS PASSED — Module 7 complete."</span>)
+    <span class="fn">print</span>(<span class="st">"Do not skip the manual two-user verification (8a + 8b)."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="st">"\n{passed}/{total} passed. Resolve the FAIL rows before Module 8."</span>)</pre>
+    </div>
+
+    <div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>======================================================================
+CHECK                                  DETAIL                 STATUS
+----------------------------------------------------------------------
+App deployed and running               RUNNING                <span class="ok-line">PASS</span>
+RLS policy 'orders_self'               1 found                <span class="ok-line">PASS</span>
+RLS enabled on orders                  yes                    <span class="ok-line">PASS</span>
+RLS filters notebook session           3 visible, 2 users     <span class="ok-line">PASS</span>
+db.py uses Pattern 1 (no global)       factory only           <span class="ok-line">PASS</span>
+app.yaml has no secrets                clean                  <span class="ok-line">PASS</span>
+======================================================================
+
+<span class="ok-line">ALL 6 CHECKS PASSED — Module 7 complete.</span>
+Do not skip the manual two-user verification (8a + 8b).</pre>
+    </div>
+
+    <!-- ─── INTERACTIVE CHECKLIST ─── -->
+    <div class="checklist-section">
+      <div class="checklist-header">
+        <span class="checklist-title">Tap each check as Cell 10 prints <em>PASS</em></span>
+        <span class="checklist-status" id="clStatus">0 / 6 complete</span>
+      </div>
+      <div class="check-row">
+        <span class="check-num">01</span>
+        <div>
+          <div class="check-name">App deployed and running</div>
+          <div class="check-desc">w.apps.get(name).compute_status.state == RUNNING</div>
+        </div>
+        <span class="check-detail" id="d1">— pending —</span>
+        <button class="check-toggle" data-check="1" onclick="toggleCheck(1)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">02</span>
+        <div>
+          <div class="check-name">RLS policy 'orders_self' exists</div>
+          <div class="check-desc">pg_policies row present</div>
+        </div>
+        <span class="check-detail" id="d2">— pending —</span>
+        <button class="check-toggle" data-check="2" onclick="toggleCheck(2)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">03</span>
+        <div>
+          <div class="check-name">RLS enabled on orders</div>
+          <div class="check-desc">pg_class.relrowsecurity is true</div>
+        </div>
+        <span class="check-detail" id="d3">— pending —</span>
+        <button class="check-toggle" data-check="3" onclick="toggleCheck(3)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">04</span>
+        <div>
+          <div class="check-name">RLS filters notebook session</div>
+          <div class="check-desc">multiple users in DB; you see only yours</div>
+        </div>
+        <span class="check-detail" id="d4">— pending —</span>
+        <button class="check-toggle" data-check="4" onclick="toggleCheck(4)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">05</span>
+        <div>
+          <div class="check-name">db.py uses Pattern 1 (no global)</div>
+          <div class="check-desc">factory function only, no @st.cache_resource</div>
+        </div>
+        <span class="check-detail" id="d5">— pending —</span>
+        <button class="check-toggle" data-check="5" onclick="toggleCheck(5)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">06</span>
+        <div>
+          <div class="check-name">app.yaml has no secrets</div>
+          <div class="check-desc">no password / secret / token fields</div>
+        </div>
+        <span class="check-detail" id="d6">— pending —</span>
+        <button class="check-toggle" data-check="6" onclick="toggleCheck(6)">○</button>
+      </div>
+
+      <div class="checklist-footer">
+        <span id="clMessage">▸ Run Cell 10. Tap each PASS above as it appears.</span>
+        <button class="reset-btn" onclick="resetChecks()">RESET</button>
+      </div>
+    </div>
+
+    <div class="substep"><span>8d</span>Cleanup (optional)</div>
+
+    <div class="cell" id="cell-11">
+      <div class="cell-header">
+        <span class="cell-label">Cell 11 · cleanup<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-11')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 11 — cleanup</span>
+<span class="cm"># Module 8 (capstone) reuses these tables and the app skeleton —</span>
+<span class="cm"># most readers leave CLEANUP_APP=False.</span>
+CLEANUP_APP = <span class="kw">False</span>
+
+<span class="kw">if</span> CLEANUP_APP:
+    <span class="kw">try</span>:
+        w.apps.<span class="fn">delete</span>(name=TUTORIAL[<span class="st">"app_name"</span>])
+        <span class="fn">print</span>(<span class="fn">f</span><span class="st">"Deleted app '{TUTORIAL['app_name']}'."</span>)
+        <span class="fn">print</span>(<span class="st">"Lakebase project, RLS policy, and all schemas preserved."</span>)
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="st">"Delete failed: {e}"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"Cleanup skipped. App still running — keep demoing."</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="st">"   App:  {TUTORIAL['app_name']}"</span>)
+    <span class="fn">print</span>(<span class="st">"   Cost: Apps runtime billed by hour while running."</span>)</pre>
+    </div>
+
+    <div class="proves"><strong>What this proves:</strong> the lab is complete — the app is live, RLS is enforcing, the static checks pass, and cleanup is opt-in. Module 8 reuses this same <code>app/</code> skeleton; <strong>most readers leave <code>CLEANUP_APP=False</code></strong>.</div>
+  </section>
+
+  <!-- ─── TROUBLESHOOTING REFERENCE ─── -->
+  <section>
+    <h2>Troubleshooting reference</h2>
+    <p>If your final checklist has any FAIL rows, find the row in the table below and apply the fix. <strong>Don't proceed to Module 8 with failing checks</strong> — the capstone reuses this exact app skeleton.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>FAIL Row</th><th>Most common cause</th><th>Resolution path</th></tr></thead>
+        <tbody>
+          <tr><td><strong>App deployed and running</strong></td><td>Cell 8 errored, or app is starting</td><td>Wait 60s and re-run Cell 9. If state stays <code>STOPPED</code>, check Cell 8 stderr; try Cell 8b SDK fallback</td></tr>
+          <tr><td><strong>RLS policy 'orders_self'</strong></td><td>Cell 7 errored mid-DDL</td><td>Re-run Cell 7 — it's idempotent (DROP POLICY IF EXISTS / CREATE POLICY)</td></tr>
+          <tr><td><strong>RLS enabled on orders</strong></td><td>The final <code>ALTER TABLE … ENABLE</code> was skipped</td><td>Re-run Cell 7's last <code>ALTER TABLE</code> line manually if the rest succeeded</td></tr>
+          <tr><td><strong>RLS filters notebook session</strong></td><td>Only 1 distinct user_email in the table</td><td>Re-run Cell 7 — it inserts the <code>demo-other@example.com</code> rows on idempotent INSERT</td></tr>
+          <tr><td><strong>db.py uses Pattern 1 (no global)</strong></td><td>Someone edited <code>db.py</code> and added a global <code>engine = create_engine(...)</code></td><td>Re-run Cell 4 to overwrite. <strong>Do not deploy with this row failing.</strong></td></tr>
+          <tr><td><strong>app.yaml has no secrets</strong></td><td>A <code>password:</code> or <code>token:</code> line was added by hand</td><td>Re-run Cell 6 to overwrite. The OBO contract requires zero secrets in this file.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── DONE BANNER ─── -->
+  <section class="done-banner">
+    <h3>What you've <em>accomplished</em></h3>
+    <p>If your final cell printed <code>ALL 6 CHECKS PASSED</code> AND the manual two-user verification confirmed distinct identities, you have done — for real, not in slides:</p>
+    <ul>
+      <li>✅ Wrote a real <code>app.yaml</code> that binds the Lakebase project with <strong>zero secrets</strong></li>
+      <li>✅ Built a per-request engine factory (<code>db.py</code>) that follows Pattern 1 from theory 7.3</li>
+      <li>✅ Wrote a Streamlit UI (<code>app.py</code>) that <strong>demonstrates RLS-enforced isolation with no <code>WHERE</code> clause</strong> — the wall is in Postgres, not the app</li>
+      <li>✅ Added an RLS policy on <code>orders</code> so OBO has something concrete to enforce</li>
+      <li>✅ Deployed the app via the Databricks CLI (or SDK) and got a live URL</li>
+      <li>✅ <strong>Verified with a teammate that two different workspace identities produce two different views of the same data</strong> — the trap-killer step</li>
+      <li>✅ Confirmed <code>db.py</code> uses no global engine and <code>app.yaml</code> carries no secrets — the two static checks every Lakebase-app PR review should perform</li>
+    </ul>
+    <p>These six capabilities are exactly what every customer Apps + Lakebase build needs. Module 8 (capstone) wraps the Module 6 agent loop into this same skeleton — same <code>db.py</code>, same <code>app.yaml</code> pattern, same two-user verification. <strong>Save this notebook somewhere you can find it again.</strong></p>
+
+    <div class="callout callout-success" style="margin-top: 24px;">
+      <span class="callout-label">▸ Module 7 complete</span>
+      <p>You finished four theory topics (7.1–7.4) and the hands-on lab. <strong>Next up: Module 8</strong> — the <em>capstone</em>. You'll glue Modules 3, 4, 5, 6, and 7 together into a single Streamlit-deployed customer-support agent. The per-request engine pattern from this lab is the substrate the entire capstone is built on.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ COPY BUTTONS ═══════════════
+function copyCell(cellId) {
+  const cell = document.getElementById(cellId);
+  const pre = cell.querySelector('pre');
+  const text = pre.innerText;
+  const btn = cell.querySelector('.copy-btn');
+
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.textContent = 'COPIED ✓';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = 'COPY';
+    }, 1800);
+  }).catch(() => {
+    btn.textContent = 'PRESS ⌘+C';
+    const range = document.createRange();
+    range.selectNode(pre);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    setTimeout(() => { btn.textContent = 'COPY'; }, 2200);
+  });
+}
+
+// ═══════════════ STEP TRACKER ═══════════════
+const STEP_KEY  = 'lakebase_lab7_steps';
+const CHECK_KEY = 'lakebase_lab7_checks';
+const TOTAL_STEPS = 8;
+const TOTAL_CHECKS = 6;
+
+function loadSteps() {
+  try { return JSON.parse(localStorage.getItem(STEP_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveSteps(s) {
+  try { localStorage.setItem(STEP_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+function markStep(n) {
+  const steps = loadSteps();
+  steps[n] = !steps[n];
+  saveSteps(steps);
+  renderSteps();
+}
+
+function renderSteps() {
+  const steps = loadSteps();
+  let done = 0;
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const pill = document.querySelector(`.step-pill[data-step="${i}"]`);
+    const btn = document.querySelector(`.step-mark[data-step="${i}"]`);
+    if (steps[i]) {
+      done++;
+      if (pill) pill.classList.add('done');
+      if (btn) {
+        btn.classList.add('done');
+        btn.textContent = '✓ Done';
+      }
+    } else {
+      if (pill) pill.classList.remove('done');
+      if (btn) {
+        btn.classList.remove('done');
+        btn.textContent = 'Mark done';
+      }
+    }
+  }
+  const counter = document.getElementById('trackerCount');
+  if (counter) {
+    counter.textContent = `${done} / ${TOTAL_STEPS}`;
+    counter.style.color = (done === TOTAL_STEPS) ? 'var(--accent-green)' : 'var(--accent-orange)';
+  }
+}
+
+function highlightActive() {
+  const sections = document.querySelectorAll('section.step');
+  const scrollY = window.scrollY + 200;
+  let active = null;
+  sections.forEach(s => {
+    if (s.offsetTop <= scrollY) active = s.id;
+  });
+  document.querySelectorAll('.step-pill').forEach(p => p.classList.remove('active'));
+  if (active) {
+    const n = active.replace('step', '');
+    const pill = document.querySelector(`.step-pill[data-step="${n}"]`);
+    if (pill && !pill.classList.contains('done')) pill.classList.add('active');
+  }
+}
+window.addEventListener('scroll', highlightActive);
+
+// ═══════════════ INTERACTIVE CHECKLIST ═══════════════
+const CHECK_DETAILS = {
+  1: 'RUNNING',
+  2: '1 found',
+  3: 'yes',
+  4: '3v / 2u',
+  5: 'factory only',
+  6: 'clean'
+};
+
+function loadChecks() {
+  try { return JSON.parse(localStorage.getItem(CHECK_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveChecks(c) {
+  try { localStorage.setItem(CHECK_KEY, JSON.stringify(c)); } catch (e) {}
+}
+
+function toggleCheck(n) {
+  const checks = loadChecks();
+  checks[n] = !checks[n];
+  saveChecks(checks);
+  renderChecks();
+}
+
+function resetChecks() {
+  if (!confirm('Reset all checks?')) return;
+  saveChecks({});
+  renderChecks();
+}
+
+function renderChecks() {
+  const checks = loadChecks();
+  let done = 0;
+  for (let i = 1; i <= TOTAL_CHECKS; i++) {
+    const btn = document.querySelector(`.check-toggle[data-check="${i}"]`);
+    const detail = document.getElementById('d' + i);
+    if (checks[i]) {
+      done++;
+      if (btn) {
+        btn.classList.add('checked');
+        btn.textContent = '✓';
+      }
+      if (detail) {
+        detail.textContent = CHECK_DETAILS[i];
+        detail.style.color = 'var(--accent-green)';
+      }
+    } else {
+      if (btn) {
+        btn.classList.remove('checked');
+        btn.textContent = '○';
+      }
+      if (detail) {
+        detail.textContent = '— pending —';
+        detail.style.color = 'var(--text-muted)';
+      }
+    }
+  }
+  const status = document.getElementById('clStatus');
+  const msg = document.getElementById('clMessage');
+  if (status) {
+    status.textContent = `${done} / ${TOTAL_CHECKS} complete`;
+    if (done === TOTAL_CHECKS) status.classList.add('complete');
+    else status.classList.remove('complete');
+  }
+  if (msg) {
+    if (done === 0) {
+      msg.textContent = '▸ Run Cell 10. Tap each PASS above as it appears.';
+      msg.style.color = '';
+    } else if (done < TOTAL_CHECKS) {
+      msg.textContent = `▸ ${TOTAL_CHECKS - done} check${TOTAL_CHECKS - done === 1 ? '' : 's'} remaining. Don't forget the manual two-user verification.`;
+      msg.style.color = '';
+    } else {
+      msg.textContent = '🎯 All static checks complete. Now run the manual two-user verification (8a + 8b).';
+      msg.style.color = 'var(--accent-green)';
+    }
+  }
+}
+
+// initial render
+renderSteps();
+renderChecks();
+highlightActive();
+</script>
+
+</body>
+</html>

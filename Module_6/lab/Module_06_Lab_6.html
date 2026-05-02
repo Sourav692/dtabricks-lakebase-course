@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 06 · Lab 6 — Build a Memory-Aware AI Agent on Lakebase</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  --code-bg: #020509;
+  --code-text: #e8dcc4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 56px 48px 48px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 70% at 90% 30%, rgba(168,85,247,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 80%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.crumb .tag {
+  color: var(--accent-purple);
+  padding: 4px 12px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.06);
+  border-radius: 2px;
+}
+.crumb .tag.lab {
+  color: var(--accent-orange);
+  border-color: rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 5vw, 52px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-purple); }
+
+.lede {
+  font-size: 16.5px; color: var(--text-dim);
+  max-width: 740px; line-height: 1.75;
+  margin-bottom: 28px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 17px; font-weight: 500;
+  color: var(--accent-purple);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── PROGRESS TRACKER (sticky) ─── */
+.tracker {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,8,15,0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 48px;
+}
+.tracker-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
+}
+.tracker-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.steps {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.step-pill::before {
+  content: '○';
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.step-pill:hover {
+  border-color: var(--accent-purple);
+  color: var(--text);
+}
+.step-pill.done {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.4);
+  color: var(--accent-green);
+}
+.step-pill.done::before {
+  content: '✓';
+  color: var(--accent-green);
+}
+.step-pill.active {
+  background: rgba(168,85,247,0.1);
+  border-color: var(--accent-purple);
+  color: var(--text);
+}
+.tracker-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-purple);
+  white-space: nowrap;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 48px 100px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 12px 0 18px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 5px 0 5px 22px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  color: var(--accent-purple);
+  font-size: 16px;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  margin: 0 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  margin: 28px 0 12px;
+  color: var(--text);
+}
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 22px 0 10px;
+}
+
+/* ─── INTRO BLOCK ─── */
+.intro-block { margin-bottom: 56px; }
+
+/* ─── PREREQ BOX ─── */
+.prereq {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0 40px;
+}
+.prereq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 22px;
+}
+.prereq-card.need { border-left: 3px solid var(--accent-green); }
+.prereq-card.skip { border-left: 3px solid var(--text-muted); opacity: 0.85; }
+.prereq-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.prereq-card.need .prereq-title { color: var(--accent-green); }
+.prereq-card.skip .prereq-title { color: var(--text-muted); }
+.prereq-card ul { margin: 0; }
+.prereq-card li { padding: 4px 0 4px 20px; font-size: 13.5px; }
+.prereq-card.need li::before { content: '✓'; color: var(--accent-green); }
+.prereq-card.skip li::before { content: '×'; color: var(--text-muted); }
+
+/* ─── STEP CARD ─── */
+.step {
+  margin: 0 0 56px;
+  scroll-margin-top: 90px;
+}
+.step-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.step-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-purple);
+  padding: 4px 10px;
+  border: 1px solid rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.06);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  letter-spacing: -0.005em;
+  flex: 1;
+}
+.step-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.step-mark:hover { border-color: var(--accent-green); color: var(--text); }
+.step-mark.done {
+  background: rgba(34,197,94,0.08);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+/* ─── CODE CELL ─── */
+.cell {
+  margin: 16px 0 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.cell-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.cell-label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.cell-label::before { content: '▸'; color: var(--accent-orange); }
+.cell-lang {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  margin-left: 8px;
+}
+.cell-actions { display: flex; gap: 6px; }
+.copy-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 5px 11px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: var(--accent-orange);
+  color: #fff;
+  border-color: var(--accent-orange);
+}
+.copy-btn.copied {
+  background: var(--accent-green);
+  color: #fff;
+  border-color: var(--accent-green);
+}
+.cell pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--code-text);
+  white-space: pre;
+}
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.st { color: #c3e88d; }
+.cm { color: var(--text-muted); font-style: italic; }
+.nm { color: var(--accent-orange); }
+.nu { color: #f78c6c; }
+
+/* ─── EXPECTED OUTPUT BLOCK ─── */
+.expect {
+  margin: 0 0 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-teal);
+  background: var(--surface);
+}
+.expect-header {
+  padding: 8px 16px;
+  background: rgba(0,191,165,0.05);
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+}
+.expect pre {
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  overflow-x: auto;
+  white-space: pre;
+}
+.expect pre .ok-line { color: var(--accent-green); }
+
+/* ─── PROVE/IF-FAILS ─── */
+.proves {
+  margin: 12px 0 0;
+  padding: 12px 16px;
+  background: rgba(0,191,165,0.04);
+  border-left: 2px solid var(--accent-teal);
+  border-radius: 0 4px 4px 0;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.proves strong { color: var(--accent-teal); }
+
+/* ─── TROUBLESHOOTING TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 20px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 11px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.55;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+td code {
+  font-size: 11.5px;
+  padding: 0 5px;
+  background: var(--code-bg);
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.callout strong { color: var(--text); }
+.callout-note { background: rgba(74,158,255,0.05); border-left-color: var(--accent-blue); }
+.callout-warn { background: rgba(251,191,36,0.05); border-left-color: var(--accent-yellow); }
+.callout-success { background: rgba(34,197,94,0.05); border-left-color: var(--accent-green); }
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+.callout-note .callout-label { color: var(--accent-blue); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-success .callout-label { color: var(--accent-green); }
+
+/* ─── INTERACTIVE CHECKLIST ─── */
+.checklist-section {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 30px;
+  margin: 40px 0;
+}
+.checklist-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.checklist-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--text);
+}
+.checklist-title em { color: var(--accent-purple); }
+.checklist-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+.checklist-status.complete {
+  background: rgba(34,197,94,0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 200px 28px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.check-row:last-child { border-bottom: none; }
+.check-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.check-name { font-size: 14.5px; color: var(--text); }
+.check-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.check-detail {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: right;
+  padding-right: 8px;
+}
+.check-toggle {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  padding: 0;
+}
+.check-toggle:hover { border-color: var(--accent-green); color: var(--accent-green); }
+.check-toggle.checked {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #fff;
+}
+
+.checklist-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reset-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+
+/* ─── COMPLETION BANNER ─── */
+.done-banner {
+  margin-top: 56px;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(168,85,247,0.04) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.done-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.done-banner h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 24px;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+.done-banner h3 em { color: var(--accent-purple); }
+
+/* ─── SUB-STEP HEADER ─── */
+.substep {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  font-style: italic;
+  color: var(--text);
+  margin: 28px 0 8px;
+  padding: 6px 0 6px 14px;
+  border-left: 2px solid var(--accent-purple);
+}
+.substep span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-style: normal;
+  color: var(--accent-purple);
+  margin-right: 10px;
+  letter-spacing: 0.1em;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main, .tracker { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 28px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+  .prereq { grid-template-columns: 1fr; }
+  .check-row {
+    grid-template-columns: 1fr 28px;
+    grid-template-rows: auto auto;
+  }
+  .check-num { grid-column: 1; grid-row: 1; }
+  .check-detail { grid-column: 1; grid-row: 2; text-align: left; padding: 0; }
+  .check-toggle { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+  .step-banner { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 06</span>
+      <span>/</span>
+      <span class="tag lab">Lab 6</span>
+      <span>/</span>
+      <span>Hands-on · Memory-Aware AI Agent on Lakebase</span>
+    </div>
+    <h1>Build a Memory-Aware<br><em>AI Agent on Lakebase</em></h1>
+    <p class="lede">Layer four-tier agent memory onto your Module 3 + Module 5 project. Build the <code>sessions</code>, <code>messages</code>, <code>episodes</code>, <code>tool_calls</code> schema. Implement an <code>AgentMemory</code> contract. Define three tools. Compose the five-step agent loop. Then prove cross-session memory works — the agent honors "I prefer email replies" in session 2 without being told twice.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">8</span><span class="meta-lbl">Steps</span></div>
+      <div class="meta-item"><span class="meta-val">~90 min</span><span class="meta-lbl">Duration</span></div>
+      <div class="meta-item"><span class="meta-val">6</span><span class="meta-lbl">Final Checks</span></div>
+      <div class="meta-item"><span class="meta-val">100%</span><span class="meta-lbl">Hands-On</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── STICKY PROGRESS TRACKER ── -->
+<div class="tracker" id="tracker">
+  <div class="tracker-inner">
+    <span class="tracker-label">Progress →</span>
+    <div class="steps">
+      <a href="#step1" class="step-pill" data-step="1">Step 1 · Setup</a>
+      <a href="#step2" class="step-pill" data-step="2">Step 2 · Schema</a>
+      <a href="#step3" class="step-pill" data-step="3">Step 3 · AgentMemory</a>
+      <a href="#step4" class="step-pill" data-step="4">Step 4 · Tools</a>
+      <a href="#step5" class="step-pill" data-step="5">Step 5 · Agent Loop</a>
+      <a href="#step6" class="step-pill" data-step="6">Step 6 · Demo</a>
+      <a href="#step7" class="step-pill" data-step="7">Step 7 · Audit</a>
+      <a href="#step8" class="step-pill" data-step="8">Step 8 · Verify</a>
+    </div>
+    <span class="tracker-count" id="trackerCount">0 / 8</span>
+  </div>
+</div>
+
+
+<main>
+
+  <!-- ─── INTRO ─── -->
+  <section class="intro-block">
+    <h2>Why this lab exists</h2>
+    <p>Module 6's six theory topics gave you the mental model: the four memory layers (6.1), the schema design (6.2), the <code>AgentMemory</code> contract (6.3), the agent loop (6.4), nightly distillation (6.5), and how it all wires into Mosaic AI Agent Framework (6.6). <strong>This lab makes each of those concrete.</strong> You will reuse the Module 3 + Module 5 project, build the four memory tables, write the <code>AgentMemory</code> class, define three tools, run the agent loop end-to-end, and prove cross-session memory works.</p>
+    <p>Total runtime ~90 minutes, of which about 15 minutes is your hands on the keyboard and the rest is LLM round-trips and you reading the audit-trail rows. Use the wait times to skim Module 6 theory if you haven't.</p>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Run mode</span>
+      <p>Do this lab in a <strong>Databricks notebook</strong> attached to a serverless cluster (or DBR 14+). All cells are Python except where SQL is explicitly called out via <code>%sql</code>. Copy each cell into your own notebook as you go — every code block on this page has a Copy button.</p>
+    </div>
+
+    <h3>Prerequisites</h3>
+    <div class="prereq">
+      <div class="prereq-card need">
+        <div class="prereq-title">▸ You need</div>
+        <ul>
+          <li><strong>Module 3 Lab 3 passed</strong> with <code>CLEANUP=False</code></li>
+          <li><strong>Module 5 Lab 5 passed</strong> with <code>CLEANUP_DOCS=False</code></li>
+          <li>The same <code>lakebase-tutorial</code> project still alive</li>
+          <li>Foundation Models API enabled (default)</li>
+          <li>An attached compute cluster (serverless recommended)</li>
+        </ul>
+      </div>
+      <div class="prereq-card skip">
+        <div class="prereq-title">▸ You do NOT need</div>
+        <ul>
+          <li>A new Lakebase project — we extend the existing one</li>
+          <li>An agent framework — we build the loop in pure Python</li>
+          <li>Module 4 (synced tables are independent of agent memory)</li>
+          <li>Documents prepared — Module 5 already loaded the corpus</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ Cost note</span>
+      <p>~30 chat completions + ~10 embedding calls = well under one cent at Foundation Models pricing. Lakebase compute is the same <code>CU_1</code> from Module 3. Step 8b includes optional cleanup. Most readers leave <code>CLEANUP_MEMORY=False</code> so Module 7 can ship the agent as a Databricks App.</p>
+    </div>
+  </section>
+
+<section class="step" id="step1">
+    <div class="step-banner">
+      <span class="step-num">STEP 01</span>
+      <h2 class="step-title">Reconnect to the Module 3 + Module 5 project</h2>
+      <button class="step-mark" data-step="1" onclick="markStep(1)">Mark done</button>
+    </div>
+    <p>Two jobs: re-establish the SQLAlchemy engine using the OAuth-refresh pattern from Module 3, then confirm the Module 5 <code>documents</code> table is still alive — it's the <em>semantic</em> memory layer the agent will reach via the <code>retrieve</code> tool. Both cells are idempotent.</p>
+    <div class="cell" id="cell-1">
+      <div class="cell-header">
+        <span class="cell-label">Cell 1 · install dependencies<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-1')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 1 — install dependencies (re-run if the kernel restarted)</span>
+%pip install --quiet <span class="st">&quot;databricks-sdk&gt;=0.30.0&quot;</span> <span class="st">&quot;psycopg[binary]&quot;</span> sqlalchemy pgvector mlflow
+dbutils.library.<span class="fn">restartPython</span>()</pre>
+    </div><div class="cell" id="cell-2">
+      <div class="cell-header">
+        <span class="cell-label">Cell 2 · reconnect + verify both prerequisites<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-2')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 2 — reload TUTORIAL config and re-open the engine on the Module 3 project</span>
+<span class="kw">import</span> uuid, time, json
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="kw">from</span> databricks.sdk <span class="kw">import</span> WorkspaceClient
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+
+w = <span class="fn">WorkspaceClient</span>()
+
+TUTORIAL = {
+    <span class="st">&quot;catalog&quot;</span>:      <span class="st">&quot;main&quot;</span>,
+    <span class="st">&quot;schema&quot;</span>:       <span class="st">&quot;lakebase_tutorial&quot;</span>,
+    <span class="st">&quot;project_name&quot;</span>: <span class="st">&quot;lakebase-tutorial&quot;</span>,
+    <span class="st">&quot;embed_model&quot;</span>:  <span class="st">&quot;databricks-bge-large-en&quot;</span>,
+    <span class="st">&quot;chat_model&quot;</span>:   <span class="st">&quot;databricks-meta-llama-3-3-70b-instruct&quot;</span>,
+    <span class="st">&quot;embed_dim&quot;</span>:    <span class="nu">1024</span>,
+    <span class="st">&quot;user&quot;</span>:         w.current_user.<span class="fn">me</span>().user_name,
+    <span class="st">&quot;host&quot;</span>:         w.config.host,
+}
+
+<span class="cm"># Confirm the project from Module 3 still exists.</span>
+existing = {p.name: p <span class="kw">for</span> p <span class="kw">in</span> w.database.<span class="fn">list_database_projects</span>()}
+<span class="kw">if</span> TUTORIAL[<span class="st">&quot;project_name&quot;</span>] <span class="kw">not</span> <span class="kw">in</span> existing:
+    <span class="kw">raise</span> <span class="fn">RuntimeError</span>(
+        f<span class="st">&quot;Project &#x27;{TUTORIAL[&#x27;project_name&#x27;]}&#x27; not found. &quot;</span>
+        f<span class="st">&quot;Run Module 3 Lab 3 first (with CLEANUP=False).&quot;</span>
+    )
+project = existing[TUTORIAL[<span class="st">&quot;project_name&quot;</span>]]
+<span class="kw">assert</span> project.state == <span class="st">&quot;READY&quot;</span>, f<span class="st">&quot;Project state is {project.state}, not READY&quot;</span>
+
+<span class="cm"># Fresh OAuth token + SQLAlchemy engine</span>
+cred = w.database.<span class="fn">generate_database_credential</span>(
+    request_id=<span class="fn">str</span>(uuid.<span class="fn">uuid4</span>()),
+    instance_names=[project.name],
+)
+url = (
+    f<span class="st">&quot;postgresql+psycopg://{TUTORIAL[&#x27;user&#x27;]}:{cred.token}&quot;</span>
+    f<span class="st">&quot;@{project.read_write_dns}:5432/databricks_postgres?sslmode=require&quot;</span>
+)
+engine = <span class="fn">create_engine</span>(url, pool_pre_ping=<span class="kw">True</span>, pool_recycle=<span class="nu">1800</span>)
+
+<span class="cm"># Confirm Module 5 documents table still exists — semantic memory layer.</span>
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    pg_version = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;SELECT version()&quot;</span>)).<span class="fn">scalar</span>()
+    docs_count = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+        SELECT count(*) FROM information_schema.tables
+        WHERE table_name = &#x27;documents&#x27;
+    &quot;&quot;&quot;</span>)).<span class="fn">scalar</span>()
+<span class="kw">if</span> docs_count == <span class="nu">0</span>:
+    <span class="kw">raise</span> <span class="fn">RuntimeError</span>(
+        <span class="st">&quot;Table &#x27;documents&#x27; not found. &quot;</span>
+        <span class="st">&quot;Run Module 5 Lab 5 first (with CLEANUP_DOCS=False).&quot;</span>
+    )
+
+<span class="fn">print</span>(f<span class="st">&quot;✅ Reconnected to &#x27;{TUTORIAL[&#x27;project_name&#x27;]}&#x27;&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;   {pg_version.split(&#x27;,&#x27;)[0]}&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;   Endpoint:  {project.read_write_dns}&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;   Module 5 &#x27;documents&#x27; table present (semantic layer ready)&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Reconnected to &#x27;lakebase-tutorial&#x27;</span>
+   PostgreSQL 17.x on aarch64-unknown-linux-gnu
+   Endpoint:  instance-a3f9e1c4-rw.cloud.databricks.com
+   Module 5 &#x27;documents&#x27; table present (semantic layer ready)</pre>
+    </div><div class="proves"><strong>What this proves:</strong> the Module 3 project is alive, your OAuth still works, you have a writable engine, and Module 5's <code>documents</code> table — the <em>semantic</em> memory layer — is queryable.</div><h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody><tr><td><code>Project &#x27;lakebase-tutorial&#x27; not found</code></td><td>Module 3 cleanup ran</td><td>Re-run Module 3 Lab 3 with <code>CLEANUP=False</code></td></tr>
+<tr><td><code>Table &#x27;documents&#x27; not found</code></td><td>Module 5 cleanup ran</td><td>Re-run Module 5 Lab 5 with <code>CLEANUP_DOCS=False</code></td></tr>
+<tr><td><code>password authentication failed</code></td><td>OAuth token expired</td><td>Re-run Cell 2 — <code>generate_database_credential</code> issues a fresh token</td></tr>
+<tr><td><code>connection refused</code></td><td>Project went idle</td><td>Wait 10–15s; Lakebase auto-resumes on first connection</td></tr></tbody>
+      </table>
+    </div></section>
+<section class="step" id="step2">
+    <div class="step-banner">
+      <span class="step-num">STEP 02</span>
+      <h2 class="step-title">Build the four-table memory schema</h2>
+      <button class="step-mark" data-step="2" onclick="markStep(2)">Mark done</button>
+    </div>
+    <p>The schema from Module 6 theory 6.2. Four tables, the foreign-key/cascade choices, the HNSW index on episodes, the composite index on messages. All idempotent — re-running this cell is safe.</p>
+    <div class="cell" id="cell-3">
+      <div class="cell-header">
+        <span class="cell-label">Cell 3 · DDL for sessions / messages / episodes / tool_calls<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-3')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 3 — agent memory schema</span>
+DDL = <span class="st">&quot;&quot;&quot;
+CREATE TABLE IF NOT EXISTS sessions (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     TEXT NOT NULL,
+    agent_name  TEXT,
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    ended_at    TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+    id          BIGSERIAL PRIMARY KEY,
+    session_id  UUID REFERENCES sessions(id) ON DELETE CASCADE,
+    role        TEXT CHECK (role IN (&#x27;system&#x27;,&#x27;user&#x27;,&#x27;assistant&#x27;,&#x27;tool&#x27;)),
+    content     TEXT,
+    tool_call   JSONB,
+    created_at  TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_msg_session ON messages(session_id, created_at);
+
+CREATE TABLE IF NOT EXISTS episodes (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    summary     TEXT,
+    embedding   vector(1024),
+    importance  REAL DEFAULT 0.5,
+    last_seen   TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_epi_hnsw ON episodes
+    USING hnsw (embedding vector_cosine_ops)
+    WITH  (m = 16, ef_construction = 64);
+CREATE INDEX IF NOT EXISTS idx_epi_user ON episodes(user_id);
+
+CREATE TABLE IF NOT EXISTS tool_calls (
+    id          BIGSERIAL PRIMARY KEY,
+    session_id  UUID REFERENCES sessions(id),
+    tool_name   TEXT,
+    args        JSONB,
+    result      JSONB,
+    duration_ms INT,
+    ok          BOOL,
+    ts          TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_tc_session ON tool_calls(session_id, ts);
+&quot;&quot;&quot;</span>
+
+<span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+    <span class="kw">for</span> stmt <span class="kw">in</span> [s.<span class="fn">strip</span>() <span class="kw">for</span> s <span class="kw">in</span> DDL.<span class="fn">split</span>(<span class="st">&quot;;&quot;</span>) <span class="kw">if</span> s.<span class="fn">strip</span>()]:
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(stmt))
+
+<span class="cm"># Confirm</span>
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    tabs = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+        SELECT table_name FROM information_schema.tables
+        WHERE table_name IN (&#x27;sessions&#x27;,&#x27;messages&#x27;,&#x27;episodes&#x27;,&#x27;tool_calls&#x27;)
+        ORDER BY table_name
+    &quot;&quot;&quot;</span>)).<span class="fn">fetchall</span>()
+    idx = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+        SELECT tablename, indexname FROM pg_indexes
+        WHERE tablename IN (&#x27;sessions&#x27;,&#x27;messages&#x27;,&#x27;episodes&#x27;,&#x27;tool_calls&#x27;)
+        ORDER BY tablename, indexname
+    &quot;&quot;&quot;</span>)).<span class="fn">fetchall</span>()
+
+<span class="fn">print</span>(<span class="st">&quot;✅ Memory tables created:&quot;</span>)
+<span class="kw">for</span> t <span class="kw">in</span> tabs:
+    <span class="fn">print</span>(f<span class="st">&quot;   · {t.table_name}&quot;</span>)
+<span class="fn">print</span>(<span class="st">&quot;\n✅ Indexes:&quot;</span>)
+<span class="kw">for</span> i <span class="kw">in</span> idx:
+    <span class="fn">print</span>(f<span class="st">&quot;   · {i.tablename:&lt;12} {i.indexname}&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Memory tables created:</span>
+   · episodes
+   · messages
+   · sessions
+   · tool_calls
+
+<span class="ok-line">✅ Indexes:</span>
+   · episodes     episodes_pkey
+   · episodes     idx_epi_hnsw
+   · episodes     idx_epi_user
+   · messages     idx_msg_session
+   · messages     messages_pkey
+   · sessions     sessions_pkey
+   · tool_calls   idx_tc_session
+   · tool_calls   tool_calls_pkey</pre>
+    </div><div class="proves"><strong>What this proves:</strong> every DDL choice from Module 6 theory 6.2 is now real schema on disk. UUID PKs on sessions, the composite index on messages, HNSW + B-tree on episodes, the (session_id, ts) index on tool_calls. Foreign keys are in place — <code>messages</code> cascades on session delete, <code>tool_calls</code> does not.</div><h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody><tr><td><code>type &quot;vector&quot; does not exist</code></td><td>Module 5 didn't enable pgvector</td><td>Re-run Module 5 Lab 5 Cell 3, then come back</td></tr>
+<tr><td><code>relation &quot;sessions&quot; already exists</code></td><td>Re-running this lab — totally fine</td><td>The DDL is <code>IF NOT EXISTS</code>; nothing to do</td></tr>
+<tr><td><code>gen_random_uuid() does not exist</code></td><td>Old Postgres without <code>pgcrypto</code></td><td>Run <code>CREATE EXTENSION IF NOT EXISTS pgcrypto;</code> then re-run Cell 3</td></tr></tbody>
+      </table>
+    </div></section>
+<section class="step" id="step3">
+    <div class="step-banner">
+      <span class="step-num">STEP 03</span>
+      <h2 class="step-title">Implement the AgentMemory contract</h2>
+      <button class="step-mark" data-step="3" onclick="markStep(3)">Mark done</button>
+    </div>
+    <p>The six methods from Module 6 theory 6.3. Every SQL statement is parameterized. Engine and embed function are both injected so the class is testable. This is the <em>only</em> layer in your agent that touches Postgres directly.</p>
+
+    <div class="substep"><span>3a</span>Define the embed helper</div>
+    <p>Same Foundation Models embedder you used in Module 5, re-defined here as a standalone function so <code>AgentMemory</code> can take it as a dependency.</p>
+    <div class="cell" id="cell-4">
+      <div class="cell-header">
+        <span class="cell-label">Cell 4 · Foundation Models embedder<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-4')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 4 — embed helper (Foundation Models API, same as Module 5)</span>
+oai = w.serving_endpoints.<span class="fn">get_open_ai_client</span>()
+
+<span class="kw">def</span> <span class="fn">embed</span>(texts):
+    <span class="st">&quot;&quot;&quot;Embed a list of strings into 1024-dim vectors via bge-large-en.&quot;&quot;&quot;</span>
+    <span class="kw">if</span> <span class="fn">isinstance</span>(texts, str):
+        texts = [texts]
+    out = oai.embeddings.<span class="fn">create</span>(
+        model=TUTORIAL[<span class="st">&quot;embed_model&quot;</span>],
+        input=texts,
+    )
+    <span class="kw">return</span> [d.embedding <span class="kw">for</span> d <span class="kw">in</span> out.data]
+
+<span class="cm"># Sanity check — one vector, dimension 1024</span>
+v = <span class="fn">embed</span>([<span class="st">&quot;agent memory test&quot;</span>])[<span class="nu">0</span>]
+<span class="kw">assert</span> <span class="fn">len</span>(v) == TUTORIAL[<span class="st">&quot;embed_dim&quot;</span>], f<span class="st">&quot;Expected 1024, got {len(v)}&quot;</span>
+<span class="fn">print</span>(f<span class="st">&quot;✅ Embedder ready · dim={len(v)} · first 4 floats: {v[:4]}&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Embedder ready · dim=1024 · first 4 floats: [0.0123, -0.0456, ...]</span></pre>
+    </div>
+    <div class="substep"><span>3b</span>Define AgentMemory</div>
+    <div class="cell" id="cell-5">
+      <div class="cell-header">
+        <span class="cell-label">Cell 5 · AgentMemory class + smoke test<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-5')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 5 — the AgentMemory contract (Module 6 theory 6.3)</span>
+@dataclass
+<span class="kw">class</span> Episode:
+    summary: str
+    importance: float
+    distance: float
+
+@dataclass
+<span class="kw">class</span> Msg:
+    role: str
+    content: str
+
+<span class="kw">class</span> AgentMemory:
+    <span class="st">&quot;&quot;&quot;Six-method contract over the four-table schema.
+    Engine + embed_fn are injected for testability.
+    &quot;&quot;&quot;</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, engine, embed_fn):
+        self.e = engine
+        self.embed = embed_fn
+
+    <span class="cm"># ── short-term ────────────────────────────────────────────</span>
+    <span class="kw">def</span> <span class="fn">start_session</span>(self, user_id, agent=<span class="st">&quot;assistant&quot;</span>) -&gt; str:
+        <span class="kw">with</span> self.e.<span class="fn">begin</span>() <span class="kw">as</span> c:
+            sid = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+                INSERT INTO sessions(user_id, agent_name)
+                VALUES (:u, :a) RETURNING id
+            &quot;&quot;&quot;</span>), <span class="fn">dict</span>(u=user_id, a=agent)).<span class="fn">scalar</span>()
+        <span class="kw">return</span> <span class="fn">str</span>(sid)
+
+    <span class="kw">def</span> <span class="fn">end_session</span>(self, sid):
+        <span class="kw">with</span> self.e.<span class="fn">begin</span>() <span class="kw">as</span> c:
+            c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;UPDATE sessions SET ended_at = now() WHERE id = :s&quot;</span>),
+                      <span class="fn">dict</span>(s=sid))
+
+    <span class="kw">def</span> <span class="fn">add_message</span>(self, sid, role, content, tool_call=<span class="kw">None</span>):
+        <span class="kw">with</span> self.e.<span class="fn">begin</span>() <span class="kw">as</span> c:
+            c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+                INSERT INTO messages(session_id, role, content, tool_call)
+                VALUES (:s, :r, :c, :t)
+            &quot;&quot;&quot;</span>), <span class="fn">dict</span>(
+                s=sid, r=role, c=content,
+                t=json.<span class="fn">dumps</span>(tool_call) <span class="kw">if</span> tool_call <span class="kw">else</span> <span class="kw">None</span>,
+            ))
+
+    <span class="kw">def</span> <span class="fn">recent_messages</span>(self, sid, n=<span class="nu">20</span>):
+        <span class="kw">with</span> self.e.<span class="fn">connect</span>() <span class="kw">as</span> c:
+            rows = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+                SELECT role, content FROM messages
+                WHERE session_id = :s
+                ORDER BY created_at DESC
+                LIMIT :n
+            &quot;&quot;&quot;</span>), <span class="fn">dict</span>(s=sid, n=n)).<span class="fn">fetchall</span>()
+        <span class="kw">return</span> [<span class="fn">Msg</span>(r.role, r.content) <span class="kw">for</span> r <span class="kw">in</span> rows[::-<span class="nu">1</span>]]
+
+    <span class="cm"># ── long-term episodic ────────────────────────────────────</span>
+    <span class="kw">def</span> <span class="fn">remember</span>(self, user_id, summary, importance=<span class="nu">0.5</span>):
+        v = self.<span class="fn">embed</span>([summary])[<span class="nu">0</span>]
+        <span class="kw">with</span> self.e.<span class="fn">begin</span>() <span class="kw">as</span> c:
+            c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+                INSERT INTO episodes(user_id, summary, embedding, importance)
+                VALUES (:u, :s, CAST(:e AS vector), :i)
+            &quot;&quot;&quot;</span>), <span class="fn">dict</span>(u=user_id, s=summary, e=<span class="fn">str</span>(v), i=importance))
+
+    <span class="kw">def</span> <span class="fn">recall</span>(self, user_id, query, k=<span class="nu">5</span>):
+        qv = self.<span class="fn">embed</span>([query])[<span class="nu">0</span>]
+        <span class="kw">with</span> self.e.<span class="fn">connect</span>() <span class="kw">as</span> c:
+            rows = c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+                SELECT summary, importance, embedding &lt;=&gt; CAST(:q AS vector) AS dist
+                FROM episodes
+                WHERE user_id = :u
+                ORDER BY (embedding &lt;=&gt; CAST(:q AS vector)) - importance * 0.1
+                LIMIT :k
+            &quot;&quot;&quot;</span>), <span class="fn">dict</span>(u=user_id, q=<span class="fn">str</span>(qv), k=k)).<span class="fn">fetchall</span>()
+        <span class="kw">return</span> [<span class="fn">Episode</span>(r.summary, r.importance, r.dist) <span class="kw">for</span> r <span class="kw">in</span> rows]
+
+    <span class="cm"># ── procedural / audit ────────────────────────────────────</span>
+    <span class="kw">def</span> <span class="fn">log_tool_call</span>(self, sid, tool_name, args, result, duration_ms, ok):
+        <span class="kw">with</span> self.e.<span class="fn">begin</span>() <span class="kw">as</span> c:
+            c.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+                INSERT INTO tool_calls(session_id, tool_name, args, result,
+                                      duration_ms, ok)
+                VALUES (:s, :n, :a, :r, :d, :o)
+            &quot;&quot;&quot;</span>), <span class="fn">dict</span>(
+                s=sid, n=tool_name,
+                a=json.<span class="fn">dumps</span>(args), r=json.<span class="fn">dumps</span>(result),
+                d=duration_ms, o=ok,
+            ))
+
+<span class="cm"># Smoke test the contract</span>
+mem = <span class="fn">AgentMemory</span>(engine, embed)
+sid_smoke = mem.<span class="fn">start_session</span>(<span class="st">&quot;smoke@test.com&quot;</span>)
+mem.<span class="fn">add_message</span>(sid_smoke, <span class="st">&quot;user&quot;</span>, <span class="st">&quot;ping&quot;</span>)
+mem.<span class="fn">add_message</span>(sid_smoke, <span class="st">&quot;assistant&quot;</span>, <span class="st">&quot;pong&quot;</span>)
+hist = mem.<span class="fn">recent_messages</span>(sid_smoke)
+<span class="kw">assert</span> <span class="fn">len</span>(hist) == <span class="nu">2</span> <span class="kw">and</span> hist[<span class="nu">0</span>].role == <span class="st">&quot;user&quot;</span>, <span class="st">&quot;Contract smoke test failed&quot;</span>
+mem.<span class="fn">end_session</span>(sid_smoke)
+<span class="fn">print</span>(f<span class="st">&quot;✅ AgentMemory contract works (smoke session: {sid_smoke[:8]}…)&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ AgentMemory contract works (smoke session: 7f3a9e21…)</span></pre>
+    </div><div class="proves"><strong>What this proves:</strong> the six-method contract round-trips through Postgres correctly. The smoke session is a real row in <code>sessions</code> with two <code>messages</code> children and an <code>ended_at</code> timestamp. You can now use <code>mem</code> as your sole interface to memory.</div><h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody><tr><td><code>column &quot;embedding&quot; is of type vector(1024) but expression is of type text</code></td><td>Missing <code>CAST(:e AS vector)</code> in the INSERT</td><td>Confirm the <code>remember</code> method's SQL has the cast</td></tr>
+<tr><td><code>psycopg.errors.CheckViolation: role</code></td><td>You passed a role like <code>"User"</code> (capitalized)</td><td>Roles must be exactly <code>system</code>, <code>user</code>, <code>assistant</code>, or <code>tool</code></td></tr>
+<tr><td><code>cannot adapt type &#x27;list&#x27;</code></td><td>Forgot to <code>str(v)</code> when binding the vector</td><td>The embedding goes into the SQL as a string literal — pgvector parses it</td></tr></tbody>
+      </table>
+    </div></section>
+<section class="step" id="step4">
+    <div class="step-banner">
+      <span class="step-num">STEP 04</span>
+      <h2 class="step-title">Define the three tools</h2>
+      <button class="step-mark" data-step="4" onclick="markStep(4)">Mark done</button>
+    </div>
+    <p>The lab agent has three tools, matching Module 6 theory 6.4: <code>retrieve</code> (semantic), <code>get_orders</code> (operational), <code>recall</code> (long-term memory). Each tool has an explicit JSON schema the LLM can read.</p>
+    <div class="cell" id="cell-6">
+      <div class="cell-header">
+        <span class="cell-label">Cell 6 · TOOLS schemas + implementations<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-6')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 6 — tool definitions and implementations</span>
+TOOLS = [
+    {
+        <span class="st">&quot;type&quot;</span>: <span class="st">&quot;function&quot;</span>,
+        <span class="st">&quot;function&quot;</span>: {
+            <span class="st">&quot;name&quot;</span>: <span class="st">&quot;retrieve&quot;</span>,
+            <span class="st">&quot;description&quot;</span>: <span class="st">&quot;Search the support knowledge base (Module 5 documents). &quot;</span>
+                           <span class="st">&quot;Use for product info, policies, FAQ.&quot;</span>,
+            <span class="st">&quot;parameters&quot;</span>: {
+                <span class="st">&quot;type&quot;</span>: <span class="st">&quot;object&quot;</span>,
+                <span class="st">&quot;properties&quot;</span>: {
+                    <span class="st">&quot;query&quot;</span>: {<span class="st">&quot;type&quot;</span>: <span class="st">&quot;string&quot;</span>, <span class="st">&quot;description&quot;</span>: <span class="st">&quot;What to search for&quot;</span>},
+                },
+                <span class="st">&quot;required&quot;</span>: [<span class="st">&quot;query&quot;</span>],
+            },
+        },
+    },
+    {
+        <span class="st">&quot;type&quot;</span>: <span class="st">&quot;function&quot;</span>,
+        <span class="st">&quot;function&quot;</span>: {
+            <span class="st">&quot;name&quot;</span>: <span class="st">&quot;get_orders&quot;</span>,
+            <span class="st">&quot;description&quot;</span>: <span class="st">&quot;Fetch recent orders for a customer email &quot;</span>
+                           <span class="st">&quot;from the operational app database (Module 3 schema).&quot;</span>,
+            <span class="st">&quot;parameters&quot;</span>: {
+                <span class="st">&quot;type&quot;</span>: <span class="st">&quot;object&quot;</span>,
+                <span class="st">&quot;properties&quot;</span>: {
+                    <span class="st">&quot;email&quot;</span>: {<span class="st">&quot;type&quot;</span>: <span class="st">&quot;string&quot;</span>},
+                },
+                <span class="st">&quot;required&quot;</span>: [<span class="st">&quot;email&quot;</span>],
+            },
+        },
+    },
+    {
+        <span class="st">&quot;type&quot;</span>: <span class="st">&quot;function&quot;</span>,
+        <span class="st">&quot;function&quot;</span>: {
+            <span class="st">&quot;name&quot;</span>: <span class="st">&quot;recall&quot;</span>,
+            <span class="st">&quot;description&quot;</span>: <span class="st">&quot;Search the agent&#x27;s long-term memories about THIS user. &quot;</span>
+                           <span class="st">&quot;Use when the user asks &#x27;what do you remember about me?&#x27;&quot;</span>,
+            <span class="st">&quot;parameters&quot;</span>: {
+                <span class="st">&quot;type&quot;</span>: <span class="st">&quot;object&quot;</span>,
+                <span class="st">&quot;properties&quot;</span>: {
+                    <span class="st">&quot;query&quot;</span>: {<span class="st">&quot;type&quot;</span>: <span class="st">&quot;string&quot;</span>},
+                },
+                <span class="st">&quot;required&quot;</span>: [<span class="st">&quot;query&quot;</span>],
+            },
+        },
+    },
+]
+
+<span class="cm"># ── Tool implementations ────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">tool_retrieve</span>(query: str, k: int = <span class="nu">3</span>):
+    <span class="st">&quot;&quot;&quot;Hybrid RRF over Module 5 documents (vector + BM25).&quot;&quot;&quot;</span>
+    qv = <span class="fn">embed</span>([query])[<span class="nu">0</span>]
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        rows = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+            WITH v AS (
+              SELECT id, ROW_NUMBER() OVER
+                (ORDER BY embedding &lt;=&gt; CAST(:qv AS vector)) AS rk
+              FROM documents
+              ORDER BY embedding &lt;=&gt; CAST(:qv AS vector) LIMIT 50
+            ),
+            k AS (
+              SELECT id, ROW_NUMBER() OVER
+                (ORDER BY ts_rank(tsv, plainto_tsquery(&#x27;english&#x27;, :q)) DESC) AS rk
+              FROM documents
+              WHERE tsv @@ plainto_tsquery(&#x27;english&#x27;, :q) LIMIT 50
+            )
+            SELECT d.title, d.content
+            FROM documents d
+            LEFT JOIN v USING(id) LEFT JOIN k USING(id)
+            WHERE v.id IS NOT NULL OR k.id IS NOT NULL
+            ORDER BY COALESCE(1.0/(60 + v.rk), 0)
+                   + COALESCE(1.0/(60 + k.rk), 0) DESC
+            LIMIT :k
+        &quot;&quot;&quot;</span>), <span class="fn">dict</span>(qv=<span class="fn">str</span>(qv), q=query, k=k)).<span class="fn">fetchall</span>()
+    <span class="kw">return</span> [{<span class="st">&quot;title&quot;</span>: r.title, <span class="st">&quot;snippet&quot;</span>: r.content[:<span class="nu">240</span>]} <span class="kw">for</span> r <span class="kw">in</span> rows]
+
+<span class="kw">def</span> <span class="fn">tool_get_orders</span>(email: str):
+    <span class="st">&quot;&quot;&quot;Operational lookup against the Module 3 orders table.&quot;&quot;&quot;</span>
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        rows = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+            SELECT o.sku, o.qty, o.total_cents, o.placed_at
+            FROM orders o JOIN users u ON o.user_id = u.id
+            WHERE u.email = :e
+            ORDER BY o.placed_at DESC
+            LIMIT 5
+        &quot;&quot;&quot;</span>), <span class="fn">dict</span>(e=email)).<span class="fn">fetchall</span>()
+    <span class="kw">return</span> [{<span class="st">&quot;sku&quot;</span>: r.sku, <span class="st">&quot;qty&quot;</span>: r.qty,
+             <span class="st">&quot;total_cents&quot;</span>: r.total_cents,
+             <span class="st">&quot;placed_at&quot;</span>: r.placed_at.<span class="fn">isoformat</span>()} <span class="kw">for</span> r <span class="kw">in</span> rows]
+
+<span class="kw">def</span> <span class="fn">tool_recall</span>(user_id: str, query: str, k: int = <span class="nu">3</span>):
+    <span class="st">&quot;&quot;&quot;Vector recall over THIS user&#x27;s episodes.&quot;&quot;&quot;</span>
+    eps = mem.<span class="fn">recall</span>(user_id, query, k=k)
+    <span class="kw">return</span> [{<span class="st">&quot;summary&quot;</span>: e.summary, <span class="st">&quot;importance&quot;</span>: <span class="fn">float</span>(e.importance)} <span class="kw">for</span> e <span class="kw">in</span> eps]
+
+<span class="cm"># Smoke test the tools</span>
+<span class="fn">print</span>(<span class="st">&quot;✅ retrieve smoke:&quot;</span>, <span class="fn">tool_retrieve</span>(<span class="st">&quot;return policy&quot;</span>, k=<span class="nu">1</span>))
+<span class="fn">print</span>(<span class="st">&quot;✅ get_orders smoke:&quot;</span>, <span class="fn">tool_get_orders</span>(<span class="st">&quot;alice@example.com&quot;</span>))
+<span class="fn">print</span>(<span class="st">&quot;✅ recall smoke:&quot;</span>, <span class="fn">tool_recall</span>(<span class="st">&quot;smoke@test.com&quot;</span>, <span class="st">&quot;anything&quot;</span>, k=<span class="nu">1</span>))</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ retrieve smoke: [{&#x27;title&#x27;: &#x27;Return Policy: 14-Day Window&#x27;, &#x27;snippet&#x27;: &#x27;Customers may return ...&#x27;}]</span>
+<span class="ok-line">✅ get_orders smoke: [{&#x27;sku&#x27;: &#x27;SKU-101&#x27;, &#x27;qty&#x27;: 2, &#x27;total_cents&#x27;: 4998, &#x27;placed_at&#x27;: &#x27;2024-...&#x27;}]</span>
+<span class="ok-line">✅ recall smoke: []</span></pre>
+    </div><div class="proves"><strong>What this proves:</strong> all three tools execute end-to-end against real data. <code>retrieve</code> runs the same RRF query you built in Module 5. <code>get_orders</code> reads the Module 3 schema. <code>recall</code> is empty for <code>smoke@test.com</code> because no episodes exist yet — that's correct. Step 6 will populate it.</div><h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody><tr><td><code>relation &quot;documents&quot; does not exist</code></td><td>Module 5 cleanup ran</td><td>Re-run Module 5 Lab 5 with <code>CLEANUP_DOCS=False</code></td></tr>
+<tr><td><code>relation &quot;orders&quot; does not exist</code></td><td>Module 3 schema was dropped</td><td>Re-run Module 3 Lab 3 Cell 4 (schema DDL)</td></tr>
+<tr><td><code>tool_get_orders returns []</code></td><td>Module 3 seed data was cleared</td><td>Re-run Module 3 Lab 3 Cell 5 (seed data)</td></tr></tbody>
+      </table>
+    </div></section>
+<section class="step" id="step5">
+    <div class="step-banner">
+      <span class="step-num">STEP 05</span>
+      <h2 class="step-title">Build the agent loop</h2>
+      <button class="step-mark" data-step="5" onclick="markStep(5)">Mark done</button>
+    </div>
+    <p>The five-step loop from Module 6 theory 6.4: recall → build → LLM → tools → write. We split each call into a clearly-named helper so the loop reads top-to-bottom.</p>
+    <div class="cell" id="cell-7">
+      <div class="cell-header">
+        <span class="cell-label">Cell 7 · run_turn() ties everything together<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-7')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 7 — the agent loop</span>
+<span class="kw">def</span> <span class="fn">chat</span>(messages, tools=<span class="kw">None</span>, temperature=<span class="nu">0.0</span>):
+    <span class="st">&quot;&quot;&quot;Thin wrapper over the chat-completion endpoint.&quot;&quot;&quot;</span>
+    kwargs = <span class="fn">dict</span>(
+        model=TUTORIAL[<span class="st">&quot;chat_model&quot;</span>],
+        messages=messages,
+        temperature=temperature,
+    )
+    <span class="kw">if</span> tools:
+        kwargs[<span class="st">&quot;tools&quot;</span>] = tools
+        kwargs[<span class="st">&quot;tool_choice&quot;</span>] = <span class="st">&quot;auto&quot;</span>
+    <span class="kw">return</span> oai.chat.completions.<span class="fn">create</span>(**kwargs)
+
+<span class="kw">def</span> <span class="fn">execute_tool</span>(sid, user_id, name, args):
+    <span class="st">&quot;&quot;&quot;Run one tool, log it, return the result string for the LLM.&quot;&quot;&quot;</span>
+    t0 = time.<span class="fn">time</span>()
+    ok = <span class="kw">True</span>
+    result = <span class="kw">None</span>
+    <span class="kw">try</span>:
+        <span class="kw">if</span> name == <span class="st">&quot;retrieve&quot;</span>:
+            result = <span class="fn">tool_retrieve</span>(args[<span class="st">&quot;query&quot;</span>])
+        <span class="kw">elif</span> name == <span class="st">&quot;get_orders&quot;</span>:
+            result = <span class="fn">tool_get_orders</span>(args[<span class="st">&quot;email&quot;</span>])
+        <span class="kw">elif</span> name == <span class="st">&quot;recall&quot;</span>:
+            result = <span class="fn">tool_recall</span>(user_id, args[<span class="st">&quot;query&quot;</span>])
+        <span class="kw">else</span>:
+            ok = <span class="kw">False</span>
+            result = {<span class="st">&quot;error&quot;</span>: f<span class="st">&quot;unknown tool: {name}&quot;</span>}
+    <span class="kw">except</span> Exception <span class="kw">as</span> ex:
+        ok = <span class="kw">False</span>
+        result = {<span class="st">&quot;error&quot;</span>: <span class="fn">str</span>(ex)}
+    <span class="kw">finally</span>:
+        duration_ms = <span class="fn">int</span>((time.<span class="fn">time</span>() - t0) * <span class="nu">1000</span>)
+        mem.<span class="fn">log_tool_call</span>(sid, name, args, result, duration_ms, ok)
+    <span class="kw">return</span> result
+
+<span class="kw">def</span> <span class="fn">run_turn</span>(sid, user_id, user_msg):
+    <span class="st">&quot;&quot;&quot;One full turn — Module 6 theory 6.4 in code.&quot;&quot;&quot;</span>
+
+    <span class="cm"># 1. Recall top-3 long-term episodes</span>
+    episodes = mem.<span class="fn">recall</span>(user_id, user_msg, k=<span class="nu">3</span>)
+    epi_text = <span class="st">&quot;\n&quot;</span>.<span class="fn">join</span>(f<span class="st">&quot;- {e.summary}&quot;</span> <span class="kw">for</span> e <span class="kw">in</span> episodes) <span class="kw">or</span> <span class="st">&quot;(no prior memories)&quot;</span>
+
+    <span class="cm"># 2. Build the message stack</span>
+    history = mem.<span class="fn">recent_messages</span>(sid, n=<span class="nu">10</span>)
+    messages = [
+        {<span class="st">&quot;role&quot;</span>: <span class="st">&quot;system&quot;</span>,
+         <span class="st">&quot;content&quot;</span>: (
+             <span class="st">&quot;You are a Northwind support assistant. &quot;</span>
+             <span class="st">&quot;Be concise. Cite sources from retrieve results when used.\n&quot;</span>
+             f<span class="st">&quot;Known about this user (long-term memory):\n{epi_text}&quot;</span>
+         )},
+        *[{<span class="st">&quot;role&quot;</span>: m.role, <span class="st">&quot;content&quot;</span>: m.content} <span class="kw">for</span> m <span class="kw">in</span> history],
+        {<span class="st">&quot;role&quot;</span>: <span class="st">&quot;user&quot;</span>, <span class="st">&quot;content&quot;</span>: user_msg},
+    ]
+    mem.<span class="fn">add_message</span>(sid, <span class="st">&quot;user&quot;</span>, user_msg)
+
+    <span class="cm"># 3. Call the LLM with tool definitions</span>
+    out = <span class="fn">chat</span>(messages, tools=TOOLS)
+    assistant_msg = out.choices[<span class="nu">0</span>].message
+
+    <span class="cm"># 4. If the LLM asked for tools, execute them and call again</span>
+    <span class="kw">if</span> assistant_msg.tool_calls:
+        messages.<span class="fn">append</span>({
+            <span class="st">&quot;role&quot;</span>: <span class="st">&quot;assistant&quot;</span>,
+            <span class="st">&quot;content&quot;</span>: assistant_msg.content <span class="kw">or</span> <span class="st">&quot;&quot;</span>,
+            <span class="st">&quot;tool_calls&quot;</span>: [tc.<span class="fn">model_dump</span>() <span class="kw">for</span> tc <span class="kw">in</span> assistant_msg.tool_calls],
+        })
+        <span class="kw">for</span> tc <span class="kw">in</span> assistant_msg.tool_calls:
+            args = json.<span class="fn">loads</span>(tc.function.arguments)
+            result = <span class="fn">execute_tool</span>(sid, user_id, tc.function.name, args)
+            messages.<span class="fn">append</span>({
+                <span class="st">&quot;role&quot;</span>: <span class="st">&quot;tool&quot;</span>,
+                <span class="st">&quot;tool_call_id&quot;</span>: tc.id,
+                <span class="st">&quot;content&quot;</span>: json.<span class="fn">dumps</span>(result),
+            })
+            mem.<span class="fn">add_message</span>(sid, <span class="st">&quot;tool&quot;</span>,
+                            json.<span class="fn">dumps</span>({<span class="st">&quot;name&quot;</span>: tc.function.name, <span class="st">&quot;result&quot;</span>: result}),
+                            tool_call={<span class="st">&quot;id&quot;</span>: tc.id, <span class="st">&quot;name&quot;</span>: tc.function.name})
+
+        out = <span class="fn">chat</span>(messages, tools=TOOLS)
+        assistant_msg = out.choices[<span class="nu">0</span>].message
+
+    <span class="cm"># 5. Write the assistant&#x27;s reply</span>
+    reply = assistant_msg.content <span class="kw">or</span> <span class="st">&quot;&quot;</span>
+    mem.<span class="fn">add_message</span>(sid, <span class="st">&quot;assistant&quot;</span>, reply)
+    <span class="kw">return</span> reply
+
+<span class="fn">print</span>(<span class="st">&quot;✅ run_turn defined&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ run_turn defined</span></pre>
+    </div><div class="proves"><strong>What this proves:</strong> the entire agent loop is now one function. Five steps, clearly numbered. Tool execution is wrapped in <code>execute_tool</code> which <code>try/finally</code>s the audit-log write — if a tool raises, the row still gets written with <code>ok=False</code>. The conversation history grows by <code>mem.add_message</code> calls, not by appending to a Python list.</div><h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody><tr><td><code>Endpoint &#x27;databricks-meta-llama-3-3-70b-instruct&#x27; not found</code></td><td>Chat model not enabled in region</td><td>Update <code>TUTORIAL["chat_model"]</code> to an available model (e.g. <code>databricks-dbrx-instruct</code>)</td></tr>
+<tr><td><code>tool_calls attribute missing on response</code></td><td>Older OpenAI SDK</td><td><code>pip install --upgrade "openai>=1.30"</code></td></tr></tbody>
+      </table>
+    </div></section>
+<section class="step" id="step6">
+    <div class="step-banner">
+      <span class="step-num">STEP 06</span>
+      <h2 class="step-title">The cross-session memory demo</h2>
+      <button class="step-mark" data-step="6" onclick="markStep(6)">Mark done</button>
+    </div>
+    <p>This is the killer demo. Two sessions, same user. In session 1, the user states a preference. In session 2, the agent recalls it without being told again.</p>
+
+    <div class="substep"><span>6a</span>Session 1: user states a preference</div>
+    <div class="cell" id="cell-8">
+      <div class="cell-header">
+        <span class="cell-label">Cell 8 · session 1 — set the preference<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-8')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 8 — Step 6a: Session 1: user states a preference</span>
+user_email = <span class="st">&quot;demo.user@example.com&quot;</span>
+
+sid1 = mem.<span class="fn">start_session</span>(user_email, agent=<span class="st">&quot;northwind-support&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;▸ Session 1 started: {sid1[:8]}…\n&quot;</span>)
+
+reply = <span class="fn">run_turn</span>(sid1, user_email,
+    <span class="st">&quot;Hi, I have a quick question. Just so you know — I prefer concise email replies, &quot;</span>
+    <span class="st">&quot;no chit-chat. What&#x27;s your return policy?&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;AGENT: {reply}\n&quot;</span>)
+
+reply = <span class="fn">run_turn</span>(sid1, user_email,
+    <span class="st">&quot;Got it, thanks. Please remember the email-reply thing for next time.&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;AGENT: {reply}&quot;</span>)
+
+mem.<span class="fn">end_session</span>(sid1)
+<span class="fn">print</span>(f<span class="st">&quot;\n▸ Session 1 ended.&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>▸ Session 1 started: 9c4f1e22…
+
+AGENT: Our return policy is a 14-day window for opened electronics.
+       Source: Return Policy doc.
+
+AGENT: Noted — concise email replies. I&#x27;ll keep that in mind.
+
+▸ Session 1 ended.</pre>
+    </div>
+    <div class="substep"><span>6b</span>Distill session 1 into an episode</div>
+    <p>In production this is the nightly Workflow from Module 6 theory 6.5. We run it on demand here.</p>
+    <div class="cell" id="cell-9">
+      <div class="cell-header">
+        <span class="cell-label">Cell 9 · distill session → episode<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-9')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 9 — Step 6b: distill the just-ended session into one episode</span>
+<span class="kw">def</span> <span class="fn">distill</span>(sid):
+    <span class="st">&quot;&quot;&quot;Read all messages from the session, ask LLM to summarize, store as episode.&quot;&quot;&quot;</span>
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        msgs = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+            SELECT role, content FROM messages
+            WHERE session_id = :s ORDER BY created_at
+        &quot;&quot;&quot;</span>), <span class="fn">dict</span>(s=sid)).<span class="fn">fetchall</span>()
+        user_id = conn.<span class="fn">execute</span>(<span class="fn">text</span>(
+            <span class="st">&quot;SELECT user_id FROM sessions WHERE id = :s&quot;</span>
+        ), <span class="fn">dict</span>(s=sid)).<span class="fn">scalar</span>()
+
+    transcript = <span class="st">&quot;\n&quot;</span>.<span class="fn">join</span>(f<span class="st">&quot;{m.role}: {m.content}&quot;</span> <span class="kw">for</span> m <span class="kw">in</span> msgs)
+
+    prompt = (
+        <span class="st">&quot;Summarize this user&#x27;s conversation in 3 sentences. &quot;</span>
+        <span class="st">&quot;Focus on stated preferences, durable facts, and decisions. &quot;</span>
+        <span class="st">&quot;Skip pleasantries and chitchat. &quot;</span>
+        <span class="st">&quot;After the summary, write a separate line:\n&quot;</span>
+        <span class="st">&quot;IMPORTANCE: &lt;0.0-1.0&gt;\n&quot;</span>
+        <span class="st">&quot;based on how useful this is for future sessions.\n\n&quot;</span>
+        f<span class="st">&quot;--- TRANSCRIPT ---\n{transcript}\n--- END ---&quot;</span>
+    )
+    out = <span class="fn">chat</span>([{<span class="st">&quot;role&quot;</span>: <span class="st">&quot;user&quot;</span>, <span class="st">&quot;content&quot;</span>: prompt}])
+    raw = out.choices[<span class="nu">0</span>].message.content
+
+    <span class="cm"># Parse summary + importance</span>
+    lines = raw.<span class="fn">strip</span>().<span class="fn">split</span>(<span class="st">&quot;\n&quot;</span>)
+    importance = <span class="nu">0.5</span>
+    summary_lines = []
+    <span class="kw">for</span> line <span class="kw">in</span> lines:
+        <span class="kw">if</span> line.<span class="fn">upper</span>().<span class="fn">startswith</span>(<span class="st">&quot;IMPORTANCE&quot;</span>):
+            <span class="kw">try</span>:
+                importance = <span class="fn">float</span>(line.<span class="fn">split</span>(<span class="st">&quot;:&quot;</span>, <span class="nu">1</span>)[<span class="nu">1</span>].<span class="fn">strip</span>())
+                importance = <span class="fn">max</span>(<span class="nu">0.0</span>, <span class="fn">min</span>(<span class="nu">1.0</span>, importance))
+            <span class="kw">except</span> Exception:
+                <span class="kw">pass</span>
+        <span class="kw">else</span>:
+            summary_lines.<span class="fn">append</span>(line)
+    summary = <span class="st">&quot; &quot;</span>.<span class="fn">join</span>(s.<span class="fn">strip</span>() <span class="kw">for</span> s <span class="kw">in</span> summary_lines <span class="kw">if</span> s.<span class="fn">strip</span>())
+
+    mem.<span class="fn">remember</span>(user_id, summary, importance=importance)
+    <span class="kw">return</span> summary, importance
+
+summary1, imp1 = <span class="fn">distill</span>(sid1)
+<span class="fn">print</span>(f<span class="st">&quot;✅ Episode written&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;   Summary:    {summary1}&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;   Importance: {imp1}&quot;</span>)
+
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    n = conn.<span class="fn">execute</span>(<span class="fn">text</span>(
+        <span class="st">&quot;SELECT count(*) FROM episodes WHERE user_id = :u&quot;</span>
+    ), <span class="fn">dict</span>(u=user_email)).<span class="fn">scalar</span>()
+<span class="fn">print</span>(f<span class="st">&quot;   Episodes for {user_email}: {n}&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre><span class="ok-line">✅ Episode written</span>
+   Summary:    User prefers concise email replies and no chit-chat.
+               Asked about return policy (14-day window for electronics).
+               Wants the email-reply preference remembered for future sessions.
+   Importance: 0.8
+   Episodes for demo.user@example.com: 1</pre>
+    </div>
+    <div class="substep"><span>6c</span>Session 2: prove the agent remembers</div>
+    <div class="cell" id="cell-10">
+      <div class="cell-header">
+        <span class="cell-label">Cell 10 · session 2 — preference is honored<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-10')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 10 — Step 6c: Session 2: same user, fresh session, no preference restated</span>
+sid2 = mem.<span class="fn">start_session</span>(user_email, agent=<span class="st">&quot;northwind-support&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;▸ Session 2 started: {sid2[:8]}…\n&quot;</span>)
+
+reply = <span class="fn">run_turn</span>(sid2, user_email,
+    <span class="st">&quot;Hey, what are my recent orders?&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;AGENT: {reply}\n&quot;</span>)
+<span class="fn">print</span>(<span class="st">&quot;─&quot;</span> * <span class="nu">60</span>)
+
+<span class="cm"># Check what episodes were recalled at the start of this session.</span>
+recalled = mem.<span class="fn">recall</span>(user_email, <span class="st">&quot;what are my recent orders?&quot;</span>, k=<span class="nu">3</span>)
+<span class="fn">print</span>(f<span class="st">&quot;\n▸ Episodes recalled into session 2&#x27;s system prompt:&quot;</span>)
+<span class="kw">for</span> r <span class="kw">in</span> recalled:
+    <span class="fn">print</span>(f<span class="st">&quot;   · imp={r.importance:.2f} dist={r.distance:.3f} :: {r.summary[:80]}…&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>▸ Session 2 started: 1b8a2d91…
+
+AGENT: Recent orders for demo.user@example.com: none on file.
+       Source: orders table.
+
+────────────────────────────────────────────────────────────
+
+▸ Episodes recalled into session 2&#x27;s system prompt:
+   · imp=0.80 dist=0.142 :: User prefers concise email replies and no chit-chat. Asked about return…</pre>
+    </div>
+    <div class="callout callout-success">
+      <span class="callout-label">▸ The killer demo</span>
+      <p>The agent honored the <em>concise, no chit-chat</em> preference in session 2 even though session 2 never restated it. The recalled episode was injected into the system prompt at step 1 of the loop. <strong>This is the demo you show on customer calls</strong> — and it's running on one Postgres, not on Redis + Pinecone + DynamoDB.</p>
+    </div>
+    <h4>If it fails</h4>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody><tr><td><code>Session 2&#x27;s reply is verbose / chatty</code></td><td>Episode wasn't recalled, or has low importance</td><td>Run <code>mem.recall(user_email, "preferences", k=5)</code> and confirm imp ≥ 0.5 — if not, re-run Cell 9 with a stricter prompt</td></tr>
+<tr><td><code>recalled is empty</code></td><td><code>user_email</code> typo between Cells 8/9/10</td><td>Confirm the same <code>user_email</code> variable is used everywhere</td></tr>
+<tr><td><code>Distill summary is gibberish</code></td><td>Chat model couldn't follow the format</td><td>Drop temperature to 0.0 in <code>distill</code>'s <code>chat()</code> call</td></tr></tbody>
+      </table>
+    </div></section>
+<section class="step" id="step7">
+    <div class="step-banner">
+      <span class="step-num">STEP 07</span>
+      <h2 class="step-title">Audit-trail spot check</h2>
+      <button class="step-mark" data-step="7" onclick="markStep(7)">Mark done</button>
+    </div>
+    <p>The <code>tool_calls</code> table is your <em>procedural</em> memory. Module 6 theory called this "the receipt your agent leaves for every action it took." Now you have receipts to inspect.</p>
+    <div class="cell" id="cell-11">
+      <div class="cell-header">
+        <span class="cell-label">Cell 11 · cross-session tool-call audit<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-11')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 11 — query the audit trail across both demo sessions</span>
+<span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+    rows = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+        SELECT s.id::text AS session_id,
+               t.tool_name, t.duration_ms, t.ok, t.ts
+        FROM tool_calls t
+        JOIN sessions s ON t.session_id = s.id
+        WHERE s.user_id = :u
+        ORDER BY t.ts
+    &quot;&quot;&quot;</span>), <span class="fn">dict</span>(u=user_email)).<span class="fn">fetchall</span>()
+
+<span class="fn">print</span>(f<span class="st">&quot;Tool calls for {user_email}: {len(rows)} rows&quot;</span>)
+<span class="fn">print</span>(f<span class="st">&quot;{&#x27;SESSION&#x27;:&lt;10} {&#x27;TOOL&#x27;:&lt;14} {&#x27;DURATION&#x27;:&lt;10} {&#x27;OK&#x27;:&lt;4} TS&quot;</span>)
+<span class="fn">print</span>(<span class="st">&quot;-&quot;</span> * <span class="nu">75</span>)
+<span class="kw">for</span> r <span class="kw">in</span> rows:
+    <span class="fn">print</span>(f<span class="st">&quot;{r.session_id[:8]:&lt;10} {r.tool_name:&lt;14} &quot;</span>
+          f<span class="st">&quot;{r.duration_ms:&gt;5} ms  {&#x27;✅&#x27; if r.ok else &#x27;❌&#x27;:&lt;4} {r.ts}&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>Tool calls for demo.user@example.com: 3 rows
+SESSION    TOOL           DURATION   OK   TS
+---------------------------------------------------------------------------
+9c4f1e22   retrieve         142 ms   ✅   2026-05-02 07:31:08.214+00
+1b8a2d91   get_orders        38 ms   ✅   2026-05-02 07:32:55.118+00
+1b8a2d91   recall            89 ms   ✅   2026-05-02 07:32:55.291+00</pre>
+    </div><div class="proves"><strong>What this proves:</strong> every tool the agent called — across both sessions — is recorded with name, duration, and success. This is the join you can run from DBSQL during incident review: <em>"show me every tool call that took >500ms and what session it came from."</em> All four memory layers, one Postgres, one query plane.</div></section>
+<section class="step" id="step8">
+    <div class="step-banner">
+      <span class="step-num">STEP 08</span>
+      <h2 class="step-title">Final verification & cleanup</h2>
+      <button class="step-mark" data-step="8" onclick="markStep(8)">Mark done</button>
+    </div>
+    <p>A pass/fail summary of everything you built. Cleanup is <em>optional</em> — Module 7 (Databricks Apps) builds directly on this exact agent code.</p>
+
+    <div class="substep"><span>8a</span>The summary checklist</div>
+    <div class="cell" id="cell-12">
+      <div class="cell-header">
+        <span class="cell-label">Cell 12 · final checklist<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-12')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 12 — final checklist</span>
+checks = []
+
+<span class="cm"># 1. Four memory tables exist</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        n = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+            SELECT count(*) FROM information_schema.tables
+            WHERE table_name IN (&#x27;sessions&#x27;,&#x27;messages&#x27;,&#x27;episodes&#x27;,&#x27;tool_calls&#x27;)
+        &quot;&quot;&quot;</span>)).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">&quot;4 memory tables exist&quot;</span>, f<span class="st">&quot;{n}/4 found&quot;</span>, n == <span class="nu">4</span>))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">&quot;4 memory tables exist&quot;</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 2. AgentMemory contract works</span>
+<span class="kw">try</span>:
+    sid_test = mem.<span class="fn">start_session</span>(<span class="st">&quot;checklist@test.com&quot;</span>)
+    mem.<span class="fn">add_message</span>(sid_test, <span class="st">&quot;user&quot;</span>, <span class="st">&quot;ping&quot;</span>)
+    h = mem.<span class="fn">recent_messages</span>(sid_test)
+    mem.<span class="fn">end_session</span>(sid_test)
+    ok = <span class="fn">len</span>(h) == <span class="nu">1</span> <span class="kw">and</span> h[<span class="nu">0</span>].role == <span class="st">&quot;user&quot;</span>
+    checks.<span class="fn">append</span>((<span class="st">&quot;AgentMemory round-trip&quot;</span>, <span class="st">&quot;INSERT+SELECT OK&quot;</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="st">&quot;fail&quot;</span>, ok))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">&quot;AgentMemory round-trip&quot;</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 3. HNSW on episodes is being used</span>
+<span class="kw">try</span>:
+    qv = <span class="fn">embed</span>([<span class="st">&quot;preferences&quot;</span>])[<span class="nu">0</span>]
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        plan = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+            EXPLAIN SELECT id FROM episodes
+            ORDER BY embedding &lt;=&gt; CAST(:qv AS vector) LIMIT 3
+        &quot;&quot;&quot;</span>), {<span class="st">&quot;qv&quot;</span>: <span class="fn">str</span>(qv)}).<span class="fn">fetchall</span>()
+    plan_text = <span class="st">&quot;\n&quot;</span>.<span class="fn">join</span>(p[<span class="nu">0</span>] <span class="kw">for</span> p <span class="kw">in</span> plan)
+    using_hnsw = <span class="st">&quot;idx_epi_hnsw&quot;</span> <span class="kw">in</span> plan_text
+    checks.<span class="fn">append</span>((<span class="st">&quot;HNSW index on episodes&quot;</span>,
+                   <span class="st">&quot;Index Scan&quot;</span> <span class="kw">if</span> using_hnsw <span class="kw">else</span> <span class="st">&quot;Seq Scan&quot;</span>, using_hnsw))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">&quot;HNSW index on episodes&quot;</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 4. Episode was distilled from session 1</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        ep = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+            SELECT summary, importance FROM episodes
+            WHERE user_id = :u
+            ORDER BY last_seen DESC LIMIT 1
+        &quot;&quot;&quot;</span>), <span class="fn">dict</span>(u=user_email)).<span class="fn">first</span>()
+    has_pref = ep <span class="kw">is</span> <span class="kw">not</span> <span class="kw">None</span> <span class="kw">and</span> (
+        <span class="st">&quot;email&quot;</span> <span class="kw">in</span> (ep.summary <span class="kw">or</span> <span class="st">&quot;&quot;</span>).<span class="fn">lower</span>() <span class="kw">or</span> <span class="st">&quot;concise&quot;</span> <span class="kw">in</span> (ep.summary <span class="kw">or</span> <span class="st">&quot;&quot;</span>).<span class="fn">lower</span>()
+    )
+    detail = f<span class="st">&quot;imp={ep.importance:.2f}&quot;</span> <span class="kw">if</span> ep <span class="kw">else</span> <span class="st">&quot;no episode&quot;</span>
+    checks.<span class="fn">append</span>((<span class="st">&quot;Episode captured preference&quot;</span>, detail, has_pref))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">&quot;Episode captured preference&quot;</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 5. Cross-session recall returns the preference</span>
+<span class="kw">try</span>:
+    eps = mem.<span class="fn">recall</span>(user_email, <span class="st">&quot;what does this user prefer?&quot;</span>, k=<span class="nu">3</span>)
+    found = <span class="fn">any</span>(<span class="st">&quot;email&quot;</span> <span class="kw">in</span> e.summary.<span class="fn">lower</span>() <span class="kw">or</span> <span class="st">&quot;concise&quot;</span> <span class="kw">in</span> e.summary.<span class="fn">lower</span>()
+                <span class="kw">for</span> e <span class="kw">in</span> eps)
+    detail = f<span class="st">&quot;top imp={eps[0].importance:.2f}&quot;</span> <span class="kw">if</span> eps <span class="kw">else</span> <span class="st">&quot;no recall&quot;</span>
+    checks.<span class="fn">append</span>((<span class="st">&quot;Cross-session recall works&quot;</span>, detail, found))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">&quot;Cross-session recall works&quot;</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># 6. tool_calls audit trail is populated</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        n = conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;&quot;&quot;
+            SELECT count(*) FROM tool_calls t JOIN sessions s ON t.session_id=s.id
+            WHERE s.user_id = :u
+        &quot;&quot;&quot;</span>), <span class="fn">dict</span>(u=user_email)).<span class="fn">scalar</span>()
+    checks.<span class="fn">append</span>((<span class="st">&quot;tool_calls audit trail&quot;</span>, f<span class="st">&quot;{n} rows&quot;</span>, n &gt;= <span class="nu">1</span>))
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    checks.<span class="fn">append</span>((<span class="st">&quot;tool_calls audit trail&quot;</span>, <span class="fn">str</span>(e)[:<span class="nu">30</span>], <span class="kw">False</span>))
+
+<span class="cm"># Print</span>
+<span class="fn">print</span>(<span class="st">&quot;=&quot;</span> * <span class="nu">70</span>)
+<span class="fn">print</span>(f<span class="st">&quot;{&#x27;CHECK&#x27;:&lt;32} {&#x27;DETAIL&#x27;:&lt;24} STATUS&quot;</span>)
+<span class="fn">print</span>(<span class="st">&quot;-&quot;</span> * <span class="nu">70</span>)
+<span class="kw">for</span> name, detail, ok <span class="kw">in</span> checks:
+    icon = <span class="st">&quot;✅&quot;</span> <span class="kw">if</span> ok <span class="kw">else</span> <span class="st">&quot;❌&quot;</span>
+    <span class="fn">print</span>(f<span class="st">&quot;{name:&lt;32} {str(detail)[:24]:&lt;24} {icon}&quot;</span>)
+<span class="fn">print</span>(<span class="st">&quot;=&quot;</span> * <span class="nu">70</span>)
+passed = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> _, _, ok <span class="kw">in</span> checks <span class="kw">if</span> ok)
+total = <span class="fn">len</span>(checks)
+<span class="kw">if</span> passed == total:
+    <span class="fn">print</span>(f<span class="st">&quot;\n🎯 ALL {total} CHECKS PASSED — Module 6 complete.&quot;</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(f<span class="st">&quot;\n⚠ {passed}/{total} passed. Resolve the ❌ rows before Module 7.&quot;</span>)</pre>
+    </div><div class="expect">
+      <div class="expect-header">▸ Expected output</div>
+<pre>======================================================================
+CHECK                            DETAIL                   STATUS
+----------------------------------------------------------------------
+4 memory tables exist            4/4 found                ✅
+AgentMemory round-trip           INSERT+SELECT OK         ✅
+HNSW index on episodes           Index Scan               ✅
+Episode captured preference      imp=0.80                 ✅
+Cross-session recall works       top imp=0.80             ✅
+tool_calls audit trail           3 rows                   ✅
+======================================================================
+
+🎯 ALL 6 CHECKS PASSED — Module 6 complete.</pre>
+    </div>
+    <!-- ─── INTERACTIVE CHECKLIST ─── -->
+    <div class="checklist-section">
+      <div class="checklist-header">
+        <span class="checklist-title">Tap each check as Cell 12 prints <em>✅</em></span>
+        <span class="checklist-status" id="clStatus">0 / 6 complete</span>
+      </div>
+      <div class="check-row">
+        <span class="check-num">01</span>
+        <div>
+          <div class="check-name">4 memory tables exist</div>
+          <div class="check-desc">sessions · messages · episodes · tool_calls</div>
+        </div>
+        <span class="check-detail" id="d1">— pending —</span>
+        <button class="check-toggle" data-check="1" onclick="toggleCheck(1)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">02</span>
+        <div>
+          <div class="check-name">AgentMemory round-trip</div>
+          <div class="check-desc">INSERT + SELECT through the contract works</div>
+        </div>
+        <span class="check-detail" id="d2">— pending —</span>
+        <button class="check-toggle" data-check="2" onclick="toggleCheck(2)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">03</span>
+        <div>
+          <div class="check-name">HNSW index on episodes</div>
+          <div class="check-desc">EXPLAIN shows Index Scan, not Seq Scan</div>
+        </div>
+        <span class="check-detail" id="d3">— pending —</span>
+        <button class="check-toggle" data-check="3" onclick="toggleCheck(3)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">04</span>
+        <div>
+          <div class="check-name">Episode captured preference</div>
+          <div class="check-desc">distilled summary mentions email / concise</div>
+        </div>
+        <span class="check-detail" id="d4">— pending —</span>
+        <button class="check-toggle" data-check="4" onclick="toggleCheck(4)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">05</span>
+        <div>
+          <div class="check-name">Cross-session recall works</div>
+          <div class="check-desc">recall() in session 2 returns the preference</div>
+        </div>
+        <span class="check-detail" id="d5">— pending —</span>
+        <button class="check-toggle" data-check="5" onclick="toggleCheck(5)">○</button>
+      </div>
+      <div class="check-row">
+        <span class="check-num">06</span>
+        <div>
+          <div class="check-name">tool_calls audit trail</div>
+          <div class="check-desc">≥ 1 row across the demo sessions</div>
+        </div>
+        <span class="check-detail" id="d6">— pending —</span>
+        <button class="check-toggle" data-check="6" onclick="toggleCheck(6)">○</button>
+      </div>
+
+      <div class="checklist-footer">
+        <span id="clMessage">▸ Run Cell 12. Tap each ✅ above as it appears.</span>
+        <button class="reset-btn" onclick="resetChecks()">RESET</button>
+      </div>
+    </div>
+
+    <div class="substep"><span>8b</span>Cleanup (optional)</div>
+    <div class="cell" id="cell-13">
+      <div class="cell-header">
+        <span class="cell-label">Cell 13 · cleanup<span class="cell-lang">Python</span></span>
+        <div class="cell-actions"><button class="copy-btn" onclick="copyCell('cell-13')">COPY</button></div>
+      </div>
+      <pre><span class="cm"># Cell 13 — cleanup</span>
+<span class="cm"># Module 7 (Databricks Apps) reuses these tables — most readers leave CLEANUP=False.</span>
+CLEANUP_MEMORY = <span class="kw">False</span>
+
+<span class="kw">if</span> CLEANUP_MEMORY:
+    <span class="kw">with</span> engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+        <span class="cm"># Order matters — drop children before parents</span>
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;DROP TABLE IF EXISTS tool_calls&quot;</span>))
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;DROP TABLE IF EXISTS messages&quot;</span>))
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;DROP TABLE IF EXISTS episodes&quot;</span>))
+        conn.<span class="fn">execute</span>(<span class="fn">text</span>(<span class="st">&quot;DROP TABLE IF EXISTS sessions&quot;</span>))
+    <span class="fn">print</span>(<span class="st">&quot;✅ Dropped 4 memory tables. (documents and Module 3 schema preserved.)&quot;</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">&quot;⏸ Cleanup skipped. Module 7 reuses these tables for the Databricks App.&quot;</span>)
+    <span class="fn">print</span>(f<span class="st">&quot;   Project: {TUTORIAL[&#x27;project_name&#x27;]}&quot;</span>)
+    <span class="fn">print</span>(f<span class="st">&quot;   Tables:  sessions · messages · episodes · tool_calls&quot;</span>)</pre>
+    </div></section>
+
+  <!-- ─── TROUBLESHOOTING REFERENCE ─── -->
+  <section>
+    <h2>Troubleshooting reference</h2>
+    <p>If your final checklist has any ❌ rows, find the row in the table below and apply the fix. Don't proceed to Module 7 with failing checks — the Databricks App in Module 7 reuses these tables and the <code>run_turn</code> function.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>❌ Row</th><th>Most common cause</th><th>Resolution path</th></tr></thead>
+        <tbody>
+          <tr><td><strong>4 memory tables exist</strong></td><td>Cell 3 errored mid-DDL</td><td>Re-run Cell 3 — <code>IF NOT EXISTS</code> makes it safe</td></tr>
+          <tr><td><strong>AgentMemory round-trip</strong></td><td>Cell 5's class definition raised</td><td>Re-run Cell 5; check that <code>embed</code> was defined in Cell 4 first</td></tr>
+          <tr><td><strong>HNSW index on episodes</strong></td><td>Wrong opclass — built with <code>vector_l2_ops</code>, queried with <code>&lt;=&gt;</code></td><td>DROP <code>idx_epi_hnsw</code>, re-run Cell 3 (uses <code>vector_cosine_ops</code>)</td></tr>
+          <tr><td><strong>Episode captured preference</strong></td><td>Distill prompt produced free-form text the parser couldn't handle</td><td>Re-run Cell 9; if it still fails, lower temperature to 0.0 in <code>chat()</code></td></tr>
+          <tr><td><strong>Cross-session recall works</strong></td><td>Recalled episode has very low importance, or <code>user_id</code> typo</td><td>Run <code>SELECT * FROM episodes WHERE user_id = :u</code> to confirm rows exist with the same email</td></tr>
+          <tr><td><strong>tool_calls audit trail</strong></td><td>Agent never called a tool in either session</td><td>Re-run Cells 8 and 10 — the questions are designed to trigger tools</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── DONE BANNER ─── -->
+  <section class="done-banner">
+    <h3>What you've <em>accomplished</em></h3>
+    <p>If your final cell printed <code>🎯 ALL 6 CHECKS PASSED</code>, you have done — for real, not in slides:</p>
+    <ul>
+      <li>✅ Built the four-table memory schema (sessions, messages, episodes, tool_calls) with HNSW + composite indexes</li>
+      <li>✅ Implemented the <code>AgentMemory</code> Python contract — six methods, all parameterized, fully testable</li>
+      <li>✅ Defined three tools with explicit JSON schemas (<code>retrieve</code>, <code>get_orders</code>, <code>recall</code>)</li>
+      <li>✅ Composed the five-step agent loop where short-term, long-term, semantic, and procedural memory all enter at the right step</li>
+      <li>✅ Distilled a session into an episode with LLM-scored importance — the same pattern ChatGPT uses</li>
+      <li>✅ <strong>Proved cross-session memory works end-to-end</strong> — the agent honored "I prefer email" in session 2 without being told twice</li>
+      <li>✅ Inspected the procedural audit trail — every tool call, every duration, every ok/fail, queryable from DBSQL</li>
+    </ul>
+    <p>These six capabilities cover the entire memory substrate of any modern agent. Module 7 wraps <code>run_turn</code> in a Databricks App with a Streamlit UI, the OBO identity model, and per-request engine factories — production-ready agent serving on Lakebase. <strong>Save this notebook somewhere you can find it again.</strong></p>
+
+    <div class="callout callout-success" style="margin-top: 24px;">
+      <span class="callout-label">▸ Module 6 complete</span>
+      <p>You finished six theory topics (6.1–6.6) and the hands-on lab. <strong>Next up: Module 7</strong> — <em>Powering Databricks Apps with Lakebase.</em> You'll wrap <code>run_turn</code> in a Streamlit UI, learn the OBO identity model and per-request engine factories, navigate the connection-pooling trap, and ship the memory-aware agent as a real Databricks App.</p>
+    </div>
+  </section>
+
+</main>
+
+
+<script>
+// ═══════════════ COPY BUTTONS ═══════════════
+function copyCell(cellId) {
+  const cell = document.getElementById(cellId);
+  const pre = cell.querySelector('pre');
+  const text = pre.innerText;
+  const btn = cell.querySelector('.copy-btn');
+
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.textContent = 'COPIED ✓';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = 'COPY';
+    }, 1800);
+  }).catch(() => {
+    btn.textContent = 'PRESS ⌘+C';
+    const range = document.createRange();
+    range.selectNode(pre);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    setTimeout(() => { btn.textContent = 'COPY'; }, 2200);
+  });
+}
+
+// ═══════════════ STEP TRACKER ═══════════════
+const STEP_KEY  = 'lakebase_lab6_steps';
+const CHECK_KEY = 'lakebase_lab6_checks';
+const TOTAL_STEPS = 8;
+const TOTAL_CHECKS = 6;
+
+function loadSteps() {
+  try { return JSON.parse(localStorage.getItem(STEP_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveSteps(s) {
+  try { localStorage.setItem(STEP_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+function markStep(n) {
+  const steps = loadSteps();
+  steps[n] = !steps[n];
+  saveSteps(steps);
+  renderSteps();
+}
+
+function renderSteps() {
+  const steps = loadSteps();
+  let done = 0;
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const pill = document.querySelector(`.step-pill[data-step="${i}"]`);
+    const btn = document.querySelector(`.step-mark[data-step="${i}"]`);
+    if (steps[i]) {
+      done++;
+      if (pill) pill.classList.add('done');
+      if (btn) {
+        btn.classList.add('done');
+        btn.textContent = '✓ Done';
+      }
+    } else {
+      if (pill) pill.classList.remove('done');
+      if (btn) {
+        btn.classList.remove('done');
+        btn.textContent = 'Mark done';
+      }
+    }
+  }
+  const counter = document.getElementById('trackerCount');
+  if (counter) {
+    counter.textContent = `${done} / ${TOTAL_STEPS}`;
+    counter.style.color = (done === TOTAL_STEPS) ? 'var(--accent-green)' : 'var(--accent-purple)';
+  }
+}
+
+function highlightActive() {
+  const sections = document.querySelectorAll('section.step');
+  const scrollY = window.scrollY + 200;
+  let active = null;
+  sections.forEach(s => {
+    if (s.offsetTop <= scrollY) active = s.id;
+  });
+  document.querySelectorAll('.step-pill').forEach(p => p.classList.remove('active'));
+  if (active) {
+    const n = active.replace('step', '');
+    const pill = document.querySelector(`.step-pill[data-step="${n}"]`);
+    if (pill && !pill.classList.contains('done')) pill.classList.add('active');
+  }
+}
+window.addEventListener('scroll', highlightActive);
+
+// ═══════════════ INTERACTIVE CHECKLIST ═══════════════
+const CHECK_DETAILS = {
+  1: '4/4 tables',
+  2: 'INSERT+SELECT',
+  3: 'Index Scan',
+  4: 'imp=0.80',
+  5: 'preference found',
+  6: '≥ 1 row'
+};
+
+function loadChecks() {
+  try { return JSON.parse(localStorage.getItem(CHECK_KEY) || '{}'); }
+  catch (e) { return {}; }
+}
+function saveChecks(c) {
+  try { localStorage.setItem(CHECK_KEY, JSON.stringify(c)); } catch (e) {}
+}
+
+function toggleCheck(n) {
+  const checks = loadChecks();
+  checks[n] = !checks[n];
+  saveChecks(checks);
+  renderChecks();
+}
+
+function resetChecks() {
+  if (!confirm('Reset all checks?')) return;
+  saveChecks({});
+  renderChecks();
+}
+
+function renderChecks() {
+  const checks = loadChecks();
+  let done = 0;
+  for (let i = 1; i <= TOTAL_CHECKS; i++) {
+    const btn = document.querySelector(`.check-toggle[data-check="${i}"]`);
+    const detail = document.getElementById('d' + i);
+    if (checks[i]) {
+      done++;
+      if (btn) {
+        btn.classList.add('checked');
+        btn.textContent = '✓';
+      }
+      if (detail) {
+        detail.textContent = CHECK_DETAILS[i];
+        detail.style.color = 'var(--accent-green)';
+      }
+    } else {
+      if (btn) {
+        btn.classList.remove('checked');
+        btn.textContent = '○';
+      }
+      if (detail) {
+        detail.textContent = '— pending —';
+        detail.style.color = 'var(--text-muted)';
+      }
+    }
+  }
+  const status = document.getElementById('clStatus');
+  const msg = document.getElementById('clMessage');
+  if (status) {
+    status.textContent = `${done} / ${TOTAL_CHECKS} complete`;
+    if (done === TOTAL_CHECKS) status.classList.add('complete');
+    else status.classList.remove('complete');
+  }
+  if (msg) {
+    if (done === 0) {
+      msg.textContent = '▸ Run Cell 12. Tap each ✅ above as it appears.';
+      msg.style.color = '';
+    } else if (done < TOTAL_CHECKS) {
+      msg.textContent = `▸ ${TOTAL_CHECKS - done} check${TOTAL_CHECKS - done === 1 ? '' : 's'} remaining. Keep going.`;
+      msg.style.color = '';
+    } else {
+      msg.textContent = '🎯 All checks complete — Module 6 done. Move on to Module 7.';
+      msg.style.color = 'var(--accent-green)';
+    }
+  }
+}
+
+// initial render
+renderSteps();
+renderChecks();
+highlightActive();
+</script>
+
+</body>
+</html>
