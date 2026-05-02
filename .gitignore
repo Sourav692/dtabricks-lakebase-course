@@ -1,2 +1,4 @@
 
 .databricks
+.venv
+__builtins__.pyi
