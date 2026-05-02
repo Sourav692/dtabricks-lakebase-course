@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 02 — Architecture Deep Dive: Compute, Storage, Branches</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 64px 48px 56px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(74,158,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(0,191,165,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+.header-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+
+.crumb {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.crumb .tag {
+  color: var(--accent-blue);
+  padding: 4px 12px;
+  border: 1px solid rgba(74,158,255,0.3);
+  background: rgba(74,158,255,0.06);
+  border-radius: 2px;
+}
+.crumb .sep { color: var(--text-muted); }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+h1 em { font-style: italic; color: var(--accent-blue); }
+
+.lede {
+  font-size: 17px; color: var(--text-dim);
+  max-width: 720px; line-height: 1.75;
+  margin-bottom: 32px;
+}
+
+.meta-row {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: fit-content; overflow: hidden;
+}
+.meta-item {
+  padding: 12px 22px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px; font-weight: 500;
+  color: var(--accent-teal);
+}
+.meta-lbl {
+  font-size: 10px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ─── MAIN ─── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 48px 100px;
+}
+
+/* ─── TOC ─── */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-blue);
+  border-radius: 6px;
+  padding: 22px 26px;
+  margin-bottom: 56px;
+}
+.toc-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  margin-bottom: 14px;
+}
+.toc ol { list-style: none; counter-reset: tc; }
+.toc li {
+  counter-increment: tc;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; align-items: baseline; gap: 16px;
+  font-size: 14px;
+}
+.toc li:last-child { border-bottom: none; }
+.toc li::before {
+  content: counter(tc, decimal-leading-zero);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  min-width: 24px;
+}
+.toc a { color: var(--text); text-decoration: none; transition: color 0.2s; }
+.toc a:hover { color: var(--accent-blue); }
+.toc .dur {
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ─── SECTION ─── */
+section.topic {
+  margin-bottom: 72px;
+  scroll-margin-top: 32px;
+}
+
+.topic-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px;
+}
+.topic-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent-blue);
+  padding: 4px 10px;
+  border: 1px solid rgba(74,158,255,0.3);
+  background: rgba(74,158,255,0.06);
+  border-radius: 2px;
+}
+.topic-banner .line { flex: 1; height: 1px; background: var(--border); }
+.topic-banner .type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.5vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+h2 em { font-style: italic; color: var(--accent-blue); }
+
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin: 36px 0 14px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin: 28px 0 10px;
+}
+
+p {
+  font-size: 15.5px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.75;
+}
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--accent-yellow); font-style: italic; }
+
+ul, ol {
+  margin: 16px 0 20px 8px;
+  padding-left: 0;
+  list-style: none;
+}
+li {
+  font-size: 15px;
+  color: var(--text-dim);
+  padding: 6px 0 6px 24px;
+  position: relative;
+  line-height: 1.7;
+}
+li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  color: var(--accent-blue);
+  font-size: 16px;
+}
+ol { counter-reset: ol; }
+ol li::before {
+  content: counter(ol, decimal-leading-zero);
+  counter-increment: ol;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--accent-blue);
+  top: 9px;
+  left: 0;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  color: var(--accent-teal);
+}
+
+pre {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-teal);
+  padding: 16px 20px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 18px 0;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+pre .com { color: var(--text-muted); font-style: italic; }
+pre .ok { color: var(--accent-green); }
+pre .bad { color: var(--accent-red); }
+
+/* ─── TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 24px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th {
+  background: var(--surface2);
+  text-align: left;
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+  line-height: 1.5;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+.yes { color: var(--accent-green); font-weight: 600; }
+.no  { color: var(--accent-red); }
+.warn { color: var(--accent-yellow); }
+
+/* ─── CALLOUT ─── */
+.callout {
+  margin: 28px 0;
+  padding: 20px 24px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.callout strong { color: var(--text); }
+.callout-checkpoint {
+  background: rgba(0,191,165,0.05);
+  border-left-color: var(--accent-teal);
+}
+.callout-warn {
+  background: rgba(251,191,36,0.05);
+  border-left-color: var(--accent-yellow);
+}
+.callout-trap {
+  background: rgba(239,68,68,0.05);
+  border-left-color: var(--accent-red);
+}
+.callout-note {
+  background: rgba(74,158,255,0.05);
+  border-left-color: var(--accent-blue);
+}
+.callout-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+.callout-checkpoint .callout-label { color: var(--accent-teal); }
+.callout-warn .callout-label { color: var(--accent-yellow); }
+.callout-trap .callout-label { color: var(--accent-red); }
+.callout-note .callout-label { color: var(--accent-blue); }
+
+/* ─── INTERACTIVE DIAGRAM SHELL ─── */
+.diagram {
+  margin: 32px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.diagram-header {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.diagram-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+}
+.diagram-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+.diagram-hint::before { content: '◉ '; color: var(--accent-teal); }
+
+.diagram-stage {
+  padding: 24px;
+  position: relative;
+  min-height: 340px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.diagram-info {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,191,165,0.03);
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  min-height: 70px;
+}
+.diagram-info-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-teal);
+  margin-bottom: 6px;
+}
+.diagram-info p { margin: 0; }
+
+/* ─── SVG common ─── */
+.arch-svg { width: 100%; max-width: 900px; height: auto; }
+.arch-node {
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.arch-node:hover { filter: brightness(1.2); }
+.arch-node rect.bg { transition: stroke-width 0.2s, fill 0.2s; }
+.arch-node text { pointer-events: none; }
+
+/* ─── DIAGRAM 2.2: BRANCH TREE ─── */
+.branch-svg { width: 100%; max-width: 900px; height: auto; }
+.branch-node { cursor: pointer; transition: filter 0.2s; }
+.branch-node:hover { filter: brightness(1.25); }
+.branch-node text { pointer-events: none; }
+
+/* ─── DIAGRAM 2.3: COLD START TIMELINE ─── */
+.timeline-svg { width: 100%; max-width: 900px; height: auto; }
+.timeline-step { cursor: pointer; transition: opacity 0.2s; }
+.timeline-step:hover { opacity: 0.85; }
+.timeline-step text { pointer-events: none; }
+
+.toggle-bar {
+  display: flex;
+  gap: 0;
+  background: var(--surface3);
+  border-radius: 4px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+.toggle-bar button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.toggle-bar button.active {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+/* ─── DIAGRAM 2.4: HA TOPOLOGY ─── */
+.ha-svg { width: 100%; max-width: 900px; height: auto; }
+.ha-node { cursor: pointer; transition: filter 0.2s; }
+.ha-node:hover { filter: brightness(1.2); }
+.ha-node text { pointer-events: none; }
+
+/* ─── DIAGRAM 2.5: TOKEN TIMELINE ─── */
+.token-svg { width: 100%; max-width: 900px; height: auto; }
+.token-step { cursor: pointer; transition: opacity 0.2s; }
+.token-step:hover { opacity: 0.9; }
+.token-step text { pointer-events: none; }
+
+/* ─── DECISION DRILL ─── */
+.drill {
+  margin: 32px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+}
+.drill-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-yellow);
+  margin-bottom: 6px;
+}
+.drill-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.drill-question {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: var(--text);
+}
+.drill-options {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-top: 12px;
+}
+.drill-options button {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.drill-options button:hover {
+  border-color: var(--accent-blue);
+  color: var(--text);
+}
+.drill-options button.correct {
+  background: rgba(34,197,94,0.15);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+.drill-options button.wrong {
+  background: rgba(239,68,68,0.12);
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+.drill-feedback {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 13.5px;
+  font-style: italic;
+  display: none;
+}
+.drill-feedback.show { display: block; }
+.drill-feedback.ok {
+  background: rgba(34,197,94,0.08);
+  border-left: 2px solid var(--accent-green);
+  color: var(--accent-green);
+}
+.drill-feedback.bad {
+  background: rgba(239,68,68,0.08);
+  border-left: 2px solid var(--accent-red);
+  color: var(--accent-red);
+}
+
+/* ─── WRAP-UP ─── */
+.wrap-up {
+  margin-top: 80px;
+  padding: 36px 32px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.wrap-up::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(74,158,255,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wrap-up h3 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 26px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.wrap-up h3 em { color: var(--accent-blue); }
+
+/* ─── PROGRESS BAR ─── */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--accent-blue);
+  z-index: 1000;
+  transition: width 0.1s;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 720px) {
+  header, main { padding-left: 24px; padding-right: 24px; }
+  h1 { font-size: 30px; }
+  .meta-row { flex-direction: column; width: 100%; }
+  .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .meta-item:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 02</span>
+      <span class="sep">/</span>
+      <span>Lakebase Mastery</span>
+      <span class="sep">/</span>
+      <span>Architecture Deep Dive</span>
+    </div>
+    <h1>Architecture <em>Deep Dive</em><br>Compute, Storage, Branches</h1>
+    <p class="lede">Separated compute and storage, copy-on-write branching, scale-to-zero, HA topology, and the OAuth token TTL trap. The architectural choices that make Lakebase feel different from RDS — and why every "magical" capability flows from one design decision.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="meta-val">5</span><span class="meta-lbl">Theory Topics</span></div>
+      <div class="meta-item"><span class="meta-val">~2.5h</span><span class="meta-lbl">Duration</span></div>
+      <div class="meta-item"><span class="meta-val">Beg–Int</span><span class="meta-lbl">Level</span></div>
+      <div class="meta-item"><span class="meta-val">5</span><span class="meta-lbl">Interactive Diagrams</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ───── TABLE OF CONTENTS ───── -->
+  <div class="toc">
+    <div class="toc-label">▸ On this page</div>
+    <ol>
+      <li><a href="#t21">Separated Compute &amp; Storage — The Defining Move</a><span class="dur">~30 min</span></li>
+      <li><a href="#t22">Branches — Git-Like Workflows for Data</a><span class="dur">~30 min</span></li>
+      <li><a href="#t23">Scale-to-Zero &amp; Cold-Start Mechanics</a><span class="dur">~25 min</span></li>
+      <li><a href="#t24">High Availability &amp; Read Replicas</a><span class="dur">~25 min</span></li>
+      <li><a href="#t25">Networking, Auth &amp; the OAuth Token TTL Trap</a><span class="dur">~30 min</span></li>
+      <li><a href="#wrap">Module 2 Wrap-Up</a><span class="dur">~5 min</span></li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 2.1 -->
+  <section class="topic" id="t21">
+    <div class="topic-banner">
+      <span class="topic-id">2.1</span>
+      <span class="line"></span>
+      <span class="type">Theory</span>
+    </div>
+    <h2>Separated compute &amp; storage — <em>the defining move</em></h2>
+
+    <h3>The architectural decision</h3>
+    <p>Classical Postgres — including managed offerings like RDS Postgres — runs Postgres on a VM with <strong>locally attached block storage</strong>. The data lives next to the compute. Replication is at the block level. Scaling means resizing the VM. Cloning means copying terabytes.</p>
+
+    <p>Lakebase Autoscaling rebuilds this stack. Storage is moved into a <strong>multi-tenant page server</strong> backed by object storage. Compute is a Postgres process that <strong>lazily fetches pages</strong> from the page server and caches them locally. The two layers communicate over a network.</p>
+
+    <p>This single decision — separating compute from storage — is what makes every distinguishing Lakebase capability possible.</p>
+
+    <h3>The two layers</h3>
+    <p>Hover or click any element below to see what each layer owns and why the boundary matters.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 1: COMPUTE/STORAGE SPLIT ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 2.1 · The Compute / Storage Split</span>
+        <span class="diagram-hint">Hover any element</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 760 460" xmlns="http://www.w3.org/2000/svg" class="arch-svg" id="archSvg">
+          <defs>
+            <marker id="arrowDown" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a9eff"/>
+            </marker>
+            <marker id="arrowUp" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e"/>
+            </marker>
+          </defs>
+
+          <!-- Client/App layer -->
+          <g class="arch-node" data-info="CLIENT — your app, notebook, agent, or BI tool. Connects to compute via TLS and OAuth. Knows nothing about storage.">
+            <rect class="bg" x="280" y="20" width="200" height="50" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="380" y="42" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">App / Client</text>
+            <text x="380" y="58" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1.5">SQL · OAUTH</text>
+          </g>
+          <line x1="380" y1="73" x2="380" y2="100" stroke="#4a5878" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+
+          <!-- COMPUTE LAYER -->
+          <g class="arch-node" data-info="COMPUTE LAYER — stateless and elastic. The Postgres process that parses queries, plans them, holds a buffer cache of hot pages, and writes WAL. Can be killed, suspended, scaled up/down, or replaced without touching durable data.">
+            <rect class="bg" x="40" y="105" width="680" height="120" rx="8" fill="#1a2a1f" stroke="#22c55e" stroke-width="1.5"/>
+            <text x="60" y="130" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="2">▸ COMPUTE LAYER · STATELESS · ELASTIC</text>
+
+            <!-- Sub-boxes inside compute -->
+            <g class="arch-node" data-info="POSTGRES PROCESS — a real Postgres 17 process. Receives queries, parses, plans, executes. Identical wire protocol to any other Postgres.">
+              <rect class="bg" x="70" y="150" width="170" height="55" rx="4" fill="#0b0f1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="155" y="173" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">Postgres</text>
+              <text x="155" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">PARSE · PLAN · RUN</text>
+            </g>
+            <g class="arch-node" data-info="LOCAL PAGE CACHE — hot pages live here in memory. Everything else gets fetched from the page server on demand. After cold start, this cache is empty and warms up over the first minute.">
+              <rect class="bg" x="295" y="150" width="170" height="55" rx="4" fill="#0b0f1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="380" y="173" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">Page Cache</text>
+              <text x="380" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">HOT PAGES · LOCAL</text>
+            </g>
+            <g class="arch-node" data-info="WAL GENERATOR — every write produces Write-Ahead-Log records. WAL flows DOWN to the storage layer, where it's durably persisted before the commit returns.">
+              <rect class="bg" x="520" y="150" width="170" height="55" rx="4" fill="#0b0f1a" stroke="#22c55e" stroke-width="1"/>
+              <text x="605" y="173" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">WAL</text>
+              <text x="605" y="192" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">WRITE AHEAD LOG</text>
+            </g>
+          </g>
+
+          <!-- bidirectional arrows: pages down request, page up response, wal down -->
+          <line x1="240" y1="245" x2="240" y2="285" stroke="#4a9eff" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+          <text x="200" y="270" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="1">pages req</text>
+
+          <line x1="380" y1="285" x2="380" y2="245" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+          <text x="395" y="270" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">pages resp</text>
+
+          <line x1="520" y1="245" x2="520" y2="285" stroke="#4a9eff" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+          <text x="540" y="270" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="1">wal stream</text>
+
+          <!-- STORAGE LAYER -->
+          <g class="arch-node" data-info="STORAGE LAYER — durable, versioned, copy-on-write. Multi-tenant page server backed by object storage. Always replicated internally. Every page version is retained for the configured window (up to 30 days). Survives any compute failure.">
+            <rect class="bg" x="40" y="290" width="680" height="150" rx="8" fill="#2a1a14" stroke="#ff6b35" stroke-width="2"/>
+            <text x="60" y="316" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ STORAGE LAYER · DURABLE · VERSIONED · COW</text>
+
+            <g class="arch-node" data-info="PAGE SERVER — reconstructs page versions on demand from base images plus WAL. Returns the page at any LSN in the retention window. This is what makes branching and instant restore feasible.">
+              <rect class="bg" x="70" y="335" width="200" height="80" rx="4" fill="#0b0f1a" stroke="#ff6b35" stroke-width="1"/>
+              <text x="170" y="362" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Page Server</text>
+              <text x="170" y="381" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1">REBUILDS PAGES</text>
+              <text x="170" y="397" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1">AT ANY LSN</text>
+            </g>
+
+            <g class="arch-node" data-info="SAFEKEEPERS — durably persist incoming WAL across multiple replicas before acknowledging the commit to compute. This is the durability guarantee that lets compute be stateless.">
+              <rect class="bg" x="295" y="335" width="170" height="80" rx="4" fill="#0b0f1a" stroke="#ff6b35" stroke-width="1"/>
+              <text x="380" y="362" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Safekeepers</text>
+              <text x="380" y="381" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1">WAL DURABILITY</text>
+              <text x="380" y="397" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1">REPLICATED</text>
+            </g>
+
+            <g class="arch-node" data-info="OBJECT STORAGE — the backing tier (S3 / ADLS / GCS). Cheap, durable, infinite capacity. Cold pages live here. Hot pages live in the page server's own memory.">
+              <rect class="bg" x="490" y="335" width="200" height="80" rx="4" fill="#0b0f1a" stroke="#ff6b35" stroke-width="1"/>
+              <text x="590" y="362" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Object Storage</text>
+              <text x="590" y="381" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1">S3 / ADLS / GCS</text>
+              <text x="590" y="397" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1">DURABLE TIER</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Hover any layer or component</div>
+        <p id="archInfo">Storage and compute are physically separated. Compute is stateless and elastic. Storage is durable, versioned, and copy-on-write. The interface between them: compute requests pages, storage returns the version at the requested LSN. WAL flows the other way.</p>
+      </div>
+    </div>
+
+    <h3>What each layer owns</h3>
+    <p>The asymmetry is the point. <strong>Compute is stateless</strong> — it can be killed, restarted, suspended, or replaced without touching durable data. <strong>Storage is durable and versioned</strong> — every page version is retained for the configured retention window (up to 30 days).</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Concern</th><th>Compute</th><th>Storage</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Query parsing &amp; planning</strong></td><td class="yes">✓</td><td>—</td></tr>
+          <tr><td><strong>Buffer cache (hot pages)</strong></td><td class="yes">✓</td><td>—</td></tr>
+          <tr><td><strong>WAL generation</strong></td><td class="yes">✓</td><td>—</td></tr>
+          <tr><td><strong>Page durability</strong></td><td>—</td><td class="yes">✓</td></tr>
+          <tr><td><strong>Per-page version history</strong></td><td>—</td><td class="yes">✓</td></tr>
+          <tr><td><strong>Replication / redundancy</strong></td><td>—</td><td class="yes">✓ (always on)</td></tr>
+          <tr><td><strong>Scaling up/down</strong></td><td class="yes">✓ (elastic)</td><td class="yes">✓ (independent)</td></tr>
+          <tr><td><strong>Survives restart of itself</strong></td><td class="no">— (stateless)</td><td class="yes">✓ (durable)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Why this enables everything</h3>
+    <p>Because compute and storage are decoupled, Lakebase can do things classical Postgres physically cannot:</p>
+    <ul>
+      <li><strong>Scale-to-zero</strong> — kill the compute when no queries run; storage keeps the data alive. (Topic 2.3.)</li>
+      <li><strong>Branching</strong> — a new branch is just a new compute pointing at the same storage with a copy-on-write snapshot pointer. No data is copied. (Topic 2.2.)</li>
+      <li><strong>Instant restore</strong> — every page version is already retained; restoring is a metadata operation, not a backup replay.</li>
+      <li><strong>Read replicas with zero replication lag</strong> — additional compute nodes share the same page-server storage. (Topic 2.4.)</li>
+      <li><strong>Resize without downtime</strong> — change the compute size; storage doesn't move because it was never local.</li>
+    </ul>
+
+    <p>Provisioned Lakebase doesn't have these capabilities precisely because its storage is locally attached and replicated at the block level. <em>Branching would mean physically copying terabytes.</em> That's why these capabilities are Autoscaling-exclusive.</p>
+
+    <h3>The trade-off you must internalize</h3>
+    <p>Remote storage is not free. A page that isn't in the local buffer cache must be fetched over the network from the page server. <strong>Cold pages cost network latency.</strong></p>
+
+    <p>This shifts what good index design looks like:</p>
+    <ul>
+      <li><strong>Index locality matters more.</strong> A well-indexed lookup hits a few pages; a sequential scan touches many. On a single-node Postgres, a seq scan of a 100MB table on a fast SSD is cheap. On Lakebase, fetching 12,500 cold 8KB pages over the network is <em>not</em> cheap.</li>
+      <li><strong><code>SELECT *</code> is more expensive than you remember.</strong> The page server returns whole rows; projecting columns matters.</li>
+      <li><strong>Tiny commits inflate WAL.</strong> Batch writes in transactions of 1k–10k rows.</li>
+    </ul>
+
+    <p>We'll cover the concrete best practices in Module 9. For now, the takeaway: <strong>think about pages, not just rows.</strong></p>
+
+    <div class="callout callout-note">
+      <span class="callout-label">▸ Mental model</span>
+      <p>If you've used <strong>Aurora</strong>, the architecture is similar in spirit (compute pods over a shared distributed storage layer) but Aurora's storage isn't copy-on-write versioned the same way. If you've used <strong>Neon</strong>, the architecture is essentially identical. Lakebase Autoscaling is built on the same architectural lineage, with deep Databricks integration (Unity Catalog, OAuth, synced tables) layered on top.</p>
+    </div>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 2.1</span>
+      <p>Can you state, in two sentences: <em>(1) what storage owns and what compute owns</em>, and <em>(2) which capability is impossible if you put them back together?</em> If yes, move on.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 2.2 -->
+  <section class="topic" id="t22">
+    <div class="topic-banner">
+      <span class="topic-id">2.2</span>
+      <span class="line"></span>
+      <span class="type">Theory</span>
+    </div>
+    <h2>Branches — <em>Git-like workflows</em> for data</h2>
+
+    <h3>What a branch actually is</h3>
+    <p>A <strong>branch</strong> in Lakebase is a named, isolated compute endpoint pointing at a copy-on-write snapshot of project storage at a specific point in time.</p>
+    <p>That sentence is doing a lot of work. Read it slowly:</p>
+    <ul>
+      <li><strong>Named</strong> — you give it a string like <code>pr-1487-add-feature-flags</code>.</li>
+      <li><strong>Isolated</strong> — writes on the branch don't touch the parent.</li>
+      <li><strong>Compute endpoint</strong> — it has its own Postgres process and its own connection string.</li>
+      <li><strong>Copy-on-write snapshot</strong> — no pages are physically copied at creation time. The branch <em>points at</em> the parent's pages until it diverges.</li>
+      <li><strong>At a specific point in time</strong> — you can branch from <code>now()</code>, from 5 minutes ago, or from any LSN inside the retention window.</li>
+    </ul>
+
+    <h3>Branch lifecycle — interactive</h3>
+    <p>Click any node in the tree below to see what happens at that step. The diagram shows a typical pattern: <code>main</code> is the production branch; <code>pr-feat</code> is opened for a PR; <code>ci-test</code> is an ephemeral CI clone; <code>restore-T</code> is a point-in-time recovery branch.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 2: BRANCH TREE ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 2.2 · Branch Tree &amp; Lifecycle</span>
+        <span class="diagram-hint">Click any branch</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" class="branch-svg" id="branchSvg">
+          <defs>
+            <marker id="brArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a9eff"/>
+            </marker>
+          </defs>
+
+          <!-- Main branch backbone -->
+          <line x1="80" y1="60" x2="700" y2="60" stroke="#22c55e" stroke-width="3"/>
+          <text x="40" y="65" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e" letter-spacing="1">main</text>
+
+          <!-- main commits / LSN markers -->
+          <g class="branch-node" data-key="main" data-info="MAIN BRANCH — your production database. Every project starts with one. Holds the durable, blessed state. Merge target for PRs (via promotion). Long-lived, scale-to-zero typically OFF.">
+            <circle cx="120" cy="60" r="8" fill="#22c55e" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="240" cy="60" r="8" fill="#22c55e" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="380" cy="60" r="8" fill="#22c55e" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="520" cy="60" r="8" fill="#22c55e" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="660" cy="60" r="8" fill="#22c55e" stroke="#0b0f1a" stroke-width="2"/>
+            <text x="120" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">LSN 100</text>
+            <text x="240" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">LSN 200</text>
+            <text x="380" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">LSN 300</text>
+            <text x="520" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">LSN 400</text>
+            <text x="660" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">LSN 500</text>
+          </g>
+
+          <!-- pr-feat branch (off main at LSN 200) -->
+          <line x1="240" y1="60" x2="240" y2="135" stroke="#a855f7" stroke-width="2" stroke-dasharray="3,3"/>
+          <line x1="240" y1="135" x2="430" y2="135" stroke="#a855f7" stroke-width="3"/>
+          <text x="200" y="140" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7" letter-spacing="1">pr-feat</text>
+
+          <g class="branch-node" data-key="prfeat" data-info="PR-FEAT BRANCH — opened off main at LSN 200. Schema migration runs here. Integration tests run here. The diff between this branch and main is the &quot;PR diff&quot; for the database. When CI is green, this branch is promoted to become the new main.">
+            <circle cx="290" cy="135" r="7" fill="#a855f7" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="350" cy="135" r="7" fill="#a855f7" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="410" cy="135" r="7" fill="#a855f7" stroke="#0b0f1a" stroke-width="2"/>
+          </g>
+          <text x="350" y="158" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#a855f7" font-style="italic">add-feature-flags</text>
+
+          <!-- promote arrow back to main -->
+          <line x1="430" y1="135" x2="520" y2="68" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="2,2" marker-end="url(#brArrow)"/>
+          <text x="495" y="105" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1">promote</text>
+
+          <!-- ci-test branch (off main at LSN 400) -->
+          <line x1="520" y1="60" x2="520" y2="220" stroke="#fbbf24" stroke-width="2" stroke-dasharray="3,3"/>
+          <line x1="520" y1="220" x2="660" y2="220" stroke="#fbbf24" stroke-width="3"/>
+          <text x="480" y="225" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24" letter-spacing="1">ci-test</text>
+
+          <g class="branch-node" data-key="citest" data-info="CI-TEST BRANCH — ephemeral. Opened automatically when a CI job kicks off. Runs the full test suite against a fresh writable copy. Dropped when the job finishes. Cost: compute for the duration + tiny test-write deltas. No need to share a flaky dev DB across the team.">
+            <circle cx="560" cy="220" r="7" fill="#fbbf24" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="610" cy="220" r="7" fill="#fbbf24" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="660" cy="220" r="7" fill="#fbbf24" stroke="#0b0f1a" stroke-width="2"/>
+          </g>
+          <text x="610" y="244" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#fbbf24" font-style="italic">ephemeral · auto-drop</text>
+
+          <!-- drop X -->
+          <text x="685" y="225" font-family="IBM Plex Mono, monospace" font-size="14" fill="#ef4444">✕</text>
+          <text x="700" y="225" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" letter-spacing="1">drop</text>
+
+          <!-- restore-T branch (off main at LSN 300) -->
+          <line x1="380" y1="60" x2="380" y2="305" stroke="#ff6b35" stroke-width="2" stroke-dasharray="3,3"/>
+          <line x1="380" y1="305" x2="560" y2="305" stroke="#ff6b35" stroke-width="3"/>
+          <text x="340" y="310" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ff6b35" letter-spacing="1">restore-T</text>
+
+          <g class="branch-node" data-key="restore" data-info="RESTORE-T BRANCH — point-in-time recovery. Someone dropped the wrong table at LSN 350 (or 14:32 UTC). Branch from main @ LSN 300 (just before the mistake). You now have a writable copy of the world before the disaster. Cherry-pick the lost rows back into main, or promote this branch.">
+            <circle cx="430" cy="305" r="7" fill="#ff6b35" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="495" cy="305" r="7" fill="#ff6b35" stroke="#0b0f1a" stroke-width="2"/>
+            <circle cx="560" cy="305" r="7" fill="#ff6b35" stroke="#0b0f1a" stroke-width="2"/>
+          </g>
+          <text x="495" y="328" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#ff6b35" font-style="italic">point-in-time recovery</text>
+
+          <!-- legend at bottom -->
+          <g transform="translate(40, 360)">
+            <text x="0" y="0" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">● = compute endpoint   ── = COW pointer at parent storage   ✕ = drop branch</text>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Click any branch</div>
+        <p id="branchInfo">Branches are cheap and instant because they share storage with the parent until they diverge. Click <strong>main</strong>, <strong>pr-feat</strong>, <strong>ci-test</strong>, or <strong>restore-T</strong> on the diagram to see the typical use pattern.</p>
+      </div>
+    </div>
+
+    <h3>What branches are for</h3>
+    <p>These are the patterns we see customers use repeatedly:</p>
+    <ul>
+      <li><strong>PR-based schema migrations</strong> — open a PR, branch off <code>main</code>, run the migration on the branch, run integration tests, review the diff, then merge by promotion when CI is green.</li>
+      <li><strong>Ephemeral CI databases</strong> — every test run gets its own branch. Created when the PR opens, dropped when it closes. No more "shared dev DB" contention.</li>
+      <li><strong>Blue-green deployments</strong> — deploy your app against a fresh branch, validate it, then atomically swap traffic by promoting the branch.</li>
+      <li><strong>Point-in-time recovery</strong> — somebody dropped the wrong table at 14:32. Branch from <code>2026-04-30 14:31:59</code> and you have a writable copy of the world before the mistake.</li>
+      <li><strong>"What-if" analysis on writable data</strong> — let an analyst run destructive <code>UPDATE</code> statements on a branch without touching <code>main</code>. Drop the branch when done.</li>
+    </ul>
+
+    <h3>The Git mental model</h3>
+    <p>If you know Git, the model transfers almost perfectly:</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Git</th><th>Lakebase</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>git branch feature-x</code></td><td>Create branch <code>feature-x</code> from <code>main</code></td></tr>
+          <tr><td>Commits diverge per branch</td><td>Page versions diverge per branch</td></tr>
+          <tr><td><code>git merge</code> (fast-forward)</td><td>Promote a branch</td></tr>
+          <tr><td><code>git branch -d feature-x</code></td><td>Drop the branch</td></tr>
+          <tr><td>Branches share history until they diverge</td><td>Branches share pages until they diverge</td></tr>
+          <tr><td>Storage cost ≈ size of unique commits</td><td>Storage cost ≈ size of unique page deltas</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The one place the analogy is <em>not</em> perfect: Lakebase doesn't have a built-in three-way merge. "Merging" a branch means promoting it to take over from the parent, or running a SQL-level reconciliation. This matches how schema migrations actually work in practice (a deploy is a swap, not a textual merge).</p>
+
+    <h3>Cost model for branches</h3>
+    <p>You pay for two things on a branch:</p>
+    <ol>
+      <li><strong>Compute</strong> — the Postgres process attached to the branch. If the branch sits idle and scale-to-zero is enabled, this approaches zero.</li>
+      <li><strong>Storage deltas</strong> — the page versions that exist <em>only</em> on this branch (because writes diverged it from the parent). You do <strong>not</strong> pay for the parent's pages a second time.</li>
+    </ol>
+
+    <p>This means an idle ephemeral CI branch with scale-to-zero costs roughly <strong>the size of its writes</strong>. A read-only branch that does no writes costs essentially nothing. This is what makes "one branch per PR" economically viable.</p>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">▸ Anti-patterns</span>
+      <p><strong>Long-lived diverged branches.</strong> If a branch has been writing for weeks, its delta footprint grows. Branches are designed for short cycles (minutes to days). For long-lived environments, use full projects.</p>
+      <p><strong>Branching to escape main's load.</strong> A read replica is the right answer for analytical load on production data — branches diverge over time, replicas don't.</p>
+      <p><strong>Treating a branch as a backup.</strong> Backups should outlive branches. The retention window covers point-in-time recovery; branches are working copies.</p>
+    </div>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 2.2</span>
+      <p>Be able to explain in one breath: <em>a branch is a new compute pointing at a copy-on-write snapshot of storage; nothing is copied at creation; writes diverge as new page versions; cost is compute + branch-unique deltas.</em></p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 2.3 -->
+  <section class="topic" id="t23">
+    <div class="topic-banner">
+      <span class="topic-id">2.3</span>
+      <span class="line"></span>
+      <span class="type">Theory</span>
+    </div>
+    <h2>Scale-to-zero &amp; <em>cold-start mechanics</em></h2>
+
+    <h3>What scale-to-zero actually does</h3>
+    <p>When a Lakebase Autoscaling branch sees no queries for roughly <strong>5 minutes</strong>, the compute process <strong>suspends</strong>. The Postgres process is gone. The storage stays exactly where it is — durable, versioned, untouched.</p>
+
+    <p>Cost behavior during suspension:</p>
+    <ul>
+      <li><strong>Compute billing → $0</strong></li>
+      <li><strong>Storage billing → unchanged</strong> (you're paying for the data either way)</li>
+    </ul>
+
+    <p>When a new connection arrives, the compute boots, attaches to storage, and begins serving. From the client's perspective, the connection looks like a slightly slow first query.</p>
+
+    <h3>The cold-start sequence — interactive timeline</h3>
+    <p>Click any step in the timeline below to see what happens at that stage of the wake-up. Each step has a typical latency budget — the totals add up to the 3–8 second cold start you'll see in practice.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 3: COLD START TIMELINE ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 2.3 · Cold-Start Timeline</span>
+        <span class="diagram-hint">Click each step</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" class="timeline-svg" id="timelineSvg">
+          <defs>
+            <marker id="tlArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5878"/>
+            </marker>
+          </defs>
+
+          <!-- Timeline backbone -->
+          <line x1="60" y1="180" x2="700" y2="180" stroke="#243550" stroke-width="2"/>
+
+          <!-- Step 1: Client sends query -->
+          <g class="timeline-step" data-key="s1" data-info="STEP 1 — Client sends the first query after idle. The Lakebase pgbouncer pool sits in front of compute. It accepts the connection request immediately and HOLDS IT — the client doesn't get a 'connection refused' error, just a slightly long wait.">
+            <circle cx="100" cy="180" r="14" fill="#1a2235" stroke="#a855f7" stroke-width="2"/>
+            <text x="100" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">1</text>
+            <text x="100" y="135" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#e8edf5" font-style="italic">Client query</text>
+            <text x="100" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1">held by pool</text>
+            <text x="100" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1">~0s</text>
+          </g>
+
+          <!-- Step 2: Boot Postgres -->
+          <g class="timeline-step" data-key="s2" data-info="STEP 2 — Boot the Postgres process. The compute pod is allocated. Postgres binary starts. This is the largest deterministic chunk of the cold start — typically 1 to 3 seconds. Bigger compute sizes don't really change this; provisioning the container is the main cost.">
+            <circle cx="220" cy="180" r="14" fill="#1a2235" stroke="#fbbf24" stroke-width="2"/>
+            <text x="220" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">2</text>
+            <text x="220" y="135" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#e8edf5" font-style="italic">Boot Postgres</text>
+            <text x="220" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="1">cold compute</text>
+            <text x="220" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="1">1–3s</text>
+          </g>
+
+          <!-- Step 3: Attach storage -->
+          <g class="timeline-step" data-key="s3" data-info="STEP 3 — Attach to the page server. Compute opens a connection to the storage layer. Reads the catalog at the latest LSN. Sub-second in practice.">
+            <circle cx="340" cy="180" r="14" fill="#1a2235" stroke="#fbbf24" stroke-width="2"/>
+            <text x="340" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">3</text>
+            <text x="340" y="135" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#e8edf5" font-style="italic">Attach storage</text>
+            <text x="340" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="1">page server</text>
+            <text x="340" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="1">&lt;1s</text>
+          </g>
+
+          <!-- Step 4: Recover WAL -->
+          <g class="timeline-step" data-key="s4" data-info="STEP 4 — Recover any in-flight WAL. If there were uncommitted writes from the previous compute incarnation, recover them now. Usually nothing to do; sub-second.">
+            <circle cx="460" cy="180" r="14" fill="#1a2235" stroke="#fbbf24" stroke-width="2"/>
+            <text x="460" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">4</text>
+            <text x="460" y="135" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#e8edf5" font-style="italic">WAL recovery</text>
+            <text x="460" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="1">apply pending</text>
+            <text x="460" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="1">&lt;1s</text>
+          </g>
+
+          <!-- Step 5: Connection accepted, query runs -->
+          <g class="timeline-step" data-key="s5" data-info="STEP 5 — Connection accepted. The client's first query finally runs. But the local buffer cache is EMPTY — every page touched by the query must be fetched from the page server. This is where you might see elevated latency on the first query specifically.">
+            <circle cx="580" cy="180" r="14" fill="#1a2235" stroke="#22c55e" stroke-width="2"/>
+            <text x="580" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">5</text>
+            <text x="580" y="135" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#e8edf5" font-style="italic">Query runs</text>
+            <text x="580" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">cold pages</text>
+            <text x="580" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1">1–4s</text>
+          </g>
+
+          <!-- Step 6: Cache warms -->
+          <g class="timeline-step" data-key="s6" data-info="STEP 6 — Cache warms over the first ~minute. The local buffer cache fills with hot pages from your workload. p99 latency is elevated during this window. After about 60 seconds, you're back to steady-state Postgres latency profiles.">
+            <circle cx="700" cy="180" r="14" fill="#1a2235" stroke="#22c55e" stroke-width="2"/>
+            <text x="700" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">6</text>
+            <text x="700" y="135" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#e8edf5" font-style="italic">Warm cache</text>
+            <text x="700" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">~60s</text>
+            <text x="700" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1">~60s</text>
+          </g>
+
+          <!-- arrows between steps -->
+          <line x1="115" y1="180" x2="205" y2="180" stroke="#4a5878" stroke-width="1" marker-end="url(#tlArrow)"/>
+          <line x1="235" y1="180" x2="325" y2="180" stroke="#4a5878" stroke-width="1" marker-end="url(#tlArrow)"/>
+          <line x1="355" y1="180" x2="445" y2="180" stroke="#4a5878" stroke-width="1" marker-end="url(#tlArrow)"/>
+          <line x1="475" y1="180" x2="565" y2="180" stroke="#4a5878" stroke-width="1" marker-end="url(#tlArrow)"/>
+          <line x1="595" y1="180" x2="685" y2="180" stroke="#4a5878" stroke-width="1" marker-end="url(#tlArrow)"/>
+
+          <!-- Total budget summary -->
+          <g transform="translate(60, 270)">
+            <rect x="0" y="0" width="640" height="60" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="20" y="22" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="2">▸ TOTAL COLD-START LATENCY BUDGET</text>
+            <text x="20" y="44" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Steps 1–5 → 3–8s before first query returns. Step 6 → first ~60s of elevated p99.</text>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Click any step</div>
+        <p id="timelineInfo">Cold start is the price of scale-to-zero. The pgbouncer pool holds the client connection during boot, so the user sees elevated latency on the first query — not a connection error. Click each step to see what happens.</p>
+      </div>
+    </div>
+
+    <h3>When to use scale-to-zero (and when NOT to)</h3>
+    <p>The decision is workload-dependent. The rule is straightforward but customers ask about it constantly.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Branch type</th><th>Scale-to-zero?</th><th>Reasoning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Production primary</strong></td><td class="no">❌ Disable</td><td>A 3–8s tail on the first request after idle = p99 SLA violation. Real users will hit it.</td></tr>
+          <tr><td><strong>Production read replica</strong></td><td class="no">❌ Usually disable</td><td>Same logic — if it serves user traffic.</td></tr>
+          <tr><td><strong>Dev / preview branches</strong></td><td class="yes">✓ Enable</td><td>Idle 90% of the time. Scale-to-zero is the whole point.</td></tr>
+          <tr><td><strong>CI / ephemeral branches</strong></td><td class="yes">✓ Enable</td><td>Created on PR open, used briefly, dropped. Perfect fit.</td></tr>
+          <tr><td><strong>Internal admin tools</strong></td><td class="yes">✓ Often enable</td><td>If users tolerate a 5s "wake up" on the first morning click, you'll save real money.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-trap">
+      <span class="callout-label">⚠ Anti-pattern · Latency-sensitive APIs</span>
+      <p>Pointing a customer-facing real-time API (recommendation, fraud, search) at a scale-to-zero branch produces a daily p99 spike that correlates exactly to the suspension window — traffic dies overnight, compute suspends, the first morning request takes 3–8s, and your monitoring lights up. <strong>Disable scale-to-zero on the production primary.</strong> You're paying for compute 24/7, but your p99 is honest.</p>
+    </div>
+
+    <h3>Page warming after cold start</h3>
+    <p>Even after the Postgres process is up, the <strong>local buffer cache is empty</strong>. The first queries pull pages from the page server. Hot pages typically sit in the page server's own memory tier and arrive in single-digit ms; truly cold pages (rarely accessed) come from object storage and take longer.</p>
+
+    <p>In practice this means: even after the cold-start completes, the <em>first minute</em> of queries on a freshly-woken branch is slower than steady-state. After that, the working set is cached locally and you're back to normal Postgres latency profiles.</p>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 2.3</span>
+      <p>Two things to remember verbatim: <em>(1) cold start ≈ 3–8s for a small DB; (2) disable scale-to-zero on the production primary, enable it on dev/preview/CI.</em> Both come up in customer design reviews.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 2.4 -->
+  <section class="topic" id="t24">
+    <div class="topic-banner">
+      <span class="topic-id">2.4</span>
+      <span class="line"></span>
+      <span class="type">Theory</span>
+    </div>
+    <h2>High availability &amp; <em>read replicas</em></h2>
+
+    <h3>The HA topology</h3>
+    <p>Lakebase HA pairs a <strong>primary compute in AZ-A</strong> with a <strong>synchronous standby in AZ-B</strong>. If the primary fails — VM crash, AZ outage, hardware fault — the standby takes over. Use the toggle below to flip between the HA topology and the read-replica topology — they're often confused, but they solve different problems.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 4: HA / REPLICA TOPOLOGY ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 2.4 · HA &amp; Replica Topology</span>
+        <div class="toggle-bar">
+          <button id="haBtn" class="active" onclick="showHATopo('ha')">HA</button>
+          <button id="replicaBtn" onclick="showHATopo('replica')">Read Replica</button>
+        </div>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" class="ha-svg" id="haSvg">
+          <defs>
+            <marker id="haArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5878"/>
+            </marker>
+            <marker id="haArrowGreen" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e"/>
+            </marker>
+          </defs>
+
+          <!-- ═══════════ HA TOPOLOGY ═══════════ -->
+          <g id="haGroup">
+            <!-- App / pgbouncer -->
+            <g class="ha-node" data-info="APP / PGBOUNCER — your application connects through a stable connection string. The DNS doesn't change across failover. pgbouncer reroutes; your app sees a brief disconnect, retries, and is back on the standby (now primary).">
+              <rect x="240" y="30" width="280" height="60" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="1.5"/>
+              <text x="380" y="55" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Application / pgbouncer</text>
+              <text x="380" y="74" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1">STABLE CONNECTION STRING</text>
+            </g>
+            <line x1="380" y1="93" x2="380" y2="125" stroke="#4a5878" stroke-width="1.5" marker-end="url(#haArrow)"/>
+            <line x1="320" y1="125" x2="380" y2="93" stroke="#4a5878" stroke-width="1"/>
+            <line x1="440" y1="125" x2="380" y2="93" stroke="#4a5878" stroke-width="1"/>
+
+            <!-- AZ-A box -->
+            <g class="ha-node" data-info="AZ-A — primary availability zone. Holds the active compute. Serves all reads and writes. If this AZ fails, traffic shifts to AZ-B in under 30 seconds.">
+              <rect x="80" y="125" width="240" height="100" rx="6" fill="#1a2a1f" stroke="#22c55e" stroke-width="2"/>
+              <text x="100" y="150" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="2">▸ AZ-A · ACTIVE</text>
+              <text x="200" y="180" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">Primary</text>
+              <text x="200" y="202" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">READS · WRITES</text>
+            </g>
+
+            <!-- AZ-B box -->
+            <g class="ha-node" data-info="AZ-B — standby availability zone. Sync standby compute, ready to take over instantly. Receives synchronous WAL stream. Doesn't serve traffic until failover. Failover is automatic and typically completes in under 30 seconds.">
+              <rect x="440" y="125" width="240" height="100" rx="6" fill="#2a1a14" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <text x="460" y="150" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="2">▸ AZ-B · STANDBY</text>
+              <text x="560" y="180" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">Standby</text>
+              <text x="560" y="202" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="1">SYNC · WAITING</text>
+            </g>
+
+            <!-- sync replication arrow -->
+            <line x1="320" y1="175" x2="440" y2="175" stroke="#22c55e" stroke-width="2" marker-end="url(#haArrowGreen)"/>
+            <text x="380" y="167" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">SYNC WAL</text>
+
+            <!-- Both connect to shared storage -->
+            <line x1="200" y1="225" x2="380" y2="290" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#haArrow)"/>
+            <line x1="560" y1="225" x2="380" y2="290" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#haArrow)"/>
+
+            <!-- Storage -->
+            <g class="ha-node" data-info="STORAGE — already replicated internally inside the page server. HA does not protect the storage tier (storage doesn't need it). HA only protects the COMPUTE tier from VM/AZ failure.">
+              <rect x="200" y="295" width="360" height="70" rx="6" fill="#0b0f1a" stroke="#ff6b35" stroke-width="2"/>
+              <text x="220" y="318" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ STORAGE · ALREADY REPLICATED</text>
+              <text x="380" y="345" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">Page Server (durable, multi-tenant)</text>
+            </g>
+
+            <!-- Failover annotation -->
+            <text x="700" y="178" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="1">FAILOVER &lt; 30s</text>
+          </g>
+
+          <!-- ═══════════ READ REPLICA TOPOLOGY ═══════════ -->
+          <g id="replicaGroup" style="display:none">
+            <!-- App tier with two paths -->
+            <g class="ha-node" data-info="WRITE TIER — your app's write traffic (and reads-after-write) goes to the primary. Connection string: <project>-rw.lakebase...">
+              <rect x="60" y="30" width="260" height="60" rx="6" fill="#1a2a1f" stroke="#22c55e" stroke-width="1.5"/>
+              <text x="190" y="55" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">App writers</text>
+              <text x="190" y="74" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">WRITES · HOT READS</text>
+            </g>
+
+            <g class="ha-node" data-info="ANALYST TIER — dashboards, reports, ad-hoc queries. Routed to a read replica so they don't compete with the primary for cache and CPU. Connection string: <project>-replica.lakebase...">
+              <rect x="440" y="30" width="260" height="60" rx="6" fill="#1a2235" stroke="#4a9eff" stroke-width="1.5"/>
+              <text x="570" y="55" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Analysts / dashboards</text>
+              <text x="570" y="74" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="1">REPORT QUERIES</text>
+            </g>
+
+            <line x1="190" y1="93" x2="190" y2="125" stroke="#4a5878" stroke-width="1.5" marker-end="url(#haArrow)"/>
+            <line x1="570" y1="93" x2="570" y2="125" stroke="#4a5878" stroke-width="1.5" marker-end="url(#haArrow)"/>
+
+            <!-- Primary -->
+            <g class="ha-node" data-info="PRIMARY COMPUTE — owns write traffic and the WAL writer role. Reads pages from the shared storage layer. Standard Postgres semantics.">
+              <rect x="60" y="125" width="260" height="100" rx="6" fill="#1a2a1f" stroke="#22c55e" stroke-width="2"/>
+              <text x="80" y="150" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="2">▸ PRIMARY</text>
+              <text x="190" y="180" text-anchor="middle" font-family="Playfair Display, serif" font-size="15" fill="#e8edf5" font-style="italic">Read-Write</text>
+              <text x="190" y="202" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">project-rw</text>
+            </g>
+
+            <!-- Read replica -->
+            <g class="ha-node" data-info="READ REPLICA — additional compute node sharing the SAME page-server storage. Sees committed pages with ZERO replication lag. Reads only — no writes. Add as many as you need.">
+              <rect x="440" y="125" width="260" height="100" rx="6" fill="#1a2235" stroke="#4a9eff" stroke-width="2"/>
+              <text x="460" y="150" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a9eff" letter-spacing="2">▸ READ REPLICA</text>
+              <text x="570" y="180" text-anchor="middle" font-family="Playfair Display, serif" font-size="15" fill="#e8edf5" font-style="italic">Read-only</text>
+              <text x="570" y="202" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="1">project-replica</text>
+            </g>
+
+            <!-- Both connect to shared storage -->
+            <line x1="190" y1="225" x2="380" y2="290" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#haArrow)"/>
+            <line x1="570" y1="225" x2="380" y2="290" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#haArrow)"/>
+
+            <!-- Storage (shared) -->
+            <g class="ha-node" data-info="SHARED STORAGE — both primary and replica read from THE SAME page server. This is what makes zero replication lag possible. Classical Postgres replicas use streaming replication and have nonzero lag — Lakebase replicas don't.">
+              <rect x="200" y="295" width="360" height="70" rx="6" fill="#0b0f1a" stroke="#ff6b35" stroke-width="2"/>
+              <text x="220" y="318" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ SHARED STORAGE · ONE COPY</text>
+              <text x="380" y="345" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">Zero replication lag for committed pages</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Toggle to compare topologies</div>
+        <p id="haInfo"><strong>HA</strong> protects against compute failure with a sync standby in another AZ — failover &lt;30s. <strong>Read replicas</strong> scale read capacity by adding compute nodes sharing the same storage — zero replication lag. They are NOT the same feature.</p>
+      </div>
+    </div>
+
+    <h3>Failover behavior</h3>
+    <p>Two important properties to internalize:</p>
+    <ul>
+      <li><strong>Storage is already replicated.</strong> The page server replicates internally — that's what makes it durable. <strong>HA is only protecting the compute tier.</strong> If the page server itself had a fault, HA wouldn't be the mechanism that recovers — the page server's own redundancy would.</li>
+      <li><strong>Connection strings are stable across failover.</strong> The DNS name your app uses doesn't change when the standby is promoted. pgbouncer reroutes; the app sees a brief disconnect-and-reconnect, not a config update.</li>
+    </ul>
+
+    <p>What to expect at failover:</p>
+    <ul>
+      <li>Typical failover time: <strong>&lt;30 seconds</strong> end-to-end.</li>
+      <li>Existing connections drop. Apps must reconnect — any production-grade Postgres client does this with retry logic (<code>psycopg.connect_retry</code>, JDBC <code>tcpKeepAlive</code> + pool retry, etc.).</li>
+      <li>In-flight transactions are rolled back. Committed transactions (synchronous replication) survive.</li>
+      <li>For <strong>RPO=0</strong> workloads, enable HA on the primary branch. Branches that don't enable HA have no standby — they go down with their AZ.</li>
+    </ul>
+
+    <h3>HA inheritance</h3>
+    <p>HA settings are <strong>per-branch</strong>, not per-project. If you enable HA on <code>main</code>, child branches <strong>inherit the choice independently</strong> — they don't automatically get HA. This usually matches what you want: prod gets HA, ephemeral CI branches don't (paying for HA on a branch that lives 20 minutes is silly).</p>
+
+    <h3>Read replicas — different problem, different shape</h3>
+    <p>The classic Postgres mental model — "read replicas have replication lag because they're catching up via streaming WAL" — <em>does not apply here</em>. Because the storage is shared at the page-server level, <strong>committed pages are visible to the replica with zero replication lag</strong>.</p>
+
+    <p>Standard pattern: <strong>send writes and hot reads to the primary, route analyst/dashboard load to a replica.</strong> Connection strings differ — your app reads from <code>&lt;project&gt;-replica.lakebase...</code>, writes to <code>&lt;project&gt;-rw.lakebase...</code>.</p>
+
+    <h4>When to add a read replica</h4>
+    <ul>
+      <li><strong>Analyst / dashboard load</strong> that you don't want competing with app writes for buffer cache and CPU.</li>
+      <li><strong>Heavy report queries</strong> that scan large ranges and would otherwise pollute the primary's cache.</li>
+      <li><strong>Geographic locality</strong> (in regions where the feature exists) — closer compute to readers.</li>
+    </ul>
+
+    <h3>Provisioned vs Autoscaling read replicas</h3>
+    <p>This is a real difference, not just a naming thing:</p>
+    <ul>
+      <li><strong>Autoscaling read replicas</strong> share the page server. <strong>Zero replication lag</strong> for committed pages.</li>
+      <li><strong>Provisioned "readable secondaries"</strong> use classical streaming replication. There's a small but nonzero lag — typically tens of milliseconds, sometimes more under load. Read-after-write consistency is <em>not</em> guaranteed.</li>
+    </ul>
+
+    <p>For workloads where read-your-own-write matters (a UI that writes a row then immediately reads it back to show the user), Autoscaling read replicas Just Work. Provisioned readable secondaries can produce stale reads.</p>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 2.4</span>
+      <p>Know two facts: <em>(1) HA protects only the compute tier — storage is already replicated; (2) Autoscaling read replicas share storage and have zero replication lag, unlike classical Postgres replicas.</em></p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ TOPIC 2.5 -->
+  <section class="topic" id="t25">
+    <div class="topic-banner">
+      <span class="topic-id">2.5</span>
+      <span class="line"></span>
+      <span class="type">Theory</span>
+    </div>
+    <h2>Networking, auth &amp; <em>the OAuth token TTL trap</em></h2>
+
+    <h3>The three connection paths</h3>
+    <p>Lakebase exposes three ways to reach the database. Pick the one that matches your workload's network and security posture.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Path</th><th>When to use</th><th>Latency</th><th>Auth</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Public endpoint over TLS</strong></td><td>Default. Notebooks, ad-hoc tools, test apps</td><td>Best</td><td>OAuth</td></tr>
+          <tr><td><strong>Inbound Private Link</strong></td><td>VPC-to-VPC traffic without traversing public internet</td><td>Same-region, intra-AWS</td><td>OAuth</td></tr>
+          <tr><td><strong>Performance Private Link</strong></td><td>High-QPS production, dedicated bandwidth</td><td>Lowest</td><td>OAuth</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The performance-intensive path is <strong>Autoscaling-only</strong> and is what you reach for when an app pool is opening hundreds-to-thousands of connections per second and you need a dedicated network path. For most internal RSA labs and demos, the public endpoint over TLS is fine. For production designs with VPC-only postures (financial services, healthcare), Inbound Private Link is the correct default.</p>
+
+    <h3>Auth — workspace OAuth as Postgres password</h3>
+    <p>This is the part that surprises Postgres-native engineers. There is no "database password" you set when creating the project. The mechanism is:</p>
+
+    <ol>
+      <li><strong>Identity</strong> = your workspace user (or a service principal). Same identity that logs into the Databricks UI.</li>
+      <li><strong>The Databricks SDK / driver issues a short-lived OAuth token</strong> representing that identity.</li>
+      <li><strong>The OAuth token is used as the Postgres password</strong> when opening the JDBC/psycopg connection.</li>
+      <li><strong>Postgres GRANTs</strong> are mapped to workspace identities — so you <code>GRANT SELECT ON orders TO "alice@company.com"</code> and it works against the actual user.</li>
+    </ol>
+
+    <p>This is what makes <strong>on-behalf-of (OBO)</strong> auth work: when a Databricks App connects to Lakebase, the connection is opened <em>as the end user</em>, not as the app. RLS policies and <code>current_user</code>-based row filters work against the workspace identity for free.</p>
+
+    <h3>The OAuth token TTL trap — interactive timeline</h3>
+    <p>Here is the single most-painful production pitfall in Lakebase, and the one this module is named after. Click each step in the timeline below to see exactly what happens — and what to do about it.</p>
+
+    <!-- ─── INTERACTIVE DIAGRAM 5: TOKEN TIMELINE ─── -->
+    <div class="diagram">
+      <div class="diagram-header">
+        <span class="diagram-title">▸ Diagram 2.5 · OAuth Token Timeline</span>
+        <span class="diagram-hint">Click each step</span>
+      </div>
+      <div class="diagram-stage">
+        <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" class="token-svg" id="tokenSvg">
+          <defs>
+            <marker id="tkArrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5878"/>
+            </marker>
+          </defs>
+
+          <!-- Time axis -->
+          <line x1="60" y1="220" x2="700" y2="220" stroke="#243550" stroke-width="2"/>
+          <text x="60" y="245" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb" letter-spacing="1">09:00</text>
+          <text x="380" y="245" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb" letter-spacing="1">~50 min</text>
+          <text x="700" y="245" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8899bb" letter-spacing="1">10:00 · TTL boundary</text>
+
+          <!-- Step 1: app connects, gets token -->
+          <g class="token-step" data-key="t1" data-info="STEP 1 (09:00) — App starts. SDK or driver obtains an OAuth token from Databricks. Token represents the workspace identity (user or service principal). Token TTL is approximately 1 hour. The token string IS the Postgres password for this connection.">
+            <circle cx="100" cy="220" r="14" fill="#1a2a1f" stroke="#22c55e" stroke-width="2"/>
+            <text x="100" y="225" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">1</text>
+            <text x="100" y="180" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#e8edf5" font-style="italic">Get token</text>
+            <text x="100" y="198" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">TTL ~1h</text>
+            <text x="100" y="265" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">app starts</text>
+          </g>
+
+          <!-- Step 2: connection opens -->
+          <g class="token-step" data-key="t2" data-info="STEP 2 (09:00+) — App opens a Postgres connection. Token is passed as the password. Pool holds the connection. Everything works perfectly. Latency is good. You ship to production.">
+            <circle cx="220" cy="220" r="14" fill="#1a2a1f" stroke="#22c55e" stroke-width="2"/>
+            <text x="220" y="225" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">2</text>
+            <text x="220" y="180" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#e8edf5" font-style="italic">Connect to PG</text>
+            <text x="220" y="198" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">password = token</text>
+            <text x="220" y="265" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1">all good</text>
+          </g>
+
+          <!-- Step 3: 50 min mark - SAFE refresh point -->
+          <g class="token-step" data-key="t3" data-info="STEP 3 (09:50) — THE FORK IN THE ROAD. ✓ With Databricks credential providers: token refreshes proactively before expiry. Connections roll over within the pool's max_lifetime. Application code never sees this. ✗ With a hardcoded token: nothing happens here. The bomb is set, and ticking.">
+            <circle cx="380" cy="220" r="16" fill="#1a2235" stroke="#fbbf24" stroke-width="2"/>
+            <text x="380" y="226" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">3</text>
+            <text x="380" y="178" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#fbbf24" font-style="italic">Decision point</text>
+            <text x="380" y="196" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="1">refresh? YES/NO</text>
+            <text x="380" y="265" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="1">~50 min mark</text>
+          </g>
+
+          <!-- Step 4a: GOOD path - refresh -->
+          <g class="token-step" data-key="t4good" data-info="✓ GOOD PATH — Databricks Python SDK or JDBC driver detects the token nearing expiry. Fetches a fresh token. Pool's max_lifetime (50 min) cycles old connections. New connections get the new token. Application keeps running. THE BUG DOES NOT EXIST.">
+            <circle cx="540" cy="170" r="14" fill="#1a2a1f" stroke="#22c55e" stroke-width="2"/>
+            <text x="540" y="175" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">✓</text>
+            <text x="540" y="135" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#22c55e" font-style="italic">Auto-refresh</text>
+            <text x="540" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">SDK / JDBC</text>
+          </g>
+
+          <!-- Step 4b: BAD path - no refresh -->
+          <g class="token-step" data-key="t4bad" data-info="✗ BAD PATH — Hardcoded token. No refresh logic. Connection looks fine. Pool keeps using it. The 1-hour timer ticks down silently.">
+            <circle cx="540" cy="270" r="14" fill="#2a1a14" stroke="#ef4444" stroke-width="2"/>
+            <text x="540" y="275" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ef4444">✗</text>
+            <text x="540" y="305" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#ef4444" font-style="italic">No refresh</text>
+            <text x="540" y="323" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" letter-spacing="1">hardcoded token</text>
+          </g>
+
+          <!-- Branching arrows from step 3 -->
+          <line x1="395" y1="210" x2="525" y2="178" stroke="#22c55e" stroke-width="1" marker-end="url(#tkArrow)"/>
+          <line x1="395" y1="232" x2="525" y2="262" stroke="#ef4444" stroke-width="1" marker-end="url(#tkArrow)"/>
+
+          <!-- Step 5: 10:01 - what happens -->
+          <g class="token-step" data-key="t5good" data-info="✓ 10:01 — App keeps running. Users have no idea anything happened. The monitoring dashboard is flat. This is the boring outcome you want.">
+            <circle cx="680" cy="170" r="14" fill="#1a2a1f" stroke="#22c55e" stroke-width="2"/>
+            <text x="680" y="175" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#22c55e">✓</text>
+            <text x="680" y="135" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#22c55e" font-style="italic">Stays up</text>
+            <text x="680" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">no incident</text>
+          </g>
+
+          <g class="token-step" data-key="t5bad" data-info="✗ 10:01 — Token expires. Connections break with cryptic errors: 'OperationalError: SSL connection has been closed unexpectedly' or 'connection to server lost'. App restart fixes it — for an hour. This is the trap. Friday afternoons are the worst time for this to surface.">
+            <circle cx="680" cy="270" r="14" fill="#2a1a14" stroke="#ef4444" stroke-width="2"/>
+            <text x="680" y="275" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ef4444">✗</text>
+            <text x="680" y="305" text-anchor="middle" font-family="Playfair Display, serif" font-size="11" fill="#ef4444" font-style="italic">Connections break</text>
+            <text x="680" y="323" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" letter-spacing="1">cryptic SSL error</text>
+          </g>
+
+          <line x1="555" y1="170" x2="665" y2="170" stroke="#22c55e" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#tkArrow)"/>
+          <line x1="555" y1="270" x2="665" y2="270" stroke="#ef4444" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#tkArrow)"/>
+
+          <!-- arrow between steps 1->2->3 -->
+          <line x1="115" y1="220" x2="205" y2="220" stroke="#4a5878" stroke-width="1" marker-end="url(#tkArrow)"/>
+          <line x1="235" y1="220" x2="365" y2="220" stroke="#4a5878" stroke-width="1" marker-end="url(#tkArrow)"/>
+
+          <!-- TTL boundary line -->
+          <line x1="660" y1="40" x2="660" y2="360" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"/>
+          <text x="666" y="55" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" letter-spacing="1">TTL = 1h</text>
+        </svg>
+      </div>
+      <div class="diagram-info">
+        <div class="diagram-info-label">▸ Click each step</div>
+        <p id="tokenInfo">OAuth tokens expire. The default TTL is approximately 1 hour. With the Databricks credential providers, refresh is invisible. With a hardcoded token, your app silently breaks ~60 minutes after deploy. Click each step on the timeline to see what's happening at that moment.</p>
+      </div>
+    </div>
+
+    <h3>The fix has two layers</h3>
+
+    <h4>1. Use the Databricks credential providers, not raw passwords</h4>
+    <p>The Databricks Python SDK and the Databricks JDBC driver <strong>automatically refresh OAuth tokens</strong> before they expire. As long as the connection is opened through them (not through <code>psycopg2.connect(password="...")</code> with a hardcoded token string), token rotation is invisible to your application code.</p>
+
+<pre><span class="com"># ❌ WRONG — hardcoded token, will fail at the 60-minute mark</span>
+token = w.config.token  <span class="com"># captures one token</span>
+conn = psycopg.connect(host=..., user=..., password=token)
+
+<span class="com"># ✅ RIGHT — token provider supplies fresh tokens on each connect</span>
+<span class="com">from databricks.sdk import WorkspaceClient</span>
+w = WorkspaceClient()
+<span class="com">def get_token(): return w.config.authenticate()["Authorization"].split(" ")[1]</span>
+<span class="com"># pass get_token() into your pool's password callback, or use the</span>
+<span class="com"># Databricks-provided SQLAlchemy/psycopg helpers that do this for you</span></pre>
+
+    <p>(Module 3 has the full working pattern. The code above is illustrative.)</p>
+
+    <h4>2. Use connection pools that expire connections</h4>
+    <p>Even with token refresh, <strong>idle pooled connections that were opened with an old token won't auto-renew their underlying authentication</strong>. Configure your pool with:</p>
+    <ul>
+      <li><code>max_lifetime</code> (or equivalent) of less than the token TTL — typically 50 minutes.</li>
+      <li><code>pre_ping</code> / connection validation on checkout.</li>
+      <li>Token refresh on connect, not on pool startup.</li>
+    </ul>
+
+    <p>This combination gives you a pool that looks stable but quietly rolls over connections within the token window, so no individual connection ever sees an expired token.</p>
+
+    <div class="callout callout-trap">
+      <span class="callout-label">⚠ Why this trap is so common</span>
+      <p>Postgres-native developers expect passwords to be permanent. The OAuth token model is unfamiliar. Local development against a Lakebase project usually works fine — the dev session ends before the token expires, so the bug doesn't manifest. <strong>Long-lived production app pools</strong> (Streamlit on Databricks Apps, FastAPI workers, etc.) are exactly the workloads where the bug <em>does</em> manifest, often hours into deployment, often on a Friday afternoon. The error message doesn't say "OAuth token expired." It looks like a generic connection drop.</p>
+      <p style="margin-top:10px;"><strong>Sticky-note takeaway:</strong> never hardcode a token as a password. Always use a credential provider.</p>
+    </div>
+
+    <h3>Compliance posture</h3>
+    <p>For customers with regulatory requirements, Lakebase Autoscaling supports the standard Databricks compliance security profiles:</p>
+    <ul>
+      <li><strong>HIPAA</strong> (US healthcare)</li>
+      <li><strong>C5</strong> (German cloud security)</li>
+      <li><strong>TISAX</strong> (automotive)</li>
+      <li><strong>FedRAMP</strong> (US public sector — verify region GA)</li>
+    </ul>
+    <p>These are workspace-level configurations, not Lakebase-specific knobs. Lakebase inherits the workspace's profile automatically.</p>
+
+    <h3>Quick decision drill</h3>
+    <p>Try these scenarios — answer without thinking longer than five seconds, then check yourself.</p>
+
+    <div class="drill">
+      <div class="drill-label">▸ Decision drill</div>
+      <div class="drill-title">Pick the right answer for each scenario</div>
+
+      <div class="drill-question" id="q1">
+        <div style="margin-bottom:10px;"><strong>Scenario 1.</strong> Customer's Streamlit app on Databricks Apps started failing with "SSL connection closed" errors after running for 70 minutes. Restarting the app fixes it for another hour.</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(1, 'a', false)">Page server is overloaded</button>
+          <button onclick="answerDrill(1, 'b', true)">OAuth token TTL — replace hardcoded token with credential provider</button>
+          <button onclick="answerDrill(1, 'c', false)">Network instability between AZ-A and AZ-B</button>
+        </div>
+        <div class="drill-feedback" id="f1"></div>
+      </div>
+
+      <div class="drill-question" id="q2">
+        <div style="margin-bottom:10px;"><strong>Scenario 2.</strong> Customer wants to deploy a real-time recommendation API on Lakebase. Asks if scale-to-zero is a good idea to save cost.</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(2, 'a', false)">Yes — scale-to-zero is the killer feature, always enable it</button>
+          <button onclick="answerDrill(2, 'b', true)">No on the production primary — cold start would spike p99 daily</button>
+          <button onclick="answerDrill(2, 'c', false)">Yes, but only if you have an HA standby</button>
+        </div>
+        <div class="drill-feedback" id="f2"></div>
+      </div>
+
+      <div class="drill-question" id="q3">
+        <div style="margin-bottom:10px;"><strong>Scenario 3.</strong> Customer asks: "If I create a branch off main, am I doubling my storage cost?"</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(3, 'a', false)">Yes — branches copy storage at creation</button>
+          <button onclick="answerDrill(3, 'b', true)">No — pages are shared via copy-on-write; you pay only for branch-unique deltas</button>
+          <button onclick="answerDrill(3, 'c', false)">Yes, but only for the first 30 days</button>
+        </div>
+        <div class="drill-feedback" id="f3"></div>
+      </div>
+
+      <div class="drill-question" id="q4">
+        <div style="margin-bottom:10px;"><strong>Scenario 4.</strong> Customer with an existing Postgres app wants to add a read replica for analyst queries. Asks if there will be any replication lag.</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(4, 'a', true)">No — Autoscaling read replicas share storage; zero lag for committed pages</button>
+          <button onclick="answerDrill(4, 'b', false)">Yes — typically tens of ms, like classical Postgres replicas</button>
+          <button onclick="answerDrill(4, 'c', false)">Only on writes; reads are always lag-free</button>
+        </div>
+        <div class="drill-feedback" id="f4"></div>
+      </div>
+
+      <div class="drill-question" id="q5">
+        <div style="margin-bottom:10px;"><strong>Scenario 5.</strong> Customer in a VPC-only environment for compliance (financial services). What network path do you recommend for the production app?</div>
+        <div class="drill-options">
+          <button onclick="answerDrill(5, 'a', false)">Public TLS endpoint — simplest</button>
+          <button onclick="answerDrill(5, 'b', true)">Inbound Private Link — VPC-to-VPC without public internet</button>
+          <button onclick="answerDrill(5, 'c', false)">SSH tunnel through a bastion host</button>
+        </div>
+        <div class="drill-feedback" id="f5"></div>
+      </div>
+    </div>
+
+    <div class="callout callout-checkpoint">
+      <span class="callout-label">🎯 Checkpoint · Topic 2.5</span>
+      <p>If a customer asks "how does auth work?" you should say: <em>workspace OAuth tokens are used as the Postgres password; tokens have a ~1-hour TTL; the Databricks drivers refresh them automatically; long-lived pools must use credential providers, never hardcoded tokens.</em></p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ WRAP-UP -->
+  <section id="wrap">
+    <div class="wrap-up">
+      <h3>Module 2 — <em>wrap-up</em></h3>
+      <p style="font-size:15.5px; color:var(--text-dim); line-height:1.75;">You should now be able to walk a customer through the architecture in front of a whiteboard:</p>
+      <ul>
+        <li><strong>Storage and compute are separated.</strong> Storage is durable, versioned, multi-tenant. Compute is stateless, elastic, lazily fetches pages. (2.1)</li>
+        <li><strong>Branches are Git for data.</strong> A branch is a new compute pointing at a copy-on-write snapshot. No data copied. Cost ≈ compute + branch-unique deltas. (2.2)</li>
+        <li><strong>Scale-to-zero is real but not free.</strong> Cold start ≈ 3–8s. Disable on production primary. Enable on dev/preview/CI. (2.3)</li>
+        <li><strong>HA protects compute, not storage.</strong> Sync standby in another AZ. &lt;30s failover. Connection strings stable. Read replicas share storage = zero replication lag. (2.4)</li>
+        <li><strong>OAuth tokens are the password.</strong> ~1h TTL. Credential providers refresh automatically. Hardcoded tokens silently break after an hour. (2.5)</li>
+      </ul>
+      <p style="margin-top:18px;">Module 3 puts every one of these in your hands. You'll provision a project, connect with a credential provider (no token trap), explore branching with <code>CREATE TABLE</code> on a child branch that doesn't affect main, and verify storage/compute separation by suspending and resuming compute while watching storage size stay flat.</p>
+      <p style="margin-top:14px;"><strong>Next up: Module 3</strong> — your first hands-on Lakebase project, end-to-end in one notebook.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════ Progress bar ═══════════════
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+// ═══════════════ Diagram 2.1: Compute/Storage Architecture ═══════════════
+document.querySelectorAll('#archSvg .arch-node').forEach(node => {
+  node.addEventListener('mouseenter', () => {
+    const info = node.dataset.info;
+    if (info) document.getElementById('archInfo').textContent = info;
+  });
+  node.addEventListener('click', () => {
+    const info = node.dataset.info;
+    if (info) document.getElementById('archInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 2.2: Branch Tree ═══════════════
+const branchData = {
+  main:    '◉ MAIN BRANCH — your production database. Every project starts with one. Holds the durable, blessed state. Merge target for PRs (via promotion). Long-lived. Scale-to-zero typically OFF.',
+  prfeat:  '◉ PR-FEAT BRANCH — opened off main at LSN 200 when a developer opens a PR. Schema migration runs here. Integration tests run here. The diff between this branch and main IS the database side of the PR. When CI is green, this branch is promoted to become the new main.',
+  citest:  '◉ CI-TEST BRANCH — ephemeral. Opened automatically when a CI job kicks off. Runs the full test suite against a fresh writable copy. Dropped when the job finishes. Cost: compute for the duration + tiny test-write deltas. No more "shared dev DB" contention.',
+  restore: '◉ RESTORE-T BRANCH — point-in-time recovery. Someone dropped the wrong table at LSN 350. Branch from main @ LSN 300 (just before the mistake). You now have a writable copy of the world before the disaster. Cherry-pick the lost rows back into main, or promote this branch.'
+};
+
+document.querySelectorAll('#branchSvg .branch-node').forEach(node => {
+  node.addEventListener('mouseenter', () => {
+    const k = node.dataset.key;
+    if (branchData[k]) document.getElementById('branchInfo').textContent = branchData[k];
+  });
+  node.addEventListener('click', () => {
+    const k = node.dataset.key;
+    if (branchData[k]) document.getElementById('branchInfo').textContent = branchData[k];
+  });
+});
+
+// ═══════════════ Diagram 2.3: Cold Start Timeline ═══════════════
+const timelineData = {
+  s1: '◉ STEP 1 — Client sends the first query after idle. The Lakebase pgbouncer pool sits in front of compute. It accepts the connection request immediately and HOLDS IT — the client doesn\'t get a "connection refused" error, just a slightly long wait.',
+  s2: '◉ STEP 2 — Boot the Postgres process. The compute pod is allocated. Postgres binary starts. This is the largest deterministic chunk of the cold start — typically 1 to 3 seconds. Bigger compute sizes don\'t really change this; provisioning the container is the main cost.',
+  s3: '◉ STEP 3 — Attach to the page server. Compute opens a connection to the storage layer. Reads the catalog at the latest LSN. Sub-second in practice.',
+  s4: '◉ STEP 4 — Recover any in-flight WAL. If there were uncommitted writes from the previous compute incarnation, recover them now. Usually nothing to do; sub-second.',
+  s5: '◉ STEP 5 — Connection accepted. The client\'s first query finally runs. But the local buffer cache is EMPTY — every page touched by the query must be fetched from the page server. This is where you might see elevated latency on the first query specifically.',
+  s6: '◉ STEP 6 — Cache warms over the first ~minute. The local buffer cache fills with hot pages from your workload. p99 latency is elevated during this window. After about 60 seconds, you\'re back to steady-state Postgres latency profiles.'
+};
+
+document.querySelectorAll('#timelineSvg .timeline-step').forEach(node => {
+  node.addEventListener('mouseenter', () => {
+    const k = node.dataset.key;
+    if (timelineData[k]) document.getElementById('timelineInfo').textContent = timelineData[k];
+  });
+  node.addEventListener('click', () => {
+    const k = node.dataset.key;
+    if (timelineData[k]) document.getElementById('timelineInfo').textContent = timelineData[k];
+  });
+});
+
+// ═══════════════ Diagram 2.4: HA / Replica Toggle ═══════════════
+function showHATopo(mode) {
+  const haG = document.getElementById('haGroup');
+  const repG = document.getElementById('replicaGroup');
+  const haBtn = document.getElementById('haBtn');
+  const repBtn = document.getElementById('replicaBtn');
+  const info = document.getElementById('haInfo');
+
+  if (mode === 'ha') {
+    haG.style.display = 'block';
+    repG.style.display = 'none';
+    haBtn.classList.add('active');
+    repBtn.classList.remove('active');
+    info.innerHTML = '<strong>HA TOPOLOGY</strong> — primary in AZ-A + synchronous standby in AZ-B. Storage is already replicated; HA only protects the compute tier. Failover &lt;30s. Connection string is stable across failover. Hover any node for detail.';
+  } else {
+    haG.style.display = 'none';
+    repG.style.display = 'block';
+    haBtn.classList.remove('active');
+    repBtn.classList.add('active');
+    info.innerHTML = '<strong>READ REPLICA TOPOLOGY</strong> — primary handles writes; replica absorbs analyst/dashboard load. Both share the same page server, so committed pages are visible on the replica with ZERO replication lag. Different connection strings for writers vs readers.';
+  }
+}
+
+document.querySelectorAll('#haSvg .ha-node').forEach(node => {
+  node.addEventListener('mouseenter', () => {
+    const info = node.dataset.info;
+    if (info) document.getElementById('haInfo').textContent = info;
+  });
+  node.addEventListener('click', () => {
+    const info = node.dataset.info;
+    if (info) document.getElementById('haInfo').textContent = info;
+  });
+});
+
+// ═══════════════ Diagram 2.5: Token Timeline ═══════════════
+const tokenData = {
+  t1:     '◉ STEP 1 (09:00) — App starts. SDK or driver obtains an OAuth token from Databricks. Token represents the workspace identity (user or service principal). Token TTL is approximately 1 hour. The token string IS the Postgres password for this connection.',
+  t2:     '◉ STEP 2 (09:00+) — App opens a Postgres connection. Token is passed as the password. Pool holds the connection. Everything works perfectly. Latency is good. You ship to production.',
+  t3:     '◉ STEP 3 (~09:50) — THE FORK IN THE ROAD. ✓ With Databricks credential providers: token refreshes proactively before expiry. Connections roll over within the pool\'s max_lifetime. Application code never sees this. ✗ With a hardcoded token: nothing happens here. The bomb is set, and ticking.',
+  t4good: '◉ ✓ GOOD PATH — Databricks Python SDK or JDBC driver detects the token nearing expiry. Fetches a fresh token. Pool\'s max_lifetime (50 min) cycles old connections. New connections get the new token. Application keeps running. THE BUG DOES NOT EXIST.',
+  t4bad:  '◉ ✗ BAD PATH — Hardcoded token. No refresh logic. Connection looks fine. Pool keeps using it. The 1-hour timer ticks down silently. No log entry warns you.',
+  t5good: '◉ ✓ 10:01 — App keeps running. Users have no idea anything happened. The monitoring dashboard is flat. This is the boring outcome you want.',
+  t5bad:  '◉ ✗ 10:01 — Token expires. Connections break with cryptic errors: "OperationalError: SSL connection has been closed unexpectedly" or "connection to server lost". App restart fixes it — for an hour. This is the trap. Friday afternoons are the worst time for this to surface.'
+};
+
+document.querySelectorAll('#tokenSvg .token-step').forEach(node => {
+  node.addEventListener('mouseenter', () => {
+    const k = node.dataset.key;
+    if (tokenData[k]) document.getElementById('tokenInfo').textContent = tokenData[k];
+  });
+  node.addEventListener('click', () => {
+    const k = node.dataset.key;
+    if (tokenData[k]) document.getElementById('tokenInfo').textContent = tokenData[k];
+  });
+});
+
+// ═══════════════ Decision Drill ═══════════════
+const drillExplain = {
+  1: { ok: '✓ Correct. Classic OAuth token TTL trap. Hardcoded token captured at app startup; expires ~60 minutes later; connections that were already open silently break. Fix: use a Databricks credential provider, plus a connection pool max_lifetime under 60 min.',
+       bad: '✗ The pattern is the smoking gun: works for an hour, restart fixes it, repeats hourly. That\'s OAuth token TTL, not page server load or network flakiness.' },
+  2: { ok: '✓ Correct. Real-time customer-facing APIs need consistent low p99. Cold start (3–8s) on the first morning request after idle would burn the SLA. Disable scale-to-zero on the production primary; enable it on dev/preview/CI branches.',
+       bad: '✗ Cold start is 3–8 seconds. On a real-time API that\'s a p99 disaster every morning when traffic resumes. Disable scale-to-zero on the production primary specifically.' },
+  3: { ok: '✓ Correct. Branches are copy-on-write — at creation no pages are physically copied. You only pay for branch-unique deltas (pages that diverged from the parent through writes on the branch). Read-only branches cost essentially nothing.',
+       bad: '✗ No data is copied at branch creation. Storage is shared via copy-on-write pointers; you pay only for pages that diverge through writes on the branch.' },
+  4: { ok: '✓ Correct. Autoscaling read replicas share the page server with the primary, so committed pages are visible to the replica with zero replication lag. The classical Postgres "streaming replica with lag" mental model does not apply here.',
+       bad: '✗ Autoscaling read replicas share storage with the primary. There\'s no streaming replication lag. (Provisioned "readable secondaries" do have lag — but that\'s the legacy offering.)' },
+  5: { ok: '✓ Correct. For VPC-only / regulated workloads, Inbound Private Link gives you intra-AWS VPC-to-VPC traffic without traversing the public internet. The public TLS endpoint is fine for dev but not for production financial workloads.',
+       bad: '✗ Public TLS or SSH tunnels are not the right answer for VPC-only compliance postures. Use Inbound Private Link — it gives VPC-to-VPC traffic without leaving the AWS backbone.' }
+};
+
+function answerDrill(q, choice, correct) {
+  const fb = document.getElementById('f' + q);
+  const buttons = document.querySelectorAll('#q' + q + ' button');
+
+  buttons.forEach(b => {
+    b.classList.remove('correct', 'wrong');
+    b.disabled = true;
+  });
+
+  buttons.forEach(b => {
+    if (b.getAttribute('onclick').includes('true')) {
+      b.classList.add('correct');
+    }
+  });
+
+  if (!correct) {
+    buttons.forEach(b => {
+      if (b.getAttribute('onclick').includes(`'${choice}'`) && b.getAttribute('onclick').includes('false')) {
+        b.classList.add('wrong');
+      }
+    });
+  }
+
+  fb.classList.add('show');
+  if (correct) {
+    fb.classList.remove('bad');
+    fb.classList.add('ok');
+    fb.textContent = drillExplain[q].ok;
+  } else {
+    fb.classList.remove('ok');
+    fb.classList.add('bad');
+    fb.textContent = drillExplain[q].bad;
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 01 · Interactive Diagram — The Lakebase Mental Model</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --orange: #ff6b35;
+  --teal: #00bfa5;
+  --blue: #4a9eff;
+  --purple: #a855f7;
+  --yellow: #fbbf24;
+  --green: #22c55e;
+  --red: #ef4444;
+  --text: #e8edf5;
+  --dim: #8899bb;
+  --muted: #4a5878;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,107,53,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 100% 100%, rgba(168,85,247,0.04) 0%, transparent 60%);
+}
+
+/* ─── HEADER ─── */
+header {
+  padding: 36px 40px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.header-inner { max-width: 1280px; margin: 0 auto; }
+.crumb {
+  display: flex; gap: 12px; align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.crumb .tag {
+  color: var(--orange);
+  border: 1px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.06);
+  padding: 4px 10px;
+  border-radius: 2px;
+}
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 42px);
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+h1 em { font-style: italic; color: var(--orange); }
+.lede {
+  font-size: 14.5px;
+  color: var(--dim);
+  max-width: 720px;
+  line-height: 1.7;
+}
+
+/* ─── APP LAYOUT ─── */
+.app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 40px 60px;
+}
+
+/* ─── TOOLBAR ─── */
+.toolbar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tb-group {
+  display: flex; gap: 6px; align-items: center;
+}
+.tb-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.tb-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 6px 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tb-btn:hover {
+  border-color: var(--orange);
+  color: var(--text);
+}
+.tb-btn.active {
+  background: var(--orange);
+  color: #fff;
+  border-color: var(--orange);
+}
+.tb-btn.active.topic-1 { background: var(--teal); border-color: var(--teal); }
+.tb-btn.active.topic-2 { background: var(--blue); border-color: var(--blue); }
+.tb-btn.active.topic-3 { background: var(--purple); border-color: var(--purple); }
+.tb-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+/* ─── MAIN GRID ─── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 18px;
+}
+@media (max-width: 980px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* ─── DIAGRAM PANEL ─── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.panel-head {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.panel-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+.panel-title::before { content: '▸ '; }
+.panel-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.stage {
+  position: relative;
+  padding: 18px;
+  background:
+    linear-gradient(rgba(30,45,69,0.3) 1px, transparent 1px) 0 0/24px 24px,
+    linear-gradient(90deg, rgba(30,45,69,0.3) 1px, transparent 1px) 0 0/24px 24px;
+}
+#mainSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 720px;
+}
+
+/* ─── NODE STYLES ─── */
+.node {
+  cursor: pointer;
+  transition: opacity 0.25s, filter 0.25s;
+}
+.node rect.bg {
+  transition: fill 0.25s, stroke 0.25s, stroke-width 0.25s;
+}
+.node:hover rect.bg {
+  filter: brightness(1.18);
+}
+.node.dim {
+  opacity: 0.18;
+}
+.node.selected rect.bg {
+  stroke-width: 2.5 !important;
+  filter: brightness(1.25) drop-shadow(0 0 8px currentColor);
+}
+.node text { pointer-events: none; user-select: none; }
+.connector {
+  transition: opacity 0.25s, stroke-width 0.25s;
+}
+.connector.dim { opacity: 0.1; }
+.connector.highlight { stroke-width: 2.5; opacity: 1; }
+
+/* Plane labels */
+.plane-band {
+  cursor: pointer;
+  transition: opacity 0.25s;
+}
+.plane-band:hover .plane-tag rect {
+  filter: brightness(1.2);
+}
+.plane-tag rect { transition: fill 0.2s; }
+
+/* ─── INFO PANEL ─── */
+.info {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  position: sticky;
+  top: 18px;
+  max-height: calc(100vh - 36px);
+  overflow: hidden;
+}
+.info-head {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.info-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.info-eyebrow .topic-pill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.08em;
+}
+.info-eyebrow .topic-pill.t1 { background: rgba(0,191,165,0.15); color: var(--teal); }
+.info-eyebrow .topic-pill.t2 { background: rgba(74,158,255,0.15); color: var(--blue); }
+.info-eyebrow .topic-pill.t3 { background: rgba(168,85,247,0.15); color: var(--purple); }
+.info-eyebrow .as-only {
+  background: rgba(255,107,53,0.15);
+  color: var(--orange);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.08em;
+}
+.info-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-style: italic;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+.info-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--orange);
+  margin-top: 4px;
+}
+
+.info-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+.info-section {
+  margin-bottom: 18px;
+}
+.info-section:last-child { margin-bottom: 0; }
+.info-section h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 6px;
+}
+.info-section p {
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.65;
+}
+.info-section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.info-section li {
+  font-size: 12.5px;
+  color: var(--dim);
+  padding: 3px 0 3px 16px;
+  position: relative;
+  line-height: 1.55;
+}
+.info-section li::before {
+  content: '›';
+  position: absolute;
+  left: 2px;
+  top: 1px;
+  color: var(--orange);
+  font-size: 13px;
+}
+.info-section code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--teal);
+}
+
+.connect-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.connect-chip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  padding: 3px 7px;
+  border-radius: 2px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+}
+.connect-chip:hover {
+  border-color: var(--orange);
+  color: var(--text);
+}
+
+/* ─── TOUR MODE ─── */
+.tour-bar {
+  padding: 12px 16px;
+  background: rgba(255,107,53,0.06);
+  border-top: 1px solid var(--border);
+  display: none;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tour-bar.show { display: flex; }
+.tour-step {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--orange);
+  letter-spacing: 0.1em;
+}
+.tour-msg {
+  font-size: 13px;
+  color: var(--text);
+  flex: 1;
+  font-style: italic;
+  line-height: 1.5;
+}
+.tour-controls { display: flex; gap: 6px; }
+.tour-btn {
+  background: var(--orange);
+  border: 1px solid var(--orange);
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tour-btn:hover { filter: brightness(1.15); }
+.tour-btn.alt {
+  background: transparent;
+  color: var(--orange);
+}
+.tour-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─── LEGEND ─── */
+.legend {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.legend-item {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.legend-line {
+  width: 16px;
+  height: 0;
+  border-top: 2px solid;
+  flex-shrink: 0;
+}
+
+/* Default placeholder content */
+.placeholder {
+  text-align: center;
+  padding: 28px 20px;
+  color: var(--muted);
+}
+.placeholder-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+  opacity: 0.5;
+}
+.placeholder-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  line-height: 1.7;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+@media (max-width: 720px) {
+  header, .app { padding-left: 18px; padding-right: 18px; }
+  .toolbar { padding: 10px 12px; gap: 8px; }
+  .tb-divider { display: none; }
+  h1 { font-size: 24px; }
+  .info { position: static; max-height: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="crumb">
+      <span class="tag">Module 01</span>
+      <span>/</span>
+      <span>Interactive Diagram</span>
+      <span>/</span>
+      <span>The Mental Model</span>
+    </div>
+    <h1>The Lakebase Mental Model — <em>explore the whole map</em></h1>
+    <p class="lede">A single interactive diagram that synthesizes all of Module 1's theory. Click any object to read its definition, see which topic introduced it, and view what it connects to. Filter by topic. Run the guided tour. Use this as a reference during customer calls.</p>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- ─── TOOLBAR ─── -->
+  <div class="toolbar">
+    <div class="tb-group">
+      <span class="tb-label">View</span>
+      <button class="tb-btn active" id="vw-all" onclick="setFilter('all')">All</button>
+      <button class="tb-btn" id="vw-t1" onclick="setFilter('t1')">Topic 1.1 · Why</button>
+      <button class="tb-btn" id="vw-t2" onclick="setFilter('t2')">Topic 1.2 · Stack</button>
+      <button class="tb-btn" id="vw-t3" onclick="setFilter('t3')">Topic 1.3 · Editions</button>
+    </div>
+    <div class="tb-divider"></div>
+    <div class="tb-group">
+      <span class="tb-label">Highlight</span>
+      <button class="tb-btn" id="hl-as" onclick="toggleAutoscalingOnly()">Autoscaling-only ★</button>
+      <button class="tb-btn" id="hl-int" onclick="toggleIntegration()">Integration patterns</button>
+    </div>
+    <div class="tb-divider"></div>
+    <div class="tb-group">
+      <span class="tb-label">Mode</span>
+      <button class="tb-btn" id="md-tour" onclick="toggleTour()">▶ Guided Tour</button>
+      <button class="tb-btn" onclick="resetView()">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- ─── MAIN GRID ─── -->
+  <div class="grid">
+
+    <!-- ─── DIAGRAM PANEL ─── -->
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Lakebase Mental Model · Diagram 1.0</span>
+        <span class="panel-meta" id="diagramStatus">25 nodes · 4 planes · 3 topics</span>
+      </div>
+
+      <div class="stage">
+        <svg viewBox="0 0 920 720" xmlns="http://www.w3.org/2000/svg" id="mainSvg">
+          <defs>
+            <!-- Arrow markers -->
+            <marker id="ah-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff6b35"/>
+            </marker>
+            <marker id="ah-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#00bfa5"/>
+            </marker>
+            <marker id="ah-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a9eff"/>
+            </marker>
+            <marker id="ah-dim" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5878"/>
+            </marker>
+          </defs>
+
+          <!-- ═══════════ PLANE BACKGROUNDS ═══════════ -->
+          <!-- App plane -->
+          <g class="plane-band" data-plane="app" onclick="selectNode('plane-app')">
+            <rect x="20" y="40" width="880" height="100" fill="rgba(168,85,247,0.04)" stroke="rgba(168,85,247,0.3)" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+            <g class="plane-tag">
+              <rect x="30" y="50" width="120" height="22" rx="2" fill="rgba(168,85,247,0.18)" stroke="rgba(168,85,247,0.4)" stroke-width="1"/>
+              <text x="40" y="65" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="2">APPLICATION</text>
+            </g>
+          </g>
+
+          <!-- Operational plane -->
+          <g class="plane-band" data-plane="op" onclick="selectNode('plane-op')">
+            <rect x="20" y="155" width="880" height="80" fill="rgba(74,158,255,0.04)" stroke="rgba(74,158,255,0.3)" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+            <g class="plane-tag">
+              <rect x="30" y="165" width="120" height="22" rx="2" fill="rgba(74,158,255,0.18)" stroke="rgba(74,158,255,0.4)" stroke-width="1"/>
+              <text x="40" y="180" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff" letter-spacing="2">OPERATIONAL</text>
+            </g>
+          </g>
+
+          <!-- Integration plane -->
+          <g class="plane-band" data-plane="int" onclick="selectNode('plane-int')">
+            <rect x="20" y="250" width="880" height="80" fill="rgba(0,191,165,0.04)" stroke="rgba(0,191,165,0.3)" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+            <g class="plane-tag">
+              <rect x="30" y="260" width="120" height="22" rx="2" fill="rgba(0,191,165,0.18)" stroke="rgba(0,191,165,0.4)" stroke-width="1"/>
+              <text x="40" y="275" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="2">INTEGRATION</text>
+            </g>
+          </g>
+
+          <!-- Core (project / branches / compute) plane -->
+          <g class="plane-band" data-plane="core" onclick="selectNode('plane-core')">
+            <rect x="20" y="345" width="880" height="220" fill="rgba(255,107,53,0.04)" stroke="rgba(255,107,53,0.4)" stroke-width="1.5" rx="6"/>
+            <g class="plane-tag">
+              <rect x="30" y="355" width="160" height="22" rx="2" fill="rgba(255,107,53,0.18)" stroke="rgba(255,107,53,0.4)" stroke-width="1"/>
+              <text x="40" y="370" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="2">CORE OBJECTS</text>
+            </g>
+          </g>
+
+          <!-- Storage plane -->
+          <g class="plane-band" data-plane="storage" onclick="selectNode('plane-storage')">
+            <rect x="20" y="580" width="880" height="80" fill="rgba(30,58,95,0.2)" stroke="rgba(74,158,255,0.4)" stroke-width="1" rx="6"/>
+            <g class="plane-tag">
+              <rect x="30" y="590" width="120" height="22" rx="2" fill="rgba(30,58,95,0.5)" stroke="rgba(74,158,255,0.4)" stroke-width="1"/>
+              <text x="40" y="605" font-family="IBM Plex Mono, monospace" font-size="9" fill="#7ab3ff" letter-spacing="2">STORAGE</text>
+            </g>
+          </g>
+
+          <!-- ═══════════ APPLICATION PLANE NODES ═══════════ -->
+          <g class="node" data-id="apps" data-topic="t2" onclick="selectNode('apps')">
+            <rect class="bg" x="170" y="60" width="160" height="60" rx="5" fill="#1e1730" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="250" y="85" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">Databricks Apps</text>
+            <text x="250" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1">FULL-STACK · MOD 7</text>
+          </g>
+
+          <g class="node" data-id="agents" data-topic="t1 t2" onclick="selectNode('agents')">
+            <rect class="bg" x="345" y="60" width="160" height="60" rx="5" fill="#1e1730" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="425" y="85" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">AI Agents</text>
+            <text x="425" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1">MEMORY · MOD 6</text>
+          </g>
+
+          <g class="node" data-id="features" data-topic="t1" onclick="selectNode('features')">
+            <rect class="bg" x="520" y="60" width="160" height="60" rx="5" fill="#1e1730" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="600" y="85" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">Feature Serving</text>
+            <text x="600" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1">SUB-10MS · ML</text>
+          </g>
+
+          <g class="node" data-id="vector" data-topic="t1" onclick="selectNode('vector')">
+            <rect class="bg" x="695" y="60" width="160" height="60" rx="5" fill="#1e1730" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="775" y="85" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">Vector Search</text>
+            <text x="775" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7" letter-spacing="1">RAG · MOD 5</text>
+          </g>
+
+          <!-- ═══════════ OPERATIONAL PLANE NODES ═══════════ -->
+          <g class="node" data-id="sql-ed" data-topic="t2" onclick="selectNode('sql-ed')">
+            <rect class="bg" x="170" y="170" width="160" height="48" rx="4" fill="#162039" stroke="#4a9eff" stroke-width="1.5"/>
+            <text x="250" y="190" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">SQL / Tables Editor</text>
+            <text x="250" y="207" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#4a9eff" letter-spacing="1">UI · DATABRICKS</text>
+          </g>
+
+          <g class="node" data-id="psql" data-topic="t2" onclick="selectNode('psql')">
+            <rect class="bg" x="345" y="170" width="160" height="48" rx="4" fill="#162039" stroke="#4a9eff" stroke-width="1.5"/>
+            <text x="425" y="190" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">Postgres Clients</text>
+            <text x="425" y="207" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#4a9eff" letter-spacing="1">PSQL · JDBC · DRIVERS</text>
+          </g>
+
+          <g class="node" data-id="data-api" data-topic="t2 t3" data-as-only="true" onclick="selectNode('data-api')">
+            <rect class="bg" x="520" y="170" width="160" height="48" rx="4" fill="#162039" stroke="#4a9eff" stroke-width="1.5"/>
+            <text x="600" y="188" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">PostgREST Data API <tspan fill="#ff6b35" font-size="10">★</tspan></text>
+            <text x="600" y="207" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#4a9eff" letter-spacing="1">AUTOSCALING · GA</text>
+          </g>
+
+          <g class="node" data-id="sdk" data-topic="t2" onclick="selectNode('sdk')">
+            <rect class="bg" x="695" y="170" width="160" height="48" rx="4" fill="#162039" stroke="#4a9eff" stroke-width="1.5"/>
+            <text x="775" y="190" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">Notebook SDK</text>
+            <text x="775" y="207" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#4a9eff" letter-spacing="1">w.database</text>
+          </g>
+
+          <!-- ═══════════ INTEGRATION PLANE NODES ═══════════ -->
+          <g class="node" data-id="uc" data-topic="t1 t2" onclick="selectNode('uc')">
+            <rect class="bg" x="170" y="265" width="160" height="48" rx="4" fill="#0d2925" stroke="#00bfa5" stroke-width="1.5"/>
+            <text x="250" y="285" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">Unity Catalog</text>
+            <text x="250" y="302" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#00bfa5" letter-spacing="1">GOVERNANCE · RBAC</text>
+          </g>
+
+          <g class="node" data-id="synced" data-topic="t1 t2" data-int="true" onclick="selectNode('synced')">
+            <rect class="bg" x="345" y="265" width="160" height="48" rx="4" fill="#0d2925" stroke="#00bfa5" stroke-width="1.5"/>
+            <text x="425" y="285" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">Synced Tables</text>
+            <text x="425" y="302" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#00bfa5" letter-spacing="1">UC → PG</text>
+          </g>
+
+          <g class="node" data-id="lhsync" data-topic="t1 t2 t3" data-int="true" data-as-only="true" onclick="selectNode('lhsync')">
+            <rect class="bg" x="520" y="265" width="160" height="48" rx="4" fill="#0d2925" stroke="#00bfa5" stroke-width="1.5"/>
+            <text x="600" y="283" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">Lakehouse Sync <tspan fill="#ff6b35" font-size="10">★</tspan></text>
+            <text x="600" y="302" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#00bfa5" letter-spacing="1">PG → UC · BETA</text>
+          </g>
+
+          <g class="node" data-id="federation" data-topic="t2" data-int="true" onclick="selectNode('federation')">
+            <rect class="bg" x="695" y="265" width="160" height="48" rx="4" fill="#0d2925" stroke="#00bfa5" stroke-width="1.5"/>
+            <text x="775" y="285" text-anchor="middle" font-family="Playfair Display, serif" font-size="12" fill="#e8edf5" font-style="italic">Federation</text>
+            <text x="775" y="302" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#00bfa5" letter-spacing="1">DBSQL → PG · LIVE</text>
+          </g>
+
+          <!-- ═══════════ CORE OBJECTS PLANE ═══════════ -->
+          <!-- Project (parent container) -->
+          <g class="node" data-id="project" data-topic="t2" onclick="selectNode('project')">
+            <rect class="bg" x="60" y="395" width="800" height="155" rx="6" fill="rgba(58,26,20,0.5)" stroke="#ff6b35" stroke-width="1.5" stroke-dasharray="6,3"/>
+            <text x="80" y="418" font-family="Playfair Display, serif" font-size="14" fill="#ff6b35" font-style="italic">Project</text>
+            <text x="80" y="435" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1">▸ TOP-LEVEL CONTAINER · OWNS STORAGE · OWNS BILLING</text>
+          </g>
+
+          <!-- main branch -->
+          <g class="node" data-id="main-branch" data-topic="t2" onclick="selectNode('main-branch')">
+            <rect class="bg" x="100" y="455" width="180" height="80" rx="5" fill="#3a1a14" stroke="#ff6b35" stroke-width="1.5"/>
+            <text x="190" y="478" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">main branch</text>
+            <text x="190" y="498" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#ff6b35" letter-spacing="1">PRIMARY COMPUTE</text>
+            <text x="190" y="514" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#fbbf24" letter-spacing="1">HA · NO SCALE-TO-ZERO</text>
+            <text x="190" y="528" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#dceacc" letter-spacing="1">DB: databricks_postgres</text>
+          </g>
+
+          <!-- dev branch -->
+          <g class="node" data-id="dev-branch" data-topic="t2 t3" data-as-only="true" onclick="selectNode('dev-branch')">
+            <rect class="bg" x="295" y="455" width="180" height="80" rx="5" fill="#1a2a1f" stroke="#22c55e" stroke-width="1.5"/>
+            <text x="385" y="478" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">dev / feature branch <tspan fill="#ff6b35" font-size="10">★</tspan></text>
+            <text x="385" y="498" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#22c55e" letter-spacing="1">COPY-ON-WRITE</text>
+            <text x="385" y="514" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#22c55e" letter-spacing="1">SCALE-TO-ZERO</text>
+            <text x="385" y="528" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#dceacc" letter-spacing="1">SECONDS TO CREATE</text>
+          </g>
+
+          <!-- read replica -->
+          <g class="node" data-id="replica" data-topic="t2 t3" data-as-only="true" onclick="selectNode('replica')">
+            <rect class="bg" x="490" y="455" width="180" height="80" rx="5" fill="#2a1a14" stroke="#ff6b35" stroke-width="1.5"/>
+            <text x="580" y="478" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">read replica <tspan fill="#ff6b35" font-size="10">★</tspan></text>
+            <text x="580" y="498" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#ff6b35" letter-spacing="1">EXTRA COMPUTE</text>
+            <text x="580" y="514" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#ff6b35" letter-spacing="1">SAME STORAGE · ZERO LAG</text>
+            <text x="580" y="528" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#dceacc" letter-spacing="1">FOR ANALYST READS</text>
+          </g>
+
+          <!-- pit restore -->
+          <g class="node" data-id="pit" data-topic="t2 t3" data-as-only="true" onclick="selectNode('pit')">
+            <rect class="bg" x="685" y="455" width="160" height="80" rx="5" fill="#2a230a" stroke="#fbbf24" stroke-width="1.5"/>
+            <text x="765" y="478" text-anchor="middle" font-family="Playfair Display, serif" font-size="13" fill="#e8edf5" font-style="italic">PIT branch <tspan fill="#ff6b35" font-size="10">★</tspan></text>
+            <text x="765" y="498" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#fbbf24" letter-spacing="1">RESTORE FROM T</text>
+            <text x="765" y="514" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#fbbf24" letter-spacing="1">UP TO 30 DAYS</text>
+            <text x="765" y="528" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#dceacc" letter-spacing="1">INSTANT</text>
+          </g>
+
+          <!-- ═══════════ STORAGE PLANE ═══════════ -->
+          <g class="node" data-id="page-server" data-topic="t2 t3" data-as-only="true" onclick="selectNode('page-server')">
+            <rect class="bg" x="170" y="600" width="685" height="50" rx="4" fill="#0f2440" stroke="#4a9eff" stroke-width="1.5"/>
+            <text x="512" y="623" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Shared Page Server · Object Storage <tspan fill="#ff6b35" font-size="10">★</tspan></text>
+            <text x="512" y="640" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#4a9eff" letter-spacing="2">COPY-ON-WRITE · MULTI-VERSION · WHAT MAKES BRANCHING WORK</text>
+          </g>
+
+          <!-- ═══════════ CONNECTORS ═══════════ -->
+          <!-- App -> Operational -->
+          <line class="connector" data-from="apps" data-to="psql" x1="250" y1="120" x2="250" y2="170" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,3" marker-end="url(#ah-dim)"/>
+          <line class="connector" data-from="agents" data-to="psql" x1="425" y1="120" x2="425" y2="170" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,3" marker-end="url(#ah-dim)"/>
+          <line class="connector" data-from="features" data-to="psql" x1="600" y1="120" x2="600" y2="170" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,3" marker-end="url(#ah-dim)"/>
+          <line class="connector" data-from="vector" data-to="psql" x1="775" y1="120" x2="775" y2="170" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,3" marker-end="url(#ah-dim)"/>
+
+          <!-- Operational -> Integration / Core -->
+          <line class="connector" data-from="psql" data-to="main-branch" x1="425" y1="218" x2="190" y2="455" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,3" marker-end="url(#ah-dim)"/>
+          <line class="connector" data-from="sdk" data-to="project" x1="775" y1="218" x2="775" y2="395" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,3" marker-end="url(#ah-dim)"/>
+          <line class="connector" data-from="sql-ed" data-to="uc" x1="250" y1="218" x2="250" y2="265" stroke="#4a5878" stroke-width="1" stroke-dasharray="2,3" marker-end="url(#ah-dim)"/>
+
+          <!-- Integration -> Core -->
+          <line class="connector" data-from="synced" data-to="main-branch" x1="425" y1="313" x2="190" y2="455" stroke="#00bfa5" stroke-width="1.2" marker-end="url(#ah-teal)"/>
+          <line class="connector" data-from="main-branch" data-to="lhsync" x1="190" y1="455" x2="600" y2="313" stroke="#00bfa5" stroke-width="1.2" marker-end="url(#ah-teal)"/>
+          <line class="connector" data-from="uc" data-to="project" x1="250" y1="313" x2="250" y2="395" stroke="#00bfa5" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#ah-teal)"/>
+          <line class="connector" data-from="federation" data-to="main-branch" x1="775" y1="313" x2="280" y2="495" stroke="#00bfa5" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ah-teal)"/>
+
+          <!-- Branches -> Storage -->
+          <line class="connector" data-from="main-branch" data-to="page-server" x1="190" y1="535" x2="190" y2="600" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#ah-orange)"/>
+          <line class="connector" data-from="dev-branch" data-to="page-server" x1="385" y1="535" x2="385" y2="600" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#ah-orange)"/>
+          <line class="connector" data-from="replica" data-to="page-server" x1="580" y1="535" x2="580" y2="600" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#ah-orange)"/>
+          <line class="connector" data-from="pit" data-to="page-server" x1="765" y1="535" x2="765" y2="600" stroke="#ff6b35" stroke-width="1.5" marker-end="url(#ah-orange)"/>
+
+          <!-- Branches -> Project (within container) -->
+          <line class="connector" data-from="main-branch" data-to="dev-branch" x1="280" y1="495" x2="295" y2="495" stroke="#22c55e" stroke-width="1.2" stroke-dasharray="2,3" marker-end="url(#ah-teal)"/>
+          <line class="connector" data-from="main-branch" data-to="replica" x1="280" y1="495" x2="490" y2="495" stroke="#ff6b35" stroke-width="1.2" stroke-dasharray="2,3" marker-end="url(#ah-orange)"/>
+          <line class="connector" data-from="main-branch" data-to="pit" x1="280" y1="495" x2="685" y2="495" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="2,3" marker-end="url(#ah-orange)"/>
+
+        </svg>
+      </div>
+
+      <div class="tour-bar" id="tourBar">
+        <span class="tour-step" id="tourStep">STEP 1 / 8</span>
+        <span class="tour-msg" id="tourMsg">—</span>
+        <div class="tour-controls">
+          <button class="tour-btn alt" id="tourPrev" onclick="tourStep(-1)">◀ Prev</button>
+          <button class="tour-btn" id="tourNext" onclick="tourStep(1)">Next ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── INFO PANEL ─── -->
+    <div class="info">
+      <div class="info-head" id="infoHead">
+        <div class="info-eyebrow">
+          <span>▸ Click any object</span>
+        </div>
+        <div class="info-name" style="font-style:normal; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--muted); letter-spacing:0.1em;">— select to inspect —</div>
+      </div>
+      <div class="info-body" id="infoBody">
+        <div class="placeholder">
+          <div class="placeholder-icon">◉</div>
+          <div class="placeholder-text">
+            Click any node in the diagram to read its definition.<br><br>
+            Or run the <strong>Guided Tour</strong> for a narrative walkthrough of all three theory topics.<br><br>
+            Use the <strong>View</strong> filter to focus on a single topic.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── LEGEND ─── -->
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch" style="background:#a855f7"></span> Application plane (T1.2)</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#4a9eff"></span> Operational plane (T1.2)</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#00bfa5"></span> Integration plane (T1.2)</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#ff6b35"></span> Core objects (T1.2)</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#22c55e"></span> Branches (T1.2 / T1.3)</div>
+    <div class="legend-item"><span style="color:#ff6b35; font-family:'IBM Plex Mono',monospace; font-size:11px;">★</span> Autoscaling-only (T1.3)</div>
+    <div class="legend-item"><span class="legend-line" style="border-color:#00bfa5"></span> Integration flow</div>
+    <div class="legend-item"><span class="legend-line" style="border-color:#ff6b35"></span> Storage attachment</div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════ NODE DATABASE ═══════════════
+const NODES = {
+  // Plane meta-nodes
+  'plane-app': {
+    name: 'Application Plane', tag: 'TOPIC 1.2 · LAYER',
+    topics: ['t2'], color: '#a855f7',
+    summary: 'What gets built on top of Lakebase. The "why" of having operational state in the lakehouse — apps, agents, ML inference, vector retrieval.',
+    detail: 'The application plane is the topmost layer in the four-plane stack from Topic 1.2. Anything here speaks to Lakebase through the operational plane (psql/JDBC/SDK) and benefits from the integration plane (synced tables, Lakehouse Sync, federation).',
+    bullets: [
+      'Databricks Apps — full-stack data products (Module 7)',
+      'AI agents — using Lakebase as memory + tool-call store (Module 6)',
+      'Feature Store online layer — sub-10ms inference lookups',
+      'Notebooks — for analysts who need transactional state',
+      'External apps — connecting via TLS or Inbound Private Link'
+    ],
+    connects: ['apps', 'agents', 'features', 'vector']
+  },
+  'plane-op': {
+    name: 'Operational Plane', tag: 'TOPIC 1.2 · LAYER',
+    topics: ['t2'], color: '#4a9eff',
+    summary: 'How humans and code touch Lakebase. Multiple surfaces, all alive at the same time, all speaking standard Postgres underneath.',
+    detail: 'Crucially, every interface here connects to a real PostgreSQL database — not a shim or wire-compatible reimplementation. Existing tools work unchanged.',
+    bullets: [
+      'SQL Editor & Tables Editor in the Databricks UI',
+      'Standard Postgres clients: psql, DataGrip, JDBC, psycopg, SQLAlchemy',
+      'PostgREST Data API — auto-generated REST endpoints (Autoscaling-only)',
+      'Notebook SDK — w.database for provisioning and lifecycle'
+    ],
+    connects: ['sql-ed', 'psql', 'data-api', 'sdk']
+  },
+  'plane-int': {
+    name: 'Integration Plane', tag: 'TOPIC 1.2 · LAYER',
+    topics: ['t2'], color: '#00bfa5',
+    summary: 'What makes Lakebase a *lakehouse* OLTP rather than just another managed Postgres. Three patterns connect Lakebase to the rest of the platform.',
+    detail: 'The integration plane is the answer to "why not just use Aurora?" — it is the layer that eliminates the seam tax described in Topic 1.1. Without UC, synced tables, Lakehouse Sync, and federation, Lakebase would just be Postgres-as-a-service.',
+    bullets: [
+      'Unity Catalog — registers Lakebase as a first-class catalog',
+      'Synced Tables — UC Delta → Lakebase, seconds-to-minutes',
+      'Lakehouse Sync — Lakebase → UC Delta, continuous CDC (Beta)',
+      'Federation — DBSQL queries Lakebase live, per-query latency'
+    ],
+    connects: ['uc', 'synced', 'lhsync', 'federation']
+  },
+  'plane-core': {
+    name: 'Core Objects', tag: 'TOPIC 1.2 · FOUNDATION',
+    topics: ['t2'], color: '#ff6b35',
+    summary: 'The vocabulary you will use every day. Six nouns: Project, Branch, Compute, Database, Synced Table, Read Replica.',
+    detail: 'Topic 1.2 made these nouns precise. Every later module assumes you know them. The most important conceptual move: a project owns *separated* storage and compute, which is what makes branches, instant restore, scale-to-zero, and read replicas possible.',
+    bullets: [
+      'Project — top-level container (storage + compute + billing)',
+      'Branch — isolated compute pointing at a copy-on-write storage snapshot',
+      'Compute — the Postgres process attached to a branch',
+      'Database — standard PG database inside the branch',
+      'Synced Table — auto-populated from UC Delta',
+      'Read Replica — extra compute on the same storage'
+    ],
+    connects: ['project', 'main-branch', 'dev-branch', 'replica', 'pit']
+  },
+  'plane-storage': {
+    name: 'Storage — Page Server', tag: 'TOPIC 1.2 / 1.3 · ARCHITECTURE',
+    topics: ['t2', 't3'], color: '#4a9eff', asOnly: true,
+    summary: 'The single most important architectural choice in Lakebase. Storage is *not* attached to compute — it lives in a shared, copy-on-write page server backed by object storage.',
+    detail: 'Every "magical" capability flows from this separation. Branches are just new pointers at the same pages. Instant restore is creating a branch at a timestamp. Scale-to-zero suspends compute while storage stays warm. Read replicas share the same pages with zero lag. None of this is possible on Provisioned, which uses traditional locally-attached storage replicated at the block level.',
+    bullets: [
+      'Multi-tenant page server, durable, versioned',
+      'Backed by object storage (cheaper than block storage)',
+      'Copy-on-write — every page version retained for the restore window',
+      'This is why Autoscaling can do branching and Provisioned cannot'
+    ],
+    connects: ['main-branch', 'dev-branch', 'replica', 'pit']
+  },
+
+  // Application plane nodes
+  'apps': {
+    name: 'Databricks Apps', tag: 'APPLICATION · TOPIC 1.2',
+    topics: ['t2'], color: '#a855f7',
+    summary: 'Full-stack data products deployed on Databricks. Backend: Lakebase. Identity: workspace OAuth. Single bill, single audit, single governance plane.',
+    detail: 'Apps + Lakebase is the combination that made the "lakehouse OLTP" pitch concrete. Before, an "app on Databricks" meant deploying a container on EKS pointing at external Postgres. Now: `databricks apps deploy`, runtime injects credentials, identity is the workspace user. Module 7 covers this in depth.',
+    bullets: [
+      'Streamlit, FastAPI, Dash, etc. — your choice',
+      'Runtime injects PGHOST / PGUSER / DATABRICKS_TOKEN',
+      'Connection runs as the end user (OBO), not a service account',
+      'Postgres GRANTs and RLS work against workspace identity'
+    ],
+    connects: ['psql', 'main-branch', 'plane-app']
+  },
+  'agents': {
+    name: 'AI Agents', tag: 'APPLICATION · TOPIC 1.1 / 1.2',
+    topics: ['t1', 't2'], color: '#a855f7',
+    summary: 'Stateful agents using Lakebase for memory. Killer use case #3 from Topic 1.1.',
+    detail: 'An agent without memory is a chatbot with amnesia. Lakebase gives stateful agents short-term context (sessions, messages), long-term episodic memory (vector-retrievable summaries), and durable tool-call logs — all in one Postgres. Module 6 builds the AgentMemory class.',
+    bullets: [
+      'Sessions, messages — short-term memory',
+      'Episodes with embeddings — long-term, vector-retrievable',
+      'Tool-call audit log — procedural memory',
+      'Wires into Mosaic AI Agent Framework as the checkpoint store'
+    ],
+    connects: ['psql', 'vector', 'plane-app']
+  },
+  'features': {
+    name: 'Feature Serving', tag: 'APPLICATION · TOPIC 1.1',
+    topics: ['t1'], color: '#a855f7',
+    summary: 'Sub-10ms feature lookups for online ML inference. Killer use case #2 from Topic 1.1.',
+    detail: 'Replaces Redis or a sidecar Postgres as the online feature store. Synced tables push features from Delta into Lakebase, and inference services read at app latency.',
+    bullets: [
+      'Synced from Delta feature tables (CONTINUOUS scheduling)',
+      'B-tree on entity ID + BRIN on event time',
+      'Reads in single-digit milliseconds for cached pages',
+      'Same UC governance as the Delta source'
+    ],
+    connects: ['synced', 'main-branch', 'plane-app']
+  },
+  'vector': {
+    name: 'Vector Search', tag: 'APPLICATION · TOPIC 1.1',
+    topics: ['t1'], color: '#a855f7',
+    summary: 'pgvector + HNSW for production RAG. Killer use case #4 from Topic 1.1. Best fit under ~10M vectors.',
+    detail: 'Module 5 covers when to use Lakebase + pgvector versus Mosaic AI Vector Search. The short answer: Lakebase for <5M vectors, hybrid SQL filters, transactional consistency, single-DB apps. Mosaic Vector Search for >10M vectors and large-scale recall.',
+    bullets: [
+      'pgvector extension built in',
+      'HNSW index (m=16, ef_construction=64)',
+      'Hybrid retrieval with BM25 + RRF',
+      'Filter pushdown via JSONB GIN indexes'
+    ],
+    connects: ['psql', 'plane-app']
+  },
+
+  // Operational plane nodes
+  'sql-ed': {
+    name: 'SQL / Tables Editor', tag: 'OPERATIONAL · TOPIC 1.2',
+    topics: ['t2'], color: '#4a9eff',
+    summary: 'The Databricks UI for ad-hoc Lakebase queries. Same surface that handles Delta — switch the catalog, query Postgres.',
+    detail: 'Available in any Databricks workspace once a Lakebase project is registered as a UC catalog. Useful for quick lookups; not where you build production app queries (those go through psql/JDBC from the app layer).',
+    bullets: [
+      'Standard SQL Editor in the Databricks UI',
+      'Tables Editor for visual browsing and inline edits',
+      'Query results returned as DataFrame in notebooks'
+    ],
+    connects: ['uc', 'plane-op']
+  },
+  'psql': {
+    name: 'Postgres Clients', tag: 'OPERATIONAL · TOPIC 1.2',
+    topics: ['t2'], color: '#4a9eff',
+    summary: 'Real Postgres means real Postgres tooling. psql, DataGrip, every JDBC tool, every ORM — all work unchanged.',
+    detail: 'This is the practical proof that Lakebase is "real Postgres" rather than a Postgres-flavored API. The wire protocol is identical to vanilla Postgres 17. The one twist: PG_PASSWORD is a short-lived OAuth token, so long-lived connections need refresh logic (the Databricks Python and JDBC drivers handle this automatically).',
+    bullets: [
+      'psql for shell access',
+      'DataGrip / pgAdmin for GUI',
+      'JDBC / psycopg / SQLAlchemy for code',
+      'Existing ORMs (SQLAlchemy, Hibernate, Prisma) work as-is'
+    ],
+    connects: ['main-branch', 'dev-branch', 'replica', 'plane-op']
+  },
+  'data-api': {
+    name: 'PostgREST Data API ★', tag: 'OPERATIONAL · TOPIC 1.2 / 1.3',
+    topics: ['t2', 't3'], color: '#4a9eff', asOnly: true,
+    summary: 'Auto-generated REST endpoints for tables. Autoscaling-exclusive feature, GA. Topic 1.3.',
+    detail: 'PostgREST inspects your Postgres schema and exposes tables as REST resources without writing any code. Useful for lightweight integrations, JAMstack-style apps, low-code tools, mobile clients. Provisioned has it in Private Preview only — this is one of the four ★ distinguishing features.',
+    bullets: [
+      'GET /tablename returns rows as JSON',
+      'POST/PATCH/DELETE for writes',
+      'Filter syntax via query parameters',
+      'Auth via the same OAuth token'
+    ],
+    connects: ['main-branch', 'plane-op']
+  },
+  'sdk': {
+    name: 'Notebook SDK', tag: 'OPERATIONAL · TOPIC 1.2',
+    topics: ['t2'], color: '#4a9eff',
+    summary: 'Programmatic provisioning and lifecycle from any Databricks notebook. The `WorkspaceClient.database` namespace.',
+    detail: 'This is what you use to create projects, branches, synced tables, and generate short-lived connection credentials. Lab 1.4 verifies this works; Module 3 uses it heavily.',
+    bullets: [
+      '`w.database.create_database_project()` — provision',
+      '`w.database.create_branch()` — branch lifecycle',
+      '`w.database.create_synced_database_table()` — sync setup',
+      '`w.database.generate_database_credential()` — short-lived OAuth tokens'
+    ],
+    connects: ['project', 'plane-op']
+  },
+
+  // Integration plane nodes
+  'uc': {
+    name: 'Unity Catalog', tag: 'INTEGRATION · TOPIC 1.1 / 1.2',
+    topics: ['t1', 't2'], color: '#00bfa5',
+    summary: 'The governance plane that makes Lakebase a lakehouse OLTP. Same RBAC, same tags, same audit as Delta.',
+    detail: 'When you `CREATE CATALOG ... USING DATABASE_INSTANCE`, Lakebase tables become first-class citizens in UC — visible from DBSQL, AI/BI, Genie, federation. Without UC, Lakebase would just be managed Postgres. With UC, it is governed lakehouse OLTP. This is one of the five points in the Module 9 customer pitch.',
+    bullets: [
+      'Lakebase project registers as a UC catalog',
+      'GRANTs flow through to Postgres-level RBAC',
+      'Tags drive cost center / env chargeback',
+      'Audit logs unified with the rest of the platform'
+    ],
+    connects: ['project', 'plane-int']
+  },
+  'synced': {
+    name: 'Synced Tables', tag: 'INTEGRATION · TOPIC 1.1 / 1.2',
+    topics: ['t1', 't2'], color: '#00bfa5',
+    summary: 'Managed CDC: UC Delta → Lakebase. Replaces Hightouch / Census / Fivetran. The killer use case #5 from Topic 1.1.',
+    detail: 'The seam-tax killer. Declare a Delta source, primary key, and scheduling policy (CONTINUOUS = streaming, ~seconds; SNAPSHOT = scheduled, ~minutes). Databricks runs the pipeline. The synced table appears as an ordinary Postgres table — query and index it normally. Module 4 covers this in depth.',
+    bullets: [
+      'Source: any UC Delta table with a primary key',
+      'CONTINUOUS or SNAPSHOT scheduling',
+      'Read-only mirror in Postgres',
+      'Add Postgres indexes after the sync runs'
+    ],
+    connects: ['main-branch', 'uc', 'plane-int']
+  },
+  'lhsync': {
+    name: 'Lakehouse Sync ★', tag: 'INTEGRATION · TOPIC 1.1 / 1.2 / 1.3',
+    topics: ['t1', 't2', 't3'], color: '#00bfa5', asOnly: true,
+    summary: 'Reverse direction: Lakebase → UC Delta. Operational data flows back for analytics. Beta on AWS.',
+    detail: 'Solves the "we want analytics on operational events" problem without rolling your own Debezium. Underlying mechanism: Postgres logical replication slots → managed CDC → Delta. The bronze table arrives with `_change_type` and `_commit_version` columns; build silver via MERGE. One of the four ★ Autoscaling-distinguishing features. Module 4 builds it end-to-end.',
+    bullets: [
+      'Continuous CDC from Lakebase to Delta',
+      'Bronze layer with full change history',
+      'Build silver with MERGE on `_change_type`',
+      'Beta on AWS — verify region GA before designing for prod'
+    ],
+    connects: ['main-branch', 'uc', 'plane-int']
+  },
+  'federation': {
+    name: 'Federation', tag: 'INTEGRATION · TOPIC 1.2',
+    topics: ['t2'], color: '#00bfa5',
+    summary: 'DBSQL queries Lakebase live over the wire. Per-query latency. For ad-hoc joins; not for high-volume reads.',
+    detail: 'After UC registration, Lakebase tables are immediately federable. You can join Postgres rows directly with Delta tables in a single query. Push-down: simple predicates push to Postgres; complex aggregations may pull rows. RSA heuristic: if you would run it more than once a week, build a synced table or Lakehouse Sync instead — federation taxes the OLTP primary.',
+    bullets: [
+      'Live reads from DBSQL — no copy',
+      'Cross-source joins (Postgres + Delta)',
+      'Predicate push-down where possible',
+      'Anti-pattern for high-volume scheduled jobs'
+    ],
+    connects: ['main-branch', 'uc', 'plane-int']
+  },
+
+  // Core objects
+  'project': {
+    name: 'Project', tag: 'CORE · TOPIC 1.2',
+    topics: ['t2'], color: '#ff6b35',
+    summary: 'The top-level container. Owns storage, branches, compute, networking, and billing scope.',
+    detail: 'When a customer says "we have one Lakebase database" they almost certainly mean "we have one Lakebase project." A project consists of two physically separated layers: a multi-tenant page server (storage) and one or more Postgres compute processes that lazily fetch pages from it. Provisioning is the first hands-on step in Module 3.',
+    bullets: [
+      'Provisioned via SDK or UI in 60–90 seconds',
+      'Owns the storage layer (page server)',
+      'Owns one or more branches (compute)',
+      'Owns the network configuration and billing'
+    ],
+    connects: ['main-branch', 'page-server', 'uc', 'plane-core']
+  },
+  'main-branch': {
+    name: 'main branch', tag: 'CORE · TOPIC 1.2',
+    topics: ['t2'], color: '#ff6b35',
+    summary: 'Every project starts with a `main` branch. This is the production primary — HA enabled, scale-to-zero disabled.',
+    detail: 'Topic 1.2 introduced branches as named compute pointing at copy-on-write storage. `main` is the convention for the long-lived primary. RSA rule: never run perf tests on main; never enable scale-to-zero on the production primary (cold starts ruin p99 SLAs).',
+    bullets: [
+      'Default branch on project creation',
+      'Connection DNS: <project>.read_write_dns',
+      'Hosts the PostgreSQL database `databricks_postgres`',
+      'Inherits HA settings from project config'
+    ],
+    connects: ['page-server', 'dev-branch', 'replica', 'pit', 'project']
+  },
+  'dev-branch': {
+    name: 'dev / feature branch ★', tag: 'CORE · TOPIC 1.2 / 1.3',
+    topics: ['t2', 't3'], color: '#22c55e', asOnly: true,
+    summary: 'A copy-on-write clone of `main`, ready in seconds. The killer feature only Autoscaling can offer.',
+    detail: 'Topic 1.3 made this concrete: branching only exists on Autoscaling because Provisioned uses locally-attached storage that would need to be physically copied. With Autoscaling, a branch is just a new pointer at the same shared pages. Use cases: PR-based migrations, ephemeral CI databases, blue-green deploys, "what-if" analysis. Module 3 has a hands-on demo.',
+    bullets: [
+      'Created via SDK in seconds, no data copied',
+      'Independent compute, isolated writes',
+      'Scale-to-zero recommended (cheap to keep around)',
+      'Drop when done — storage cost reverts to parent'
+    ],
+    connects: ['page-server', 'main-branch', 'plane-core']
+  },
+  'replica': {
+    name: 'read replica ★', tag: 'CORE · TOPIC 1.2 / 1.3',
+    topics: ['t2', 't3'], color: '#ff6b35', asOnly: true,
+    summary: 'Extra compute sharing the same storage as `main`. Zero replication lag for committed pages.',
+    detail: 'Provisioned offers "readable secondaries" using streaming replication (small lag). Autoscaling true read replicas share the same page-server storage and therefore see committed pages with zero lag. Pattern: writes + hot reads on primary; analyst / dashboard load on replica.',
+    bullets: [
+      'Same storage as primary — no replication lag',
+      'Independent compute scaling',
+      'Pattern: route analyst load away from primary',
+      'Available on Autoscaling; "readable secondaries" on Provisioned'
+    ],
+    connects: ['page-server', 'main-branch', 'plane-core']
+  },
+  'pit': {
+    name: 'PIT branch ★', tag: 'CORE · TOPIC 1.2 / 1.3',
+    topics: ['t2', 't3'], color: '#fbbf24', asOnly: true,
+    summary: 'Point-in-time restore via branch from a timestamp. Up to 30 days of history. Instant.',
+    detail: 'Restore is just a branch from a past timestamp. Because every page version is retained for the restore window, the operation is instant — no WAL replay, no backup restore. Module 3 lab 3.6 demonstrates: corrupt a row, branch from 5 minutes ago, verify the original row is intact, selectively re-import. Provisioned has only traditional PITR (slower).',
+    bullets: [
+      'Create branch from timestamp T',
+      'Up to 30-day retention window',
+      'Instant — no WAL replay',
+      'Use for accidental data loss recovery'
+    ],
+    connects: ['page-server', 'main-branch', 'plane-core']
+  },
+  'page-server': {
+    name: 'Page Server (storage) ★', tag: 'STORAGE · TOPIC 1.2 / 1.3',
+    topics: ['t2', 't3'], color: '#4a9eff', asOnly: true,
+    summary: 'The defining architectural choice. Multi-tenant, copy-on-write, object-backed, versioned.',
+    detail: 'The single most important thing to internalize from Topic 1.2 and 1.3. Storage is *separated* from compute and shared across all branches of a project. This is what enables every "magical" capability — branching, instant restore, scale-to-zero, true read replicas. None of these are possible on Provisioned because Provisioned uses traditional locally-attached storage.',
+    bullets: [
+      'Object storage (cheaper than block storage)',
+      'Copy-on-write — every page version retained',
+      'Multi-tenant at the platform level',
+      'The mechanism behind all four ★ Autoscaling-only features'
+    ],
+    connects: ['main-branch', 'dev-branch', 'replica', 'pit']
+  }
+};
+
+// ═══════════════ STATE ═══════════════
+let currentFilter = 'all';
+let highlightAS = false;
+let highlightInt = false;
+let selectedNode = null;
+let tourActive = false;
+let tourIdx = 0;
+
+// ═══════════════ TOUR SCRIPT ═══════════════
+const TOUR = [
+  { node: null,            msg: 'Welcome. This tour walks through Module 1 in 8 stops — what Lakebase replaces, the four planes, the core objects, and the Autoscaling vs Provisioned distinction. Click Next.' },
+  { node: 'plane-app',     msg: 'Topic 1.1 — Why. The application plane is what we are trying to enable: apps, agents, feature serving, vector search. These are the workloads that historically needed a sidecar Postgres.' },
+  { node: 'apps',          msg: 'Databricks Apps is the killer combination. Pre-Lakebase, an "app on Databricks" meant a container on EKS pointed at external Postgres. Now: one platform, one identity, one bill.' },
+  { node: 'plane-int',     msg: 'Topic 1.1 / 1.2 — How the seam disappears. The integration plane is what makes Lakebase a *lakehouse* OLTP rather than just managed Postgres. Three patterns: synced tables, Lakehouse Sync, federation.' },
+  { node: 'synced',        msg: 'Synced Tables replace reverse-ETL — the Hightouch / Census / Fivetran pipelines that previously pushed Delta data into a sidecar Postgres. This is where the seam tax goes to die.' },
+  { node: 'project',       msg: 'Topic 1.2 — The vocabulary. A Project is the top-level container. It owns storage and one or more branches. Most customers run one project per use case.' },
+  { node: 'page-server',   msg: 'Topic 1.2 / 1.3 — The defining architectural choice. Storage is SEPARATED from compute and shared across all branches via a copy-on-write page server. This is what makes Autoscaling fundamentally different from Provisioned.' },
+  { node: 'dev-branch',    msg: 'Topic 1.3 — Branches. Because storage is shared and copy-on-write, a new branch is just a new compute pointing at the same pages. Created in seconds. No data copied. This — and instant restore, true replicas, the Data API — is why Autoscaling is the default.' },
+];
+
+// ═══════════════ FILTER LOGIC ═══════════════
+function setFilter(f) {
+  currentFilter = f;
+  highlightAS = false;
+  highlightInt = false;
+  document.getElementById('hl-as').classList.remove('active');
+  document.getElementById('hl-int').classList.remove('active');
+  document.querySelectorAll('.tb-btn[id^="vw-"]').forEach(b => {
+    b.classList.remove('active', 'topic-1', 'topic-2', 'topic-3');
+  });
+  const btn = document.getElementById('vw-' + f);
+  btn.classList.add('active');
+  if (f === 't1') btn.classList.add('topic-1');
+  else if (f === 't2') btn.classList.add('topic-2');
+  else if (f === 't3') btn.classList.add('topic-3');
+  applyFilter();
+}
+
+function toggleAutoscalingOnly() {
+  highlightAS = !highlightAS;
+  document.getElementById('hl-as').classList.toggle('active', highlightAS);
+  applyFilter();
+}
+
+function toggleIntegration() {
+  highlightInt = !highlightInt;
+  document.getElementById('hl-int').classList.toggle('active', highlightInt);
+  applyFilter();
+}
+
+function applyFilter() {
+  const nodes = document.querySelectorAll('#mainSvg .node');
+  const planeBands = document.querySelectorAll('#mainSvg .plane-band');
+  const connectors = document.querySelectorAll('#mainSvg .connector');
+
+  nodes.forEach(n => {
+    const topics = (n.dataset.topic || '').split(/\s+/);
+    const isAS = n.dataset.asOnly === 'true';
+    const isInt = n.dataset.int === 'true';
+
+    let visible = true;
+    if (currentFilter !== 'all') {
+      visible = topics.includes(currentFilter);
+    }
+    if (visible && highlightAS) {
+      visible = isAS;
+    }
+    if (visible && highlightInt) {
+      visible = isInt;
+    }
+    n.classList.toggle('dim', !visible);
+  });
+
+  // Plane bands stay visible for context unless user is filtering hard
+  planeBands.forEach(p => {
+    p.classList.toggle('dim', highlightAS || highlightInt);
+  });
+
+  // Connectors: dim those whose endpoints are dimmed
+  connectors.forEach(c => {
+    const f = c.dataset.from;
+    const t = c.dataset.to;
+    const fNode = document.querySelector(`.node[data-id="${f}"]`);
+    const tNode = document.querySelector(`.node[data-id="${t}"]`);
+    const fDim = fNode && fNode.classList.contains('dim');
+    const tDim = tNode && tNode.classList.contains('dim');
+    c.classList.toggle('dim', fDim || tDim);
+  });
+
+  updateStatus();
+}
+
+function updateStatus() {
+  const visible = document.querySelectorAll('#mainSvg .node:not(.dim)').length;
+  const total = document.querySelectorAll('#mainSvg .node').length;
+  const status = document.getElementById('diagramStatus');
+  if (currentFilter === 'all' && !highlightAS && !highlightInt) {
+    status.textContent = `${total} objects · 4 planes · 3 topics`;
+  } else {
+    let parts = [`${visible} / ${total} objects`];
+    if (currentFilter !== 'all') parts.push(`Topic ${currentFilter.replace('t','1.')}`);
+    if (highlightAS) parts.push('Autoscaling-only ★');
+    if (highlightInt) parts.push('Integration');
+    status.textContent = parts.join(' · ');
+  }
+}
+
+// ═══════════════ NODE SELECTION ═══════════════
+function selectNode(id) {
+  const data = NODES[id];
+  if (!data) return;
+
+  selectedNode = id;
+
+  // Visual selection
+  document.querySelectorAll('#mainSvg .node, #mainSvg .plane-band').forEach(n => n.classList.remove('selected'));
+  const target = document.querySelector(`[data-id="${id}"], [data-plane="${id.replace('plane-','')}"]`);
+
+  // For plane meta-nodes, find the plane-band
+  let visualTarget = document.querySelector(`.node[data-id="${id}"]`);
+  if (!visualTarget) {
+    const planeName = id.replace('plane-', '');
+    visualTarget = document.querySelector(`.plane-band[data-plane="${planeName}"]`);
+  }
+  if (visualTarget) visualTarget.classList.add('selected');
+
+  // Highlight related connectors
+  document.querySelectorAll('#mainSvg .connector').forEach(c => {
+    c.classList.remove('highlight');
+  });
+  if (data.connects) {
+    data.connects.forEach(toId => {
+      document.querySelectorAll(`#mainSvg .connector[data-from="${id}"][data-to="${toId}"], #mainSvg .connector[data-from="${toId}"][data-to="${id}"]`).forEach(c => {
+        c.classList.add('highlight');
+      });
+    });
+  }
+
+  renderInfo(data);
+}
+
+function renderInfo(data) {
+  const head = document.getElementById('infoHead');
+  const body = document.getElementById('infoBody');
+
+  const topicPills = (data.topics || []).map(t => {
+    const label = t === 't1' ? '1.1' : t === 't2' ? '1.2' : '1.3';
+    return `<span class="topic-pill ${t}">T${label}</span>`;
+  }).join('');
+
+  const asPill = data.asOnly ? '<span class="as-only">★ AUTOSCALING-ONLY</span>' : '';
+
+  head.innerHTML = `
+    <div class="info-eyebrow">
+      ${topicPills}
+      ${asPill}
+    </div>
+    <div class="info-name">${data.name}</div>
+    <div class="info-tag">${data.tag}</div>
+  `;
+
+  let html = `<div class="info-section">
+    <h4>▸ Summary</h4>
+    <p>${data.summary}</p>
+  </div>`;
+
+  if (data.detail) {
+    html += `<div class="info-section">
+      <h4>▸ Detail</h4>
+      <p>${data.detail}</p>
+    </div>`;
+  }
+
+  if (data.bullets && data.bullets.length) {
+    html += `<div class="info-section">
+      <h4>▸ Key points</h4>
+      <ul>${data.bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+    </div>`;
+  }
+
+  if (data.connects && data.connects.length) {
+    const chips = data.connects
+      .filter(c => NODES[c])
+      .map(c => `<span class="connect-chip" onclick="selectNode('${c}')">${NODES[c].name}</span>`)
+      .join('');
+    if (chips) {
+      html += `<div class="info-section">
+        <h4>▸ Connects to</h4>
+        <div class="connect-list">${chips}</div>
+      </div>`;
+    }
+  }
+
+  body.innerHTML = html;
+}
+
+// ═══════════════ TOUR ═══════════════
+function toggleTour() {
+  tourActive = !tourActive;
+  document.getElementById('tourBar').classList.toggle('show', tourActive);
+  document.getElementById('md-tour').classList.toggle('active', tourActive);
+  if (tourActive) {
+    tourIdx = 0;
+    runTourStep();
+  } else {
+    document.querySelectorAll('#mainSvg .node, #mainSvg .plane-band').forEach(n => n.classList.remove('selected'));
+  }
+}
+
+function tourStep(delta) {
+  tourIdx = Math.max(0, Math.min(TOUR.length - 1, tourIdx + delta));
+  runTourStep();
+}
+
+function runTourStep() {
+  const step = TOUR[tourIdx];
+  document.getElementById('tourStep').textContent = `STEP ${tourIdx + 1} / ${TOUR.length}`;
+  document.getElementById('tourMsg').textContent = step.msg;
+  document.getElementById('tourPrev').disabled = tourIdx === 0;
+  document.getElementById('tourNext').disabled = tourIdx === TOUR.length - 1;
+  document.getElementById('tourNext').textContent = tourIdx === TOUR.length - 1 ? 'End ✓' : 'Next ▶';
+
+  if (step.node) {
+    selectNode(step.node);
+  } else {
+    document.querySelectorAll('#mainSvg .node, #mainSvg .plane-band').forEach(n => n.classList.remove('selected'));
+    document.querySelectorAll('#mainSvg .connector').forEach(c => c.classList.remove('highlight'));
+    document.getElementById('infoHead').innerHTML = `
+      <div class="info-eyebrow"><span>▸ Guided Tour</span></div>
+      <div class="info-name">Module 1 — Mental Model Tour</div>
+      <div class="info-tag">8 STOPS · ~3 MIN</div>
+    `;
+    document.getElementById('infoBody').innerHTML = `
+      <div class="info-section">
+        <p>The tour highlights one node at a time and explains why it matters. Click <strong>Next ▶</strong> in the tour bar below the diagram to advance.</p>
+      </div>
+      <div class="info-section">
+        <h4>▸ What you'll see</h4>
+        <ul>
+          <li>The application plane and what we are enabling</li>
+          <li>How the seam tax disappears via integration</li>
+          <li>The core objects vocabulary</li>
+          <li>The page server — Lakebase's defining architectural choice</li>
+          <li>Why Autoscaling is the default</li>
+        </ul>
+      </div>
+    `;
+  }
+}
+
+// ═══════════════ RESET ═══════════════
+function resetView() {
+  setFilter('all');
+  if (tourActive) toggleTour();
+  document.querySelectorAll('#mainSvg .node, #mainSvg .plane-band').forEach(n => n.classList.remove('selected'));
+  document.querySelectorAll('#mainSvg .connector').forEach(c => c.classList.remove('highlight'));
+  selectedNode = null;
+  document.getElementById('infoHead').innerHTML = `
+    <div class="info-eyebrow"><span>▸ Click any object</span></div>
+    <div class="info-name" style="font-style:normal; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--muted); letter-spacing:0.1em;">— select to inspect —</div>
+  `;
+  document.getElementById('infoBody').innerHTML = `
+    <div class="placeholder">
+      <div class="placeholder-icon">◉</div>
+      <div class="placeholder-text">
+        Click any node in the diagram to read its definition.<br><br>
+        Or run the <strong>Guided Tour</strong> for a narrative walkthrough of all three theory topics.<br><br>
+        Use the <strong>View</strong> filter to focus on a single topic.
+      </div>
+    </div>
+  `;
+}
+
+// Initial state
+updateStatus();
+</script>
+
+</body>
+</html>

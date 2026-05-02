@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 02 · Interactive Concepts — Lakebase Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  --code-bg: #020509;
+  --code-text: #e8dcc4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+/* Header */
+.header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2rem;
+  margin-bottom: 2rem;
+}
+.crumbs {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+.crumbs span { color: var(--text-muted); margin: 0 0.5rem; }
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.1;
+  margin-bottom: 0.6rem;
+}
+h1 .accent { color: var(--accent-blue); }
+.lede {
+  font-size: 1.05rem;
+  color: var(--text-dim);
+  max-width: 60ch;
+}
+
+/* Tab nav */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+.tab {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0.85rem 1.1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text-dim); }
+.tab.active {
+  color: var(--accent-blue);
+  border-bottom-color: var(--accent-blue);
+}
+.tab .tnum {
+  color: var(--text-muted);
+  margin-right: 0.5rem;
+  font-weight: 500;
+}
+.tab.active .tnum { color: var(--accent-blue); }
+
+/* Panel */
+.panel { display: none; }
+.panel.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.panel-intro {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-blue);
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 2rem;
+  border-radius: 4px;
+}
+.panel-intro h2 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: var(--text);
+}
+.panel-intro p {
+  color: var(--text-dim);
+  font-size: 0.98rem;
+}
+
+/* Interactive frame — shared shell for every demo */
+.demo {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.demo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.9rem;
+  margin-bottom: 1.2rem;
+}
+.demo-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+}
+.demo-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+  padding: 1rem;
+  background: var(--surface2);
+  border-radius: 4px;
+  align-items: center;
+}
+.ctl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 140px;
+}
+.ctl-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.ctl-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent-blue);
+}
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+.btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--surface3);
+  color: var(--text-dim);
+  border: 1px solid var(--border2);
+  padding: 0.55rem 1rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:hover { color: var(--text); border-color: var(--accent-blue); }
+.btn.primary {
+  background: var(--accent-blue);
+  color: var(--bg);
+  border-color: var(--accent-blue);
+  font-weight: 500;
+}
+.btn.primary:hover { background: #6db4ff; }
+.btn.danger {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+.btn.danger:hover { background: var(--accent-red); color: var(--bg); }
+.btn.toggle.on {
+  background: var(--accent-blue);
+  color: var(--bg);
+  border-color: var(--accent-blue);
+}
+
+/* Stage — where the SVG / animated content lives */
+.stage {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.2rem;
+  min-height: 280px;
+  position: relative;
+}
+.stage svg { width: 100%; height: auto; display: block; }
+
+/* Read-out panel */
+.readout {
+  margin-top: 1rem;
+  padding: 1rem 1.2rem;
+  background: var(--code-bg);
+  border-left: 2px solid var(--accent-teal);
+  border-radius: 3px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+}
+.readout strong {
+  color: var(--accent-teal);
+  font-weight: 500;
+}
+.readout .ok { color: var(--accent-green); }
+.readout .bad { color: var(--accent-red); }
+.readout .warn { color: var(--accent-yellow); }
+.readout .num { color: var(--accent-blue); }
+
+/* Stat grid */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+.stat {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.9rem 1rem;
+}
+.stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+.stat-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.15rem;
+  color: var(--text);
+  font-weight: 500;
+}
+.stat-val.blue { color: var(--accent-blue); }
+.stat-val.green { color: var(--accent-green); }
+.stat-val.red { color: var(--accent-red); }
+.stat-val.yellow { color: var(--accent-yellow); }
+
+/* SVG text base */
+.svg-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  fill: var(--text);
+}
+.svg-label-sm {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  fill: var(--text-dim);
+}
+.svg-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  fill: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Note callout */
+.note {
+  margin-top: 1.2rem;
+  padding: 0.9rem 1.1rem;
+  background: var(--surface2);
+  border-left: 2px solid var(--accent-yellow);
+  border-radius: 3px;
+  font-size: 0.92rem;
+  color: var(--text-dim);
+}
+.note strong { color: var(--accent-yellow); font-weight: 500; }
+
+/* Footer */
+.footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 720px) {
+  .demo { padding: 1rem; }
+  .controls { padding: 0.8rem; }
+  .stage { padding: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════════════════ HEADER -->
+  <div class="header">
+    <div class="crumbs">
+      Lakebase Roadmap <span>›</span> Module 02 <span>›</span> Interactive Concepts
+    </div>
+    <h1>Module 2 — <span class="accent"><em>Architecture, Hands-On</em></span></h1>
+    <p class="lede">
+      Five live demos. Drag the sliders, click the branches, trigger the cold start, watch the token expire.
+      Each diagram is the concept — not a picture of it.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ TAB NAV -->
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-panel="p1"><span class="tnum">2.1</span>Compute / Storage</button>
+    <button class="tab" data-panel="p2"><span class="tnum">2.2</span>Branches</button>
+    <button class="tab" data-panel="p3"><span class="tnum">2.3</span>Cold Start</button>
+    <button class="tab" data-panel="p4"><span class="tnum">2.4</span>HA &amp; Replicas</button>
+    <button class="tab" data-panel="p5"><span class="tnum">2.5</span>Token TTL</button>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════ PANEL 1: COMPUTE / STORAGE -->
+  <div class="panel active" id="p1">
+
+    <div class="panel-intro">
+      <h2>2.1 — Separated Compute &amp; Storage</h2>
+      <p>
+        In classic Postgres, compute and storage are one process on one disk. Lakebase splits them.
+        The compute node is stateless past its in-memory cache; durability lives in the storage layer.
+        Press <strong>Write Row</strong> and follow the WAL record through the system.
+      </p>
+    </div>
+
+    <div class="demo">
+      <div class="demo-header">
+        <div class="demo-title">Demo · Write-Path Flow</div>
+        <div class="demo-hint">Click write to fire a transaction</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn primary" id="p1Write">Write Row</button>
+        <button class="btn" id="p1Burst">Burst (10 writes)</button>
+        <button class="btn danger" id="p1Crash">Crash Compute</button>
+        <button class="btn" id="p1Reset">Reset</button>
+      </div>
+
+      <div class="stage">
+        <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+          <!-- Layer dividers -->
+          <line x1="0" y1="100" x2="760" y2="100" stroke="#1e2d45" stroke-dasharray="3 4"/>
+          <line x1="0" y1="220" x2="760" y2="220" stroke="#1e2d45" stroke-dasharray="3 4"/>
+
+          <text x="14" y="30" class="svg-title">CLIENT</text>
+          <text x="14" y="130" class="svg-title">COMPUTE · STATELESS</text>
+          <text x="14" y="250" class="svg-title">STORAGE · DURABLE</text>
+
+          <!-- Client -->
+          <rect x="100" y="40" width="100" height="40" rx="4" fill="#111827" stroke="#243550"/>
+          <text x="150" y="65" text-anchor="middle" class="svg-label">App / psql</text>
+
+          <!-- Compute box -->
+          <rect x="100" y="140" width="220" height="60" rx="4" fill="#0b0f1a" stroke="#4a9eff" stroke-width="1.5"/>
+          <text x="210" y="158" text-anchor="middle" class="svg-label" fill="#4a9eff">Postgres + Page Cache</text>
+          <text x="210" y="178" text-anchor="middle" class="svg-label-sm">RAM only · evictable</text>
+          <text x="210" y="194" text-anchor="middle" class="svg-label-sm" id="p1CacheStat">cache: 0 pages</text>
+
+          <!-- WAL stream arrow -->
+          <line id="p1WalArrow" x1="320" y1="170" x2="430" y2="170" stroke="#243550" stroke-width="1.5" marker-end="url(#arr1)"/>
+          <text x="375" y="160" text-anchor="middle" class="svg-label-sm">WAL</text>
+
+          <!-- Safekeepers (3) -->
+          <rect x="430" y="135" width="120" height="70" rx="4" fill="#0b0f1a" stroke="#a855f7"/>
+          <text x="490" y="153" text-anchor="middle" class="svg-label" fill="#a855f7">Safekeepers</text>
+          <circle cx="455" cy="178" r="8" fill="#1a2235" stroke="#a855f7" id="p1Sk1"/>
+          <circle cx="490" cy="178" r="8" fill="#1a2235" stroke="#a855f7" id="p1Sk2"/>
+          <circle cx="525" cy="178" r="8" fill="#1a2235" stroke="#a855f7" id="p1Sk3"/>
+          <text x="490" y="198" text-anchor="middle" class="svg-label-sm">quorum = 2 of 3</text>
+
+          <!-- Page server -->
+          <line x1="550" y1="170" x2="615" y2="170" stroke="#243550" stroke-width="1.5" marker-end="url(#arr1)"/>
+          <rect x="615" y="140" width="125" height="60" rx="4" fill="#0b0f1a" stroke="#22c55e"/>
+          <text x="677" y="160" text-anchor="middle" class="svg-label" fill="#22c55e">Page Server</text>
+          <text x="677" y="178" text-anchor="middle" class="svg-label-sm">indexes WAL</text>
+          <text x="677" y="194" text-anchor="middle" class="svg-label-sm" id="p1PsStat">records: 0</text>
+
+          <!-- Object storage -->
+          <line x1="677" y1="200" x2="677" y2="255" stroke="#243550" stroke-width="1.5" marker-end="url(#arr1)"/>
+          <rect x="600" y="260" width="155" height="45" rx="4" fill="#0b0f1a" stroke="#fbbf24"/>
+          <text x="677" y="280" text-anchor="middle" class="svg-label" fill="#fbbf24">Object Storage</text>
+          <text x="677" y="295" text-anchor="middle" class="svg-label-sm">S3 · cheap · forever</text>
+
+          <!-- Page-fault read path (dashed, reverse) -->
+          <line x1="615" y1="155" x2="320" y2="155" stroke="#22c55e" stroke-dasharray="2 3" stroke-width="1" opacity="0.5"/>
+          <text x="450" y="148" text-anchor="middle" class="svg-label-sm" fill="#22c55e" opacity="0.7">page-fault read</text>
+
+          <!-- Client → compute arrow -->
+          <line x1="150" y1="80" x2="150" y2="135" stroke="#243550" stroke-width="1.5" marker-end="url(#arr1)"/>
+
+          <!-- Animated WAL packet -->
+          <circle id="p1Packet" cx="320" cy="170" r="5" fill="#4a9eff" opacity="0"/>
+
+          <defs>
+            <marker id="arr1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a5878"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="readout" id="p1Read">
+        <strong>Idle.</strong> Click <em>Write Row</em>. The WAL record will travel: compute → safekeepers (quorum) → page server → object storage. Notice that compute holds nothing durable — only a soft page cache.
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Writes</div><div class="stat-val blue" id="p1S1">0</div></div>
+        <div class="stat"><div class="stat-label">WAL records</div><div class="stat-val" id="p1S2">0</div></div>
+        <div class="stat"><div class="stat-label">Avg ack (ms)</div><div class="stat-val green" id="p1S3">—</div></div>
+        <div class="stat"><div class="stat-label">Compute state</div><div class="stat-val green" id="p1S4">healthy</div></div>
+      </div>
+
+      <div class="note">
+        <strong>Why this matters.</strong> Crash compute. The data survives — because durability moved out of the box that died. That single move is what unlocks branches, scale-to-zero, and zero-lag replicas. Watch for it across the next four panels.
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════ PANEL 2: BRANCHES -->
+  <div class="panel" id="p2">
+
+    <div class="panel-intro">
+      <h2>2.2 — Branches as Copy-on-Write</h2>
+      <p>
+        Because the data lives in shared object storage, a new branch is just a new pointer into the existing WAL —
+        not a copy of the bytes. Build a branch tree below. Watch storage cost barely move while the branch count climbs.
+      </p>
+    </div>
+
+    <div class="demo">
+      <div class="demo-header">
+        <div class="demo-title">Demo · Branch Tree Builder</div>
+        <div class="demo-hint">Click main to branch, then writes accrue on each branch</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn primary" id="p2BranchMain">+ Branch from main</button>
+        <button class="btn" id="p2WriteSel">Write to selected</button>
+        <button class="btn danger" id="p2DropSel">Drop selected</button>
+        <button class="btn" id="p2ResetTree">Reset</button>
+      </div>
+
+      <div class="stage">
+        <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" id="p2Svg">
+          <text x="14" y="22" class="svg-title">BRANCH TREE · CLICK A NODE TO SELECT</text>
+          <!-- Main timeline -->
+          <line x1="60" y1="160" x2="700" y2="160" stroke="#243550" stroke-width="2"/>
+          <text x="60" y="148" class="svg-label" fill="#fbbf24">main</text>
+
+          <!-- LSN ticks -->
+          <g id="p2Ticks"></g>
+
+          <!-- Dynamic branches -->
+          <g id="p2Branches"></g>
+        </svg>
+      </div>
+
+      <div class="readout" id="p2Read">
+        <strong>Tree empty.</strong> Click <em>+ Branch from main</em> to fork off the latest LSN. Branches share the existing WAL — only diverging writes consume new bytes.
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Total branches</div><div class="stat-val blue" id="p2S1">1</div></div>
+        <div class="stat"><div class="stat-label">Main bytes</div><div class="stat-val" id="p2S2">10 MB</div></div>
+        <div class="stat"><div class="stat-label">Branch deltas</div><div class="stat-val yellow" id="p2S3">0 MB</div></div>
+        <div class="stat"><div class="stat-label">Total stored</div><div class="stat-val green" id="p2S4">10 MB</div></div>
+      </div>
+
+      <div class="note">
+        <strong>The cost insight.</strong> Five branches with no diverging writes cost the same as one. That's why every PR can have its own database, every nightly CI run gets a fresh isolated copy, and a "what did the table look like at 09:42" question becomes a single API call.
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════ PANEL 3: COLD START -->
+  <div class="panel" id="p3">
+
+    <div class="panel-intro">
+      <h2>2.3 — Scale-to-Zero &amp; the Cold-Start Tax</h2>
+      <p>
+        When a Lakebase instance idles past its threshold, compute deprovisions. Storage stays put.
+        The next query <em>wakes</em> compute — boot, attach, replay WAL, then serve. Set the workload below and fire a query.
+      </p>
+    </div>
+
+    <div class="demo">
+      <div class="demo-header">
+        <div class="demo-title">Demo · Cold-Start Simulator</div>
+        <div class="demo-hint">Adjust idle time and WAL backlog, then fire</div>
+      </div>
+
+      <div class="controls">
+        <div class="ctl-group">
+          <span class="ctl-label">Idle time</span>
+          <input type="range" id="p3Idle" min="0" max="60" value="15" step="1">
+          <span class="ctl-value" id="p3IdleV">15 min</span>
+        </div>
+        <div class="ctl-group">
+          <span class="ctl-label">WAL backlog</span>
+          <input type="range" id="p3Wal" min="0" max="100" value="10" step="5">
+          <span class="ctl-value" id="p3WalV">10 MB</span>
+        </div>
+        <div class="ctl-group">
+          <span class="ctl-label">Cache warm</span>
+          <input type="range" id="p3Cache" min="0" max="100" value="0" step="10">
+          <span class="ctl-value" id="p3CacheV">0 %</span>
+        </div>
+        <button class="btn primary" id="p3Fire">Fire Query</button>
+      </div>
+
+      <div class="stage">
+        <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
+          <text x="14" y="22" class="svg-title">WAKEUP TIMELINE</text>
+
+          <!-- Step boxes -->
+          <g id="p3Steps">
+            <rect x="40"  y="80" width="115" height="50" rx="3" fill="#0b0f1a" stroke="#243550" id="p3B1"/>
+            <text x="97"  y="100" text-anchor="middle" class="svg-label">Query in</text>
+            <text x="97"  y="118" text-anchor="middle" class="svg-label-sm" id="p3T1">— ms</text>
+
+            <rect x="170" y="80" width="115" height="50" rx="3" fill="#0b0f1a" stroke="#243550" id="p3B2"/>
+            <text x="227" y="100" text-anchor="middle" class="svg-label">Boot pod</text>
+            <text x="227" y="118" text-anchor="middle" class="svg-label-sm" id="p3T2">— ms</text>
+
+            <rect x="300" y="80" width="115" height="50" rx="3" fill="#0b0f1a" stroke="#243550" id="p3B3"/>
+            <text x="357" y="100" text-anchor="middle" class="svg-label">Attach store</text>
+            <text x="357" y="118" text-anchor="middle" class="svg-label-sm" id="p3T3">— ms</text>
+
+            <rect x="430" y="80" width="115" height="50" rx="3" fill="#0b0f1a" stroke="#243550" id="p3B4"/>
+            <text x="487" y="100" text-anchor="middle" class="svg-label">Replay WAL</text>
+            <text x="487" y="118" text-anchor="middle" class="svg-label-sm" id="p3T4">— ms</text>
+
+            <rect x="560" y="80" width="115" height="50" rx="3" fill="#0b0f1a" stroke="#243550" id="p3B5"/>
+            <text x="617" y="100" text-anchor="middle" class="svg-label">Run + reply</text>
+            <text x="617" y="118" text-anchor="middle" class="svg-label-sm" id="p3T5">— ms</text>
+          </g>
+
+          <!-- Connectors -->
+          <line x1="155" y1="105" x2="170" y2="105" stroke="#4a5878"/>
+          <line x1="285" y1="105" x2="300" y2="105" stroke="#4a5878"/>
+          <line x1="415" y1="105" x2="430" y2="105" stroke="#4a5878"/>
+          <line x1="545" y1="105" x2="560" y2="105" stroke="#4a5878"/>
+
+          <!-- Total bar -->
+          <rect x="40" y="170" width="635" height="20" rx="3" fill="#0b0f1a" stroke="#1e2d45"/>
+          <rect x="40" y="170" width="0" height="20" rx="3" fill="#4a9eff" id="p3Bar"/>
+          <text x="40" y="210" class="svg-label-sm">Total time to first row:</text>
+          <text x="675" y="210" text-anchor="end" class="svg-label" fill="#4a9eff" id="p3Total">— ms</text>
+        </svg>
+      </div>
+
+      <div class="readout" id="p3Read">
+        <strong>Set parameters and fire.</strong> Idle time controls whether compute is warm, scaled-down, or fully cold. WAL backlog stretches the replay step. Cache warmth shaves the first-row penalty.
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-label">State at fire</div><div class="stat-val" id="p3S1">—</div></div>
+        <div class="stat"><div class="stat-label">Boot</div><div class="stat-val yellow" id="p3S2">— ms</div></div>
+        <div class="stat"><div class="stat-label">Replay</div><div class="stat-val yellow" id="p3S3">— ms</div></div>
+        <div class="stat"><div class="stat-label">SLO verdict</div><div class="stat-val" id="p3S4">—</div></div>
+      </div>
+
+      <div class="note">
+        <strong>Pattern.</strong> Internal tools, dev branches, batch endpoints — fine for scale-to-zero. User-facing real-time APIs on a 50 ms p99 budget — keep min-compute &gt; 0 or you'll eat cold starts during traffic dips.
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════ PANEL 4: HA & REPLICAS -->
+  <div class="panel" id="p4">
+
+    <div class="panel-intro">
+      <h2>2.4 — HA &amp; Read Replicas</h2>
+      <p>
+        HA means a sync standby ready to take writes. A read replica is a separate compute pointing at the same storage —
+        no replication lag, no extra storage cost. Toggle the topology, kill an AZ, scale replicas, watch the QPS land.
+      </p>
+    </div>
+
+    <div class="demo">
+      <div class="demo-header">
+        <div class="demo-title">Demo · HA Failover &amp; Replica Scaling</div>
+        <div class="demo-hint">Switch mode, kill AZ, drag replica count</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn toggle on" id="p4ModeHA">HA mode</button>
+        <button class="btn toggle" id="p4ModeRR">Read-replica mode</button>
+        <div class="ctl-group" id="p4ReplicaCtl" style="display:none">
+          <span class="ctl-label">Read replicas</span>
+          <input type="range" id="p4Reps" min="0" max="6" value="2" step="1">
+          <span class="ctl-value" id="p4RepsV">2</span>
+        </div>
+        <button class="btn danger" id="p4KillAZ">Kill AZ-A</button>
+        <button class="btn" id="p4Recover">Recover</button>
+      </div>
+
+      <div class="stage">
+        <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+          <text x="14" y="22" class="svg-title" id="p4Mode">HA · SYNC STANDBY</text>
+
+          <!-- AZ-A box -->
+          <rect x="40"  y="50" width="200" height="120" rx="4" fill="#0b0f1a" stroke="#1e2d45" id="p4AzA"/>
+          <text x="140" y="72" text-anchor="middle" class="svg-label-sm">AZ-A</text>
+          <rect x="65" y="90" width="150" height="60" rx="3" fill="#111827" stroke="#22c55e" id="p4Primary"/>
+          <text x="140" y="115" text-anchor="middle" class="svg-label" fill="#22c55e">Primary</text>
+          <text x="140" y="135" text-anchor="middle" class="svg-label-sm" id="p4PrimaryStat">accepting writes</text>
+
+          <!-- AZ-B box (HA mode only) -->
+          <g id="p4HaGroup">
+            <rect x="280" y="50" width="200" height="120" rx="4" fill="#0b0f1a" stroke="#1e2d45"/>
+            <text x="380" y="72" text-anchor="middle" class="svg-label-sm">AZ-B</text>
+            <rect x="305" y="90" width="150" height="60" rx="3" fill="#111827" stroke="#a855f7" id="p4Standby"/>
+            <text x="380" y="115" text-anchor="middle" class="svg-label" fill="#a855f7">Sync standby</text>
+            <text x="380" y="135" text-anchor="middle" class="svg-label-sm" id="p4StandbyStat">replicating</text>
+
+            <!-- Sync arrow -->
+            <line x1="215" y1="120" x2="305" y2="120" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arr2)"/>
+            <text x="260" y="113" text-anchor="middle" class="svg-label-sm" fill="#a855f7">sync WAL</text>
+          </g>
+
+          <!-- Read replicas (RR mode only) -->
+          <g id="p4RrGroup" style="display:none"></g>
+
+          <!-- Storage at bottom -->
+          <rect x="220" y="220" width="320" height="60" rx="4" fill="#0b0f1a" stroke="#fbbf24"/>
+          <text x="380" y="245" text-anchor="middle" class="svg-label" fill="#fbbf24">Shared Storage Layer</text>
+          <text x="380" y="262" text-anchor="middle" class="svg-label-sm">page server · safekeepers · object storage</text>
+
+          <!-- Lines from compute to storage -->
+          <line id="p4LineP" x1="140" y1="170" x2="280" y2="220" stroke="#fbbf24" stroke-width="1" opacity="0.7"/>
+          <line id="p4LineS" x1="380" y1="170" x2="380" y2="220" stroke="#fbbf24" stroke-width="1" opacity="0.7"/>
+
+          <!-- QPS readout (right side) -->
+          <rect x="560" y="50" width="180" height="120" rx="4" fill="#0b0f1a" stroke="#243550"/>
+          <text x="650" y="72" text-anchor="middle" class="svg-label-sm">TRAFFIC</text>
+          <text x="650" y="105" text-anchor="middle" class="svg-label">Writes: <tspan id="p4Wqps" fill="#22c55e">100/s</tspan></text>
+          <text x="650" y="130" text-anchor="middle" class="svg-label">Reads: <tspan id="p4Rqps" fill="#4a9eff">500/s</tspan></text>
+          <text x="650" y="155" text-anchor="middle" class="svg-label-sm" id="p4Health">all healthy</text>
+
+          <defs>
+            <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#a855f7"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="readout" id="p4Read">
+        <strong>HA mode active.</strong> Primary in AZ-A, sync standby in AZ-B. WAL is replicated synchronously — a write must hit both before ack. Kill AZ-A and watch the standby promote.
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Mode</div><div class="stat-val blue" id="p4S1">HA</div></div>
+        <div class="stat"><div class="stat-label">Read capacity</div><div class="stat-val green" id="p4S2">1× primary</div></div>
+        <div class="stat"><div class="stat-label">Write availability</div><div class="stat-val green" id="p4S3">99.99%</div></div>
+        <div class="stat"><div class="stat-label">Replica lag</div><div class="stat-val green" id="p4S4">0 ms</div></div>
+      </div>
+
+      <div class="note">
+        <strong>Don't conflate the two.</strong> HA buys you write availability across an AZ failure. Read replicas buy you read throughput. They're orthogonal — production usually wants both.
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════ PANEL 5: TOKEN TTL -->
+  <div class="panel" id="p5">
+
+    <div class="panel-intro">
+      <h2>2.5 — OAuth Token TTL Trap</h2>
+      <p>
+        Lakebase auth uses short-lived OAuth tokens (~1 hour). If your app fetches one at startup and reuses it,
+        you have a working service that goes broken at the 60-minute mark. Press <strong>Run</strong> and let the clock advance.
+      </p>
+    </div>
+
+    <div class="demo">
+      <div class="demo-header">
+        <div class="demo-title">Demo · Two-Path Token Lifecycle</div>
+        <div class="demo-hint">Run the clock — watch one path break, one survive</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn primary" id="p5Run">▶ Run clock</button>
+        <button class="btn" id="p5Pause">Pause</button>
+        <button class="btn" id="p5ResetClock">Reset</button>
+        <div class="ctl-group">
+          <span class="ctl-label">Speed</span>
+          <input type="range" id="p5Speed" min="1" max="20" value="6" step="1">
+          <span class="ctl-value" id="p5SpeedV">6×</span>
+        </div>
+      </div>
+
+      <div class="stage">
+        <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+          <text x="14" y="22" class="svg-title">CLOCK <tspan id="p5Clock" fill="#4a9eff">00:00</tspan> · TOKEN TTL 60 MIN</text>
+
+          <!-- Timeline base -->
+          <line x1="60" y1="140" x2="700" y2="140" stroke="#243550" stroke-width="1.5"/>
+
+          <!-- Tick marks every 15 min -->
+          <g class="svg-label-sm">
+            <line x1="60"  y1="135" x2="60"  y2="145" stroke="#4a5878"/><text x="60"  y="160" text-anchor="middle">0</text>
+            <line x1="220" y1="135" x2="220" y2="145" stroke="#4a5878"/><text x="220" y="160" text-anchor="middle">15</text>
+            <line x1="380" y1="135" x2="380" y2="145" stroke="#4a5878"/><text x="380" y="160" text-anchor="middle">30</text>
+            <line x1="540" y1="135" x2="540" y2="145" stroke="#4a5878"/><text x="540" y="160" text-anchor="middle">45</text>
+            <line x1="700" y1="135" x2="700" y2="145" stroke="#4a5878"/><text x="700" y="160" text-anchor="middle">60</text>
+          </g>
+          <text x="60" y="180" class="svg-label-sm">minutes elapsed →</text>
+
+          <!-- Good path (top) -->
+          <text x="14" y="60" class="svg-title" fill="#22c55e">GOOD · refreshes</text>
+          <line x1="60" y1="80" x2="700" y2="80" stroke="#22c55e" stroke-width="2" id="p5GoodLine"/>
+          <circle cx="60"  cy="80" r="5" fill="#22c55e"/>
+          <circle cx="220" cy="80" r="4" fill="#22c55e" opacity="0.7"/>
+          <circle cx="380" cy="80" r="4" fill="#22c55e" opacity="0.7"/>
+          <circle cx="540" cy="80" r="4" fill="#22c55e" opacity="0.7"/>
+          <text x="380" y="68" text-anchor="middle" class="svg-label-sm" fill="#22c55e">queries succeeding · token rotated each call</text>
+
+          <!-- Bad path (bottom) -->
+          <text x="14" y="220" class="svg-title" fill="#ef4444">BAD · cached at startup</text>
+          <line x1="60"  y1="240" x2="700" y2="240" stroke="#243550" stroke-width="2"/>
+          <line x1="60"  y1="240" x2="700" y2="240" stroke="#22c55e" stroke-width="2" id="p5BadLine"/>
+          <circle cx="60" cy="240" r="5" fill="#22c55e" id="p5BadStart"/>
+          <text x="380" y="232" text-anchor="middle" class="svg-label-sm" fill="#fbbf24" id="p5BadText">queries succeeding · token still valid</text>
+
+          <!-- Cursor markers -->
+          <line x1="60" y1="40" x2="60" y2="260" stroke="#4a9eff" stroke-width="1" stroke-dasharray="2 3" id="p5Cursor"/>
+
+          <!-- Status pills -->
+          <rect x="560" y="38" width="170" height="32" rx="4" fill="#0b0f1a" stroke="#22c55e" id="p5GoodPill"/>
+          <text x="645" y="58" text-anchor="middle" class="svg-label" fill="#22c55e" id="p5GoodStatus">200 OK</text>
+
+          <rect x="560" y="198" width="170" height="32" rx="4" fill="#0b0f1a" stroke="#22c55e" id="p5BadPill"/>
+          <text x="645" y="218" text-anchor="middle" class="svg-label" fill="#22c55e" id="p5BadStatus">200 OK</text>
+        </svg>
+      </div>
+
+      <div class="readout" id="p5Read">
+        <strong>Idle.</strong> Press <em>Run clock</em>. The good path rotates its token every connection via a credential provider. The bad path uses a token cached at app startup — and dies the moment the clock crosses 60 min.
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Clock</div><div class="stat-val blue" id="p5S1">00:00</div></div>
+        <div class="stat"><div class="stat-label">Good queries</div><div class="stat-val green" id="p5S2">0</div></div>
+        <div class="stat"><div class="stat-label">Bad queries</div><div class="stat-val" id="p5S3">0</div></div>
+        <div class="stat"><div class="stat-label">Failures (bad)</div><div class="stat-val red" id="p5S4">0</div></div>
+      </div>
+
+      <div class="note">
+        <strong>The fix.</strong> Wire your driver to a credential provider that mints a fresh token on every connection (or every N minutes, well below TTL). Long-lived pools should validate-on-checkout and rotate. Never hardcode a token. Never cache one past its TTL.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Module 02 · Lakebase Architecture · Interactive Companion
+  </div>
+
+</div><!-- /container -->
+
+
+<script>
+/* ═════════════════════════════════════════════ TAB SWITCHING */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
+  });
+});
+
+/* ═════════════════════════════════════════════ PANEL 1 — COMPUTE/STORAGE */
+(function() {
+  let writes = 0, walRecords = 0, ackTimes = [], crashed = false;
+  const $ = id => document.getElementById(id);
+
+  function flashNode(id, color) {
+    const n = $(id);
+    if (!n) return;
+    const orig = n.getAttribute('stroke');
+    n.setAttribute('stroke', color);
+    n.setAttribute('stroke-width', '2.5');
+    setTimeout(() => {
+      n.setAttribute('stroke', orig);
+      n.setAttribute('stroke-width', '1.5');
+    }, 400);
+  }
+
+  function animatePacket(callback) {
+    const p = $('p1Packet');
+    p.setAttribute('opacity', '1');
+    p.setAttribute('cx', '320');
+    let x = 320;
+    const step = () => {
+      x += 8;
+      p.setAttribute('cx', x);
+      if (x < 615) requestAnimationFrame(step);
+      else {
+        p.setAttribute('opacity', '0');
+        callback && callback();
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
+  function singleWrite() {
+    if (crashed) {
+      $('p1Read').innerHTML = '<strong class="bad">Compute is dead.</strong> No writes are possible — but storage is intact. Click Reset to bring compute back; data will be there.';
+      return;
+    }
+    writes++;
+    walRecords++;
+    flashNode('p1Sk1', '#a855f7');
+    setTimeout(() => flashNode('p1Sk2', '#a855f7'), 80);
+    setTimeout(() => flashNode('p1Sk3', '#a855f7'), 160);
+    animatePacket(() => {
+      const ack = 4 + Math.random() * 6;
+      ackTimes.push(ack);
+      const avg = (ackTimes.reduce((a,b)=>a+b,0) / ackTimes.length).toFixed(1);
+      $('p1S1').textContent = writes;
+      $('p1S2').textContent = walRecords;
+      $('p1S3').textContent = avg;
+      $('p1CacheStat').textContent = `cache: ${Math.min(writes * 2, 64)} pages`;
+      $('p1PsStat').textContent = `records: ${walRecords}`;
+      $('p1Read').innerHTML = `<strong class="ok">Write ${writes} acked in ${ack.toFixed(1)} ms.</strong> WAL hit safekeeper quorum (2 of 3), then drained to page server, which periodically flushes to S3. Compute holds nothing it cares about losing.`;
+    });
+  }
+
+  $('p1Write').addEventListener('click', singleWrite);
+  $('p1Burst').addEventListener('click', () => {
+    if (crashed) return;
+    for (let i = 0; i < 10; i++) setTimeout(singleWrite, i * 120);
+  });
+  $('p1Crash').addEventListener('click', () => {
+    crashed = true;
+    $('p1S4').textContent = 'crashed';
+    $('p1S4').className = 'stat-val red';
+    $('p1Read').innerHTML = '<strong class="bad">Compute crashed.</strong> But notice: page server, safekeepers, and object storage are <em>untouched</em>. The data is fine. A new compute pod can attach to the same storage and resume — that\'s the whole point of the split.';
+  });
+  $('p1Reset').addEventListener('click', () => {
+    writes = 0; walRecords = 0; ackTimes = []; crashed = false;
+    $('p1S1').textContent = '0'; $('p1S2').textContent = '0';
+    $('p1S3').textContent = '—'; $('p1S4').textContent = 'healthy';
+    $('p1S4').className = 'stat-val green';
+    $('p1CacheStat').textContent = 'cache: 0 pages';
+    $('p1PsStat').textContent = 'records: 0';
+    $('p1Read').innerHTML = '<strong>Reset.</strong> Click <em>Write Row</em> to fire a transaction.';
+  });
+})();
+
+/* ═════════════════════════════════════════════ PANEL 2 — BRANCH TREE */
+(function() {
+  const $ = id => document.getElementById(id);
+  let branches = []; // {id, parent, lsn, writes, x, y}
+  let mainWrites = 100;
+  let nextId = 1;
+  let selectedId = null;
+
+  function redraw() {
+    const g = $('p2Branches');
+    g.innerHTML = '';
+    branches.forEach((b, i) => {
+      // Branch line off main
+      const startX = 60 + b.lsn * 6.4; // position along main
+      const yOffset = (i % 2 === 0 ? -1 : 1) * (50 + Math.floor(i / 2) * 35);
+      const branchY = 160 + yOffset;
+      const endX = Math.min(startX + 80 + b.writes * 2, 720);
+
+      // Connector
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${startX} 160 Q ${startX + 20} ${branchY} ${startX + 40} ${branchY}`);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', selectedId === b.id ? '#4a9eff' : '#a855f7');
+      path.setAttribute('stroke-width', selectedId === b.id ? '2.5' : '1.5');
+      g.appendChild(path);
+
+      // Branch line
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', startX + 40);
+      line.setAttribute('y1', branchY);
+      line.setAttribute('x2', endX);
+      line.setAttribute('y2', branchY);
+      line.setAttribute('stroke', selectedId === b.id ? '#4a9eff' : '#a855f7');
+      line.setAttribute('stroke-width', selectedId === b.id ? '2.5' : '1.5');
+      g.appendChild(line);
+
+      // Branch tip
+      const tip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      tip.setAttribute('cx', endX);
+      tip.setAttribute('cy', branchY);
+      tip.setAttribute('r', selectedId === b.id ? '7' : '5');
+      tip.setAttribute('fill', selectedId === b.id ? '#4a9eff' : '#0b0f1a');
+      tip.setAttribute('stroke', selectedId === b.id ? '#4a9eff' : '#a855f7');
+      tip.setAttribute('stroke-width', '2');
+      tip.style.cursor = 'pointer';
+      tip.addEventListener('click', () => { selectedId = b.id; redraw(); updateRead(); });
+      g.appendChild(tip);
+
+      // Label
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', endX + 10);
+      t.setAttribute('y', branchY + 4);
+      t.setAttribute('class', 'svg-label-sm');
+      t.setAttribute('fill', selectedId === b.id ? '#4a9eff' : '#a855f7');
+      t.textContent = `${b.id} (+${b.writes})`;
+      g.appendChild(t);
+    });
+
+    // Main tip
+    const ticks = $('p2Ticks');
+    ticks.innerHTML = '';
+    const tipMain = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    tipMain.setAttribute('cx', 60 + mainWrites * 6.4);
+    tipMain.setAttribute('cy', 160);
+    tipMain.setAttribute('r', selectedId === 'main' ? '7' : '5');
+    tipMain.setAttribute('fill', selectedId === 'main' ? '#fbbf24' : '#0b0f1a');
+    tipMain.setAttribute('stroke', '#fbbf24');
+    tipMain.setAttribute('stroke-width', '2');
+    tipMain.style.cursor = 'pointer';
+    tipMain.addEventListener('click', () => { selectedId = 'main'; redraw(); updateRead(); });
+    ticks.appendChild(tipMain);
+
+    // Stats
+    $('p2S1').textContent = branches.length + 1;
+    const mainBytes = mainWrites / 10;
+    const deltas = branches.reduce((s,b) => s + b.writes / 10, 0);
+    $('p2S2').textContent = `${mainBytes.toFixed(1)} MB`;
+    $('p2S3').textContent = `${deltas.toFixed(1)} MB`;
+    $('p2S4').textContent = `${(mainBytes + deltas).toFixed(1)} MB`;
+  }
+
+  function updateRead() {
+    const r = $('p2Read');
+    if (selectedId === null) {
+      r.innerHTML = '<strong>Tip:</strong> click a branch tip or main to select it. Then "Write to selected" or "Drop selected".';
+    } else if (selectedId === 'main') {
+      r.innerHTML = `<strong>Selected: <em>main</em></strong> · ${mainWrites} writes · ${(mainWrites/10).toFixed(1)} MB. Branches forked from main read its bytes for free until they diverge.`;
+    } else {
+      const b = branches.find(x => x.id === selectedId);
+      if (b) {
+        r.innerHTML = `<strong>Selected: <em>${b.id}</em></strong> · forked at LSN ~${b.lsn} · ${b.writes} writes since fork · delta ${(b.writes/10).toFixed(1)} MB. Storage cost = delta only.`;
+      }
+    }
+  }
+
+  $('p2BranchMain').addEventListener('click', () => {
+    if (branches.length >= 8) {
+      $('p2Read').innerHTML = '<strong class="warn">Hit demo cap (8 branches).</strong> Drop one or reset.';
+      return;
+    }
+    const id = `branch-${nextId++}`;
+    branches.push({ id, parent: 'main', lsn: mainWrites, writes: 5 });
+    selectedId = id;
+    redraw(); updateRead();
+  });
+
+  $('p2WriteSel').addEventListener('click', () => {
+    if (selectedId === 'main') { mainWrites += 10; }
+    else if (selectedId) {
+      const b = branches.find(x => x.id === selectedId);
+      if (b) b.writes += 10;
+    } else {
+      $('p2Read').innerHTML = '<strong class="warn">Nothing selected.</strong> Click a branch tip first.';
+      return;
+    }
+    redraw(); updateRead();
+  });
+
+  $('p2DropSel').addEventListener('click', () => {
+    if (!selectedId || selectedId === 'main') {
+      $('p2Read').innerHTML = '<strong class="warn">Can\'t drop main.</strong> Select a branch tip.';
+      return;
+    }
+    branches = branches.filter(b => b.id !== selectedId);
+    selectedId = null;
+    redraw(); updateRead();
+  });
+
+  $('p2ResetTree').addEventListener('click', () => {
+    branches = []; mainWrites = 100; nextId = 1; selectedId = null;
+    redraw(); updateRead();
+  });
+
+  redraw();
+})();
+
+/* ═════════════════════════════════════════════ PANEL 3 — COLD START */
+(function() {
+  const $ = id => document.getElementById(id);
+  const idle = $('p3Idle'), wal = $('p3Wal'), cache = $('p3Cache');
+
+  function updateLabels() {
+    $('p3IdleV').textContent = `${idle.value} min`;
+    $('p3WalV').textContent = `${wal.value} MB`;
+    $('p3CacheV').textContent = `${cache.value} %`;
+  }
+  [idle, wal, cache].forEach(el => el.addEventListener('input', updateLabels));
+  updateLabels();
+
+  $('p3Fire').addEventListener('click', () => {
+    const idleV = +idle.value, walV = +wal.value, cacheV = +cache.value;
+    let state, t1, t2, t3, t4, t5;
+
+    t1 = 2; // query in always cheap
+
+    if (idleV < 5) {
+      state = 'warm';
+      t2 = 0; t3 = 0; t4 = 0; t5 = 5 + (100 - cacheV) * 0.2;
+    } else if (idleV < 15) {
+      state = 'scaled-down';
+      t2 = 80 + Math.random() * 40;
+      t3 = 30 + Math.random() * 20;
+      t4 = walV * 1.2;
+      t5 = 8 + (100 - cacheV) * 0.5;
+    } else {
+      state = 'cold';
+      t2 = 350 + Math.random() * 250; // pod boot
+      t3 = 80 + Math.random() * 40;
+      t4 = walV * 2.5;
+      t5 = 15 + (100 - cacheV) * 1.2;
+    }
+
+    const total = t1 + t2 + t3 + t4 + t5;
+    $('p3T1').textContent = `${t1.toFixed(0)} ms`;
+    $('p3T2').textContent = `${t2.toFixed(0)} ms`;
+    $('p3T3').textContent = `${t3.toFixed(0)} ms`;
+    $('p3T4').textContent = `${t4.toFixed(0)} ms`;
+    $('p3T5').textContent = `${t5.toFixed(0)} ms`;
+    $('p3Total').textContent = `${total.toFixed(0)} ms`;
+
+    // Bar fill
+    const pct = Math.min(total / 1500, 1);
+    const bar = $('p3Bar');
+    bar.setAttribute('width', 635 * pct);
+    bar.setAttribute('fill', total < 100 ? '#22c55e' : total < 500 ? '#fbbf24' : '#ef4444');
+
+    // Color step boxes by where time was spent
+    [['p3B2', t2], ['p3B3', t3], ['p3B4', t4], ['p3B5', t5]].forEach(([id, t]) => {
+      $(id).setAttribute('stroke', t > 200 ? '#ef4444' : t > 50 ? '#fbbf24' : '#22c55e');
+    });
+
+    $('p3S1').textContent = state;
+    $('p3S2').textContent = `${t2.toFixed(0)} ms`;
+    $('p3S3').textContent = `${t4.toFixed(0)} ms`;
+
+    let verdict, vClass, msg;
+    if (total < 50) { verdict = '✓ p99 < 50ms'; vClass = 'green'; msg = `<strong class="ok">Warm path · ${total.toFixed(0)} ms.</strong> Compute was hot, cache had your pages, no boot or replay needed. This is what your real-time API needs to look like.`; }
+    else if (total < 200) { verdict = 'borderline'; vClass = 'yellow'; msg = `<strong class="warn">Lukewarm · ${total.toFixed(0)} ms.</strong> Compute scaled down but pod hadn't fully evicted. OK for internal tools, risky for user-facing latency budgets.`; }
+    else { verdict = '✗ blew SLO'; vClass = 'red'; msg = `<strong class="bad">Cold · ${total.toFixed(0)} ms.</strong> Pod boot + storage attach + WAL replay all on the critical path. Fine for a dev branch. Not fine for the request that just timed out in production.`; }
+    $('p3S4').textContent = verdict;
+    $('p3S4').className = `stat-val ${vClass}`;
+    $('p3Read').innerHTML = msg;
+  });
+})();
+
+/* ═════════════════════════════════════════════ PANEL 4 — HA / REPLICAS */
+(function() {
+  const $ = id => document.getElementById(id);
+  let mode = 'ha';
+  let azDown = false;
+  let replicas = 2;
+
+  function setMode(newMode) {
+    mode = newMode;
+    $('p4ModeHA').classList.toggle('on', mode === 'ha');
+    $('p4ModeRR').classList.toggle('on', mode === 'rr');
+    $('p4HaGroup').style.display = mode === 'ha' ? '' : 'none';
+    $('p4RrGroup').style.display = mode === 'rr' ? '' : 'none';
+    $('p4ReplicaCtl').style.display = mode === 'rr' ? '' : 'none';
+    $('p4Mode').textContent = mode === 'ha' ? 'HA · SYNC STANDBY' : 'READ REPLICA · SHARED STORAGE';
+    $('p4S1').textContent = mode === 'ha' ? 'HA' : 'Read replica';
+    redraw();
+  }
+
+  function drawReplicas() {
+    const g = $('p4RrGroup');
+    g.innerHTML = '';
+    for (let i = 0; i < replicas; i++) {
+      const x = 280 + (i % 3) * 130;
+      const y = 50 + Math.floor(i / 3) * 70;
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', x); rect.setAttribute('y', y + 20);
+      rect.setAttribute('width', '110'); rect.setAttribute('height', '40');
+      rect.setAttribute('rx', '3');
+      rect.setAttribute('fill', '#111827');
+      rect.setAttribute('stroke', '#4a9eff');
+      g.appendChild(rect);
+
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', x + 55); t.setAttribute('y', y + 45);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('class', 'svg-label');
+      t.setAttribute('fill', '#4a9eff');
+      t.textContent = `Replica ${i+1}`;
+      g.appendChild(t);
+
+      // Line down to storage
+      const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      ln.setAttribute('x1', x + 55); ln.setAttribute('y1', y + 60);
+      ln.setAttribute('x2', x + 55); ln.setAttribute('y2', '220');
+      ln.setAttribute('stroke', '#fbbf24');
+      ln.setAttribute('opacity', '0.5');
+      g.appendChild(ln);
+    }
+  }
+
+  function redraw() {
+    if (mode === 'rr') drawReplicas();
+
+    // AZ status
+    if (azDown) {
+      $('p4AzA').setAttribute('stroke', '#ef4444');
+      $('p4AzA').setAttribute('opacity', '0.5');
+      $('p4Primary').setAttribute('stroke', '#ef4444');
+      $('p4PrimaryStat').textContent = 'AZ DOWN';
+      if (mode === 'ha') {
+        $('p4Standby').setAttribute('stroke', '#22c55e');
+        $('p4StandbyStat').textContent = 'PROMOTED · accepting writes';
+        $('p4S3').textContent = '99.99%';
+        $('p4S3').className = 'stat-val green';
+        $('p4Health').textContent = 'failed over';
+        $('p4Read').innerHTML = '<strong class="ok">AZ-A is gone. Standby promoted to primary in &lt; 30 s.</strong> Writes resume on the new primary, which keeps using the same shared storage. Clients reconnect via the same endpoint.';
+        $('p4Wqps').textContent = '100/s';
+      } else {
+        $('p4S3').textContent = 'OFFLINE';
+        $('p4S3').className = 'stat-val red';
+        $('p4Health').textContent = 'writes down';
+        $('p4Read').innerHTML = '<strong class="bad">AZ-A is gone — and no standby exists.</strong> Read replicas keep serving reads from the shared storage, but writes are unavailable until you fail over manually or add HA.';
+        $('p4Wqps').textContent = '0/s';
+      }
+    } else {
+      $('p4AzA').setAttribute('stroke', '#1e2d45');
+      $('p4AzA').setAttribute('opacity', '1');
+      $('p4Primary').setAttribute('stroke', '#22c55e');
+      $('p4PrimaryStat').textContent = 'accepting writes';
+      $('p4Standby') && $('p4Standby').setAttribute('stroke', '#a855f7');
+      $('p4StandbyStat') && ($('p4StandbyStat').textContent = 'replicating');
+      $('p4S3').textContent = mode === 'ha' ? '99.99%' : '99.5%';
+      $('p4S3').className = mode === 'ha' ? 'stat-val green' : 'stat-val yellow';
+      $('p4Health').textContent = 'all healthy';
+      $('p4Wqps').textContent = '100/s';
+      if (mode === 'ha') {
+        $('p4Read').innerHTML = '<strong>HA mode.</strong> Sync standby in another AZ holds an up-to-date WAL position. Writes ack only after both safekeepers confirm. Read capacity stays at 1×.';
+      } else {
+        $('p4Read').innerHTML = `<strong>Read-replica mode · ${replicas} replicas.</strong> All replicas read from the same page server — zero replication lag, zero extra storage. Reads scale linearly. Writes still go to one primary.`;
+      }
+    }
+
+    $('p4S2').textContent = mode === 'ha' ? '1× primary' : `${1 + replicas}× combined`;
+    $('p4S4').textContent = '0 ms';
+    $('p4Rqps').textContent = mode === 'ha' ? '500/s' : `${500 * (1 + replicas)}/s`;
+  }
+
+  $('p4ModeHA').addEventListener('click', () => setMode('ha'));
+  $('p4ModeRR').addEventListener('click', () => setMode('rr'));
+  $('p4Reps').addEventListener('input', e => {
+    replicas = +e.target.value;
+    $('p4RepsV').textContent = replicas;
+    redraw();
+  });
+  $('p4KillAZ').addEventListener('click', () => { azDown = true; redraw(); });
+  $('p4Recover').addEventListener('click', () => { azDown = false; redraw(); });
+
+  redraw();
+})();
+
+/* ═════════════════════════════════════════════ PANEL 5 — TOKEN TTL */
+(function() {
+  const $ = id => document.getElementById(id);
+  let clockMin = 0;
+  let running = false;
+  let speed = 6;
+  let goodCount = 0, badCount = 0, badFails = 0;
+  let timer = null;
+
+  function fmt(m) {
+    const h = Math.floor(m / 60);
+    const mm = Math.floor(m % 60);
+    return `${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+  }
+
+  function tick() {
+    if (!running) return;
+    clockMin += 0.5;
+    if (clockMin > 120) clockMin = 120;
+
+    // Cursor position: 0 -> 60 maps to x 60 -> 700; past 60, freeze at 700
+    const xPos = 60 + Math.min(clockMin, 60) * (640 / 60);
+    $('p5Cursor').setAttribute('x1', xPos);
+    $('p5Cursor').setAttribute('x2', xPos);
+    $('p5Clock').textContent = fmt(clockMin);
+    $('p5S1').textContent = fmt(clockMin);
+
+    // Each "tick" = one query attempt by both paths
+    goodCount++;
+    badCount++;
+    $('p5S2').textContent = goodCount;
+    $('p5S3').textContent = badCount;
+
+    if (clockMin >= 60) {
+      // Bad path fails after token expires
+      badFails++;
+      $('p5S4').textContent = badFails;
+      // Visual: bad line turns red
+      $('p5BadLine').setAttribute('stroke', '#ef4444');
+      $('p5BadStart').setAttribute('fill', '#ef4444');
+      $('p5BadText').textContent = 'token expired · 401 / connection drops';
+      $('p5BadText').setAttribute('fill', '#ef4444');
+      $('p5BadPill').setAttribute('stroke', '#ef4444');
+      $('p5BadStatus').textContent = '401 expired';
+      $('p5BadStatus').setAttribute('fill', '#ef4444');
+      $('p5Read').innerHTML = `<strong class="bad">Clock crossed 60 min — bad path is broken.</strong> Cached token is rejected, every new connection 401s. Good path keeps minting fresh tokens via its credential provider and is unaware anything happened.`;
+    } else {
+      $('p5Read').innerHTML = `<strong>Clock at ${fmt(clockMin)}.</strong> Both paths working. Good path rotates tokens proactively. Bad path is fine — <em>for now</em>.`;
+    }
+
+    if (clockMin >= 120) { running = false; clearInterval(timer); }
+  }
+
+  $('p5Run').addEventListener('click', () => {
+    if (running) return;
+    running = true;
+    timer = setInterval(tick, 1000 / speed);
+  });
+  $('p5Pause').addEventListener('click', () => {
+    running = false;
+    if (timer) clearInterval(timer);
+  });
+  $('p5ResetClock').addEventListener('click', () => {
+    running = false;
+    if (timer) clearInterval(timer);
+    clockMin = 0; goodCount = 0; badCount = 0; badFails = 0;
+    $('p5Cursor').setAttribute('x1', 60);
+    $('p5Cursor').setAttribute('x2', 60);
+    $('p5Clock').textContent = '00:00';
+    $('p5S1').textContent = '00:00';
+    $('p5S2').textContent = '0';
+    $('p5S3').textContent = '0';
+    $('p5S4').textContent = '0';
+    $('p5BadLine').setAttribute('stroke', '#22c55e');
+    $('p5BadStart').setAttribute('fill', '#22c55e');
+    $('p5BadText').textContent = 'queries succeeding · token still valid';
+    $('p5BadText').setAttribute('fill', '#fbbf24');
+    $('p5BadPill').setAttribute('stroke', '#22c55e');
+    $('p5BadStatus').textContent = '200 OK';
+    $('p5BadStatus').setAttribute('fill', '#22c55e');
+    $('p5Read').innerHTML = '<strong>Reset.</strong> Press <em>Run clock</em> to start the simulation.';
+  });
+  $('p5Speed').addEventListener('input', e => {
+    speed = +e.target.value;
+    $('p5SpeedV').textContent = `${speed}×`;
+    if (running) {
+      clearInterval(timer);
+      timer = setInterval(tick, 1000 / speed);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
