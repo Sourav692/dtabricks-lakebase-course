@@ -50,7 +50,7 @@ dbutils.library.restartPython()
 
 # Cell 2 — tutorial config + project creation
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.database import DatabaseProject
+from databricks.sdk.service.database import DatabaseInstance, DatabaseInstanceState
 import time
 
 w = WorkspaceClient()
@@ -66,31 +66,31 @@ TUTORIAL = {
 }
 
 # Idempotent: if the project already exists, just fetch it.
-existing = {p.name: p for p in w.database.list_database_projects()}
+existing = {p.name: p for p in w.database.list_database_instances()}
 if TUTORIAL["project_name"] in existing:
     print(f"Project '{TUTORIAL['project_name']}' already exists — reusing.")
     project = existing[TUTORIAL["project_name"]]
 else:
     print(f"Creating project '{TUTORIAL['project_name']}' (capacity=CU_1, retention=7d)...")
-    project = w.database.create_database_project(
-        project=DatabaseProject(
+    project = w.database.create_database_instance(
+        database_instance=DatabaseInstance(
             name=TUTORIAL["project_name"],
             capacity="CU_1",
             retention_window_in_days=7,
         )
-    )
+    ).result()
 
-# Poll until READY
-print("Waiting for state=READY (typically 60–90s)...")
+# Poll until AVAILABLE
+print("Waiting for state=AVAILABLE (typically 60–90s)...")
 for i in range(40):  # 40 * 5s = 200s max
-    p = w.database.get_database_project(TUTORIAL["project_name"])
-    if p.state == "READY":
+    p = w.database.get_database_instance(TUTORIAL["project_name"])
+    if p.state == DatabaseInstanceState.AVAILABLE:
         project = p
         break
     time.sleep(5)
     print(f"  [{i*5:3d}s] state={p.state}")
 else:
-    raise RuntimeError(f"Project did not reach READY: state={p.state}")
+    raise RuntimeError(f"Project did not reach AVAILABLE: state={p.state}")
 
 print()
 print(f"✅ Project ready")
@@ -119,7 +119,7 @@ from sqlalchemy import create_engine, text
 from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
-project = w.database.get_database_project(TUTORIAL["project_name"])
+project = w.database.get_database_instance(TUTORIAL["project_name"])
 
 # Generate a fresh OAuth token for this engine
 cred = w.database.generate_database_credential(
@@ -236,11 +236,28 @@ print(f"✅ Seeded {nu} users and {no} orders")
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC -- Cell 6 — register Lakebase as a Unity Catalog catalog
-# MAGIC CREATE CATALOG IF NOT EXISTS lakebase_tutorial
-# MAGIC USING DATABASE `lakebase-tutorial.databricks_postgres`
-# MAGIC OPTIONS (description = 'OLTP catalog for the Lakebase tutorial');
+# Cell 6 — register Lakebase as a Unity Catalog catalog
+from databricks.sdk.service.database import DatabaseCatalog
+
+catalog_name = "lakebase_tutorial"
+
+# Idempotent: check if the catalog already exists
+try:
+    db_catalog = w.database.get_database_catalog(catalog_name)
+    print(f"Catalog '{catalog_name}' already registered — reusing.")
+except Exception:
+    print(f"Registering Lakebase instance as UC catalog '{catalog_name}'...")
+    db_catalog = w.database.create_database_catalog(
+        catalog=DatabaseCatalog(
+            name=catalog_name,
+            database_instance_name=TUTORIAL["project_name"],
+            database_name="databricks_postgres",
+        )
+    )
+
+print(f"\u2705 UC catalog '{db_catalog.name}' registered")
+print(f"   Instance: {db_catalog.database_instance_name}")
+print(f"   Database: {db_catalog.database_name}")
 
 # COMMAND ----------
 
@@ -265,25 +282,26 @@ df.show(truncate=False)
 # COMMAND ----------
 
 # Cell 8 — create the dev branch from main
-from databricks.sdk.service.database import DatabaseBranch
+from databricks.sdk.service.database import DatabaseInstance, DatabaseInstanceRef, DatabaseInstanceState
 
 print("Creating branch 'dev' from 'main'...")
-branch = w.database.create_database_branch(
-    project_name=TUTORIAL["project_name"],
-    branch=DatabaseBranch(name="dev"),
+branch = w.database.create_database_instance(
+    database_instance=DatabaseInstance(
+        name="dev",
+        parent_instance_ref=DatabaseInstanceRef(name=TUTORIAL["project_name"]),
+        capacity="CU_1",
+    ),
 )
 
-# Poll until the branch is READY
+# Poll until the branch is AVAILABLE
 for i in range(30):
-    b = w.database.get_database_branch(
-        project_name=TUTORIAL["project_name"], branch_name="dev"
-    )
-    if b.state == "READY":
+    b = w.database.get_database_instance("dev")
+    if b.state == DatabaseInstanceState.AVAILABLE:
         branch = b
         break
     time.sleep(3)
 
-print(f"✅ Branch 'dev' ready")
+print(f"\u2705 Branch 'dev' ready")
 print(f"   Endpoint: {branch.read_write_dns}")
 
 # COMMAND ----------
@@ -340,10 +358,8 @@ print(f"✅ main branch — users={nu}, orders={no} (unchanged)")
 # COMMAND ----------
 
 # Cell 11 — clean up the dev branch
-w.database.delete_database_branch(
-    project_name=TUTORIAL["project_name"], branch_name="dev"
-)
-print("✅ Branch 'dev' deleted")
+w.database.delete_database_instance("dev")
+print("\u2705 Branch 'dev' deleted")
 
 # COMMAND ----------
 
@@ -396,23 +412,23 @@ print(f"⚠ Corrupted: user id=1 email is now '{bad}'")
 
 # Cell 14 — create a recovery branch from T_GOOD
 print(f"Creating branch 'recovery' FROM TIMESTAMP {T_GOOD.isoformat()}...")
-recovery = w.database.create_database_branch(
-    project_name=TUTORIAL["project_name"],
-    branch=DatabaseBranch(
+recovery = w.database.create_database_instance(
+    database_instance=DatabaseInstance(
         name="recovery",
-        parent_branch_name="main",
-        parent_timestamp=T_GOOD,  # branch-from-timestamp
+        capacity="CU_1",
+        parent_instance_ref=DatabaseInstanceRef(
+            name=TUTORIAL["project_name"],
+            branch_time=T_GOOD.isoformat(),  # point-in-time branch
+        ),
     ),
 )
 for i in range(30):
-    b = w.database.get_database_branch(
-        project_name=TUTORIAL["project_name"], branch_name="recovery"
-    )
-    if b.state == "READY":
+    b = w.database.get_database_instance("recovery")
+    if b.state == DatabaseInstanceState.AVAILABLE:
         recovery = b; break
     time.sleep(3)
 
-print(f"✅ Branch 'recovery' ready @ {recovery.read_write_dns}")
+print(f"\u2705 Branch 'recovery' ready @ {recovery.read_write_dns}")
 
 # COMMAND ----------
 
@@ -455,10 +471,8 @@ print(f"✅ main fixed: user id=1 email is now '{fixed}'")
 # COMMAND ----------
 
 # Cell 16 — clean up
-w.database.delete_database_branch(
-    project_name=TUTORIAL["project_name"], branch_name="recovery"
-)
-print("✅ Branch 'recovery' deleted")
+w.database.delete_database_instance("recovery")
+print("\u2705 Branch 'recovery' deleted")
 
 # COMMAND ----------
 
@@ -468,12 +482,14 @@ print("✅ Branch 'recovery' deleted")
 # COMMAND ----------
 
 # Cell 17 — final checklist
+from databricks.sdk.service.database import DatabaseInstanceState
+
 checks = []
 
-# 1. Project exists and is READY
+# 1. Project exists and is AVAILABLE
 try:
-    p = w.database.get_database_project(TUTORIAL["project_name"])
-    checks.append(("Project provisioned", f"state={p.state}", p.state == "READY"))
+    p = w.database.get_database_instance(TUTORIAL["project_name"])
+    checks.append(("Project provisioned", f"state={p.state}", p.state == DatabaseInstanceState.AVAILABLE))
 except Exception as e:
     checks.append(("Project provisioned", str(e)[:30], False))
 
@@ -481,7 +497,7 @@ except Exception as e:
 try:
     with engine.connect() as c:
         v = c.execute(text("SELECT version()")).scalar()
-    checks.append(("Engine + SQL works", v.split(",")[0], "PostgreSQL 17" in v))
+    checks.append(("Engine + SQL works", v.split(",")[0], "PostgreSQL" in v))
 except Exception as e:
     checks.append(("Engine + SQL works", str(e)[:30], False))
 
@@ -522,15 +538,15 @@ print("=" * 70)
 print(f"{'CHECK':<28} {'DETAIL':<28} STATUS")
 print("-" * 70)
 for name, detail, ok in checks:
-    icon = "✅" if ok else "❌"
+    icon = "\u2705" if ok else "\u274c"
     print(f"{name:<28} {str(detail)[:28]:<28} {icon}")
 print("=" * 70)
 passed = sum(1 for _, _, ok in checks if ok)
 total = len(checks)
 if passed == total:
-    print(f"\n🎯 ALL {total} CHECKS PASSED — Module 3 complete.")
+    print(f"\n\U0001f3af ALL {total} CHECKS PASSED \u2014 Module 3 complete.")
 else:
-    print(f"\n⚠ {passed}/{total} passed. Resolve the ❌ rows before Module 4.")
+    print(f"\n\u26a0 {passed}/{total} passed. Resolve the \u274c rows before Module 4.")
 
 # COMMAND ----------
 
@@ -549,15 +565,15 @@ if CLEANUP:
     spark.sql("DROP CATALOG IF EXISTS lakebase_tutorial CASCADE")
 
     print(f"Deleting Lakebase project '{TUTORIAL['project_name']}'...")
-    w.database.delete_database_project(name=TUTORIAL["project_name"])
-    print("✅ Cleanup complete — billing stops within minutes.")
+    w.database.delete_database_instance(TUTORIAL["project_name"])
+    print("\u2705 Cleanup complete \u2014 billing stops within minutes.")
 else:
-    print("⏸ Cleanup skipped. The project will be reused in Module 4.")
+    print("\u23f8 Cleanup skipped. The project will be reused in Module 4.")
     print(f"   Project: {TUTORIAL['project_name']}")
     print(f"   Endpoint: {project.read_write_dns}")
     print()
     print("   To delete later, set CLEANUP=True and re-run this cell, OR")
-    print("   visit Compute → Lakebase in the workspace UI.")
+    print("   visit Compute \u2192 Lakebase in the workspace UI.")
 
 # COMMAND ----------
 
