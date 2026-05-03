@@ -113,6 +113,30 @@ That sentence is doing a lot of work. Read it slowly:
 - **Copy-on-write snapshot** — no pages are physically copied at creation time. The branch *points at* the parent's pages until it diverges.
 - **At a specific point in time** — you can branch from `now()`, from 5 minutes ago, or from any LSN inside the retention window.
 
+### What is an LSN?
+
+Before explaining the branch lifecycle visually, you need to understand **LSN — Log Sequence Number**.
+
+An LSN is a **monotonically increasing integer** that marks a precise position in the WAL (Write-Ahead Log) stream. Every `INSERT`, `UPDATE`, `DELETE`, and every committed transaction advances the LSN by some amount. Think of it as a **universal clock for the database**, measured not in wall-clock time but in **bytes of WAL written**.
+
+```
+Initial state         First writes          More writes
+     │                    │                     │
+LSN 0 ──────────────── LSN 100 ──────────────── LSN 200 ────▶  (grows forever)
+```
+
+Why does LSN matter for branches? Because the Page Server can reconstruct **any page at any LSN** within the retention window. When you say "branch from 5 minutes ago," the system translates that timestamp to the highest LSN committed before that moment — and the Page Server serves the branch that exact version of the data.
+
+LSN is also more precise than a timestamp:
+
+| | Timestamp | LSN |
+|---|---|---|
+| **Precision** | Millisecond — multiple transactions can share a timestamp | Exact — every commit has a unique LSN |
+| **Monotonic?** | No — clock skew, NTP adjustments can reorder | Yes — always increases |
+| **Used internally?** | No | Yes — the Page Server works in LSNs |
+
+When you pass a `parent_timestamp` to the Lakebase API, it is converted internally to the **highest LSN committed before that timestamp**. That is the point your branch is created from.
+
 ### Branch lifecycle
 
 ```
@@ -137,12 +161,81 @@ That sentence is doing a lot of work. Read it slowly:
         new pages become parent     compute released, deltas GC'd
 ```
 
+Here is how LSN labels map to a realistic branch tree with `main` producing commits at LSN 100, 200, 300, 400, and 500:
+
+```
+main:  ●──────────●──────────●──────────●──────────●
+    LSN 100    LSN 200    LSN 300    LSN 400    LSN 500
+
+               │              │           │
+               │ pr-feat       │ restore-T  │ ci-test
+               ▼              ▼           ▼
+        ●──●──●──●       ●──●──●      ●──●──● ✕ drop
+     (schema migration) (recovery     (ephemeral
+      → promote→LSN400)  branch)       CI clone)
+```
+
+- **`pr-feat`** is opened off `main` at **LSN 200**. Schema migration runs here. Integration tests run here. When CI is green, this branch is promoted — its pages become the new `main` at around LSN 400.
+- **`restore-T`** is opened off `main` at **LSN 300** — just before a mistake that happened at LSN 350 (a dropped table). The branch sees the world as it was before the disaster.
+- **`ci-test`** is opened off `main` at **LSN 400**. Runs the full test suite on an isolated, writable copy. Dropped when the job finishes.
+
 A branch starts as a pure pointer — zero copied data. As writes occur on the branch, **new page versions are written to the storage layer attributed to the branch**. The parent's pages are unchanged. This is exactly how copy-on-write filesystems and Git work.
 
 When you're done, you either:
 
 - **Promote** the branch — its page versions become the new "main" view (e.g., a successful blue-green deploy).
 - **Drop** the branch — the branch's compute is released and the branch-only deltas are garbage collected. The parent is unaffected.
+
+### What "writable copy" means
+
+The phrase *"writable copy"* appears frequently in branch descriptions and is worth being precise about.
+
+A branch is **not** a read-only snapshot. It is a full Postgres database that:
+
+1. **Sees all the data from the parent at the branch LSN** — full read access to everything as it was at that point.
+2. **Accepts new writes** — `INSERT`, `UPDATE`, `DELETE`, `ALTER TABLE`, `DROP TABLE`, anything normal Postgres accepts.
+3. **Keeps those writes isolated** — changes on the branch **do not affect the parent** (`main`) or any sibling branch.
+
+The key mechanism is **Copy-on-Write (COW)**:
+
+```
+restore-T tries to UPDATE Page A: "John, age=30" → "John, age=31"
+
+Step 1: Page Server creates a NEW version of Page A, attributed to restore-T
+        Page A @ LSN 301 (restore-T only): "John, age=31"   ← NEW
+
+Step 2: Original is untouched
+        Page A @ LSN 300 (shared): "John, age=30"           ← main still sees this
+
+Step 3: restore-T reads Page A → "John, age=31"
+        main reads Page A → "John, age=30"
+```
+
+Only the pages you **actually modify** are ever duplicated — and only at the moment of modification. Pages never written on a branch cost nothing extra.
+
+This is also what makes disaster recovery actionable. A read-only snapshot lets you *see* the past. A writable copy lets you *fix* the present using the past:
+
+```sql
+-- On restore-T branch (writable, before the dropped table)
+SELECT id, data FROM orders WHERE id IN (101, 102, 103);
+-- Rows exist here — they were deleted from main after LSN 300
+
+-- Back on main (production)
+INSERT INTO orders
+SELECT id, data
+FROM dblink('host=restore-T-endpoint ...', 'SELECT id, data FROM orders WHERE id IN (101,102,103)')
+  AS t(id int, data text);
+-- Cherry-pick the lost rows back
+```
+
+| | Read-Only Snapshot | Writable Copy (Lakebase Branch) |
+|---|---|---|
+| Query past data | ✅ | ✅ |
+| Run `INSERT / UPDATE / DELETE` | ❌ | ✅ |
+| Run schema migrations | ❌ | ✅ |
+| Changes affect parent | N/A | Never |
+| Pages physically copied at creation | Maybe | No — COW |
+| Own connection string | Maybe | ✅ Always |
 
 ### What branches are for
 
@@ -185,7 +278,10 @@ This means an idle ephemeral CI branch with scale-to-zero costs roughly **the si
 - **Treating a branch as a backup.** Backups should outlive branches. The retention window covers point-in-time recovery; branches are working copies.
 
 > **🎯 Checkpoint for 2.2**
-> Be able to explain in one breath: *a branch is a new compute pointing at a copy-on-write snapshot of storage; nothing is copied at creation; writes diverge as new page versions; cost is compute + branch-unique deltas.*
+> Three things to be able to say without hesitation:
+> 1. *An LSN is a monotonically increasing WAL position — the database's universal clock. The Page Server can reconstruct any page at any LSN within the retention window.*
+> 2. *A branch is a new compute pointing at a copy-on-write snapshot of storage at a specific LSN; nothing is copied at creation; writes diverge as new page versions; cost is compute + branch-unique deltas.*
+> 3. *"Writable copy" means the branch is a full read-write Postgres database — not a read-only snapshot. COW means only the pages you actually write are ever duplicated, only at the moment they diverge.*
 
 ---
 
@@ -255,14 +351,91 @@ If you point a customer-facing real-time API (recommendation, fraud, search) at 
 
 The fix is straightforward: **disable scale-to-zero on the production primary**. You're paying for compute 24/7, but your p99 is honest. Module 9 covers this in the "Best Practices" topic.
 
-### Page warming after cold start
+### Page warming after cold start — in depth
 
-Even after the Postgres process is up, the **local buffer cache is empty**. The first queries pull pages from the page server. Hot pages typically sit in the page server's own memory tier and arrive in single-digit ms; truly cold pages (rarely accessed) come from object storage and take longer.
+Even after the Postgres process is up and the cold-start completes, the **local buffer cache is empty**. This produces a second performance effect that is distinct from the cold-start itself but equally important to understand.
 
-In practice this means: even after the cold-start completes, the *first minute* of queries on a freshly-woken branch is slower than steady-state. After that, the working set is cached locally and you're back to normal Postgres latency profiles.
+#### What the buffer cache is
+
+Postgres keeps a pool of 8KB page slots in RAM called `shared_buffers`. When Postgres needs to read a row it checks:
+
+```
+Does this 8KB page exist in shared_buffers?
+
+  YES → Read directly from RAM.             (~0.1 ms)
+  NO  → Fetch from Page Server over network. (~2–5 ms per page)
+        Then store it in shared_buffers for next time.
+```
+
+In classical Postgres (locally attached disk), a cache miss costs ~0.1 ms (SSD). In Lakebase, a cache miss costs ~2–5 ms (network round trip to the Page Server). **The steady-state latency is identical** once the cache is warm. The difference only matters during the warming window.
+
+#### What happens during warm-up, step by step
+
+```
+t=0s  Query 1: SELECT * FROM orders WHERE customer_id = 42
+               ↓
+               Cache = empty → MISS on every page touched
+               Fetches index page from Page Server  (~3ms)
+               Fetches data page 1847 from Page Server (~3ms)
+               Fetches data page 1848 from Page Server (~3ms)
+               Returns result. Total: ~15ms (vs ~0.5ms steady-state)
+               Pages 1847, 1848, index page now in local cache.
+
+t=5s  Query 2: SELECT * FROM orders WHERE customer_id = 43
+               ↓
+               Index page → HIT ✓  (already cached)
+               Data page 1849 → MISS (different row)
+               Slightly faster than Query 1.
+
+t=30s Cache hit rate ≈ 60%   p99 ≈ 8ms
+t=60s Cache hit rate ≈ 95%+  p99 ≈ 2ms  ← back to steady-state
+```
+
+#### Why it only takes ~60 seconds and not hours
+
+Your workload does not touch every page equally. In any real database:
+
+```
+Total pages in database:               100,000 pages  (800 MB)
+Pages touched by 95% of queries
+(the "hot working set"):                 3,000 pages  ( 24 MB)
+```
+
+The buffer cache only needs to fill with the **hot working set** — the pages your actual queries repeatedly access. That is a small fraction of the total data. Once those pages are resident in RAM, almost every page lookup is a cache hit.
+
+#### What "p99 latency is elevated" means
+
+**p99** = the latency that 99% of queries are faster than = the worst case your real users see.
+
+```
+During warm-up (~0–60 seconds after cold start):
+
+  p50 (median query):   2 ms   ← most queries happen to hit cached pages
+  p99 (slowest 1%):    25 ms   ← unlucky queries still hitting cold pages
+
+After warm-up (steady state):
+
+  p50:  0.3 ms
+  p99:  2 ms   ← even the tail is fast; almost everything is in RAM
+```
+
+p99 spikes are the symptom you will see on your monitoring charts after a cold-start event. The spike is not random noise — it corresponds exactly to the suspension window, and it resolves naturally over the first minute of traffic.
+
+#### Summary: two-phase performance after scale-to-zero
+
+| Phase | Duration | What's happening | Latency profile |
+|---|---|---|---|
+| **Cold start** | 3–8 seconds | Compute boots, attaches to Page Server | Connection held by pgbouncer |
+| **Cache warming** | ~60 seconds | Hot pages accumulate in local buffer cache | p99 elevated, p50 normal-ish |
+| **Steady state** | Indefinitely | Working set is cached | Full Postgres performance |
+
+The fix for latency-sensitive workloads is the same as for cold start: **disable scale-to-zero on the production primary**. Both effects disappear when compute never suspends.
 
 > **🎯 Checkpoint for 2.3**
-> Two things to remember verbatim: *(1) cold start ≈ 3–8s for a small DB; (2) disable scale-to-zero on the production primary, enable it on dev/preview/CI.* Both come up in customer design reviews.
+> Three things to remember verbatim:
+> 1. *Cold start ≈ 3–8s for a small DB — compute boot + storage attach.*
+> 2. *Cache warming adds ~60 seconds of elevated p99 after the cold start, as the local buffer cache fills with the hot working set. p50 recovers faster.*
+> 3. *Disable scale-to-zero on the production primary. Enable it on dev/preview/CI.* Both effects (cold start and cache warming) disappear when compute never suspends.
 
 ---
 
@@ -456,8 +629,8 @@ These are workspace-level configurations, not Lakebase-specific knobs. Lakebase 
 You should now be able to walk a customer through the architecture in front of a whiteboard:
 
 - **Storage and compute are separated.** Storage is durable, versioned, multi-tenant. Compute is stateless, elastic, lazily fetches pages. (2.1)
-- **Branches are Git for data.** A branch is a new compute pointing at a copy-on-write snapshot. No data copied. Cost ≈ compute + branch-unique deltas. (2.2)
-- **Scale-to-zero is real but not free.** Cold start ≈ 3–8s. Disable on production primary. Enable on dev/preview/CI. (2.3)
+- **Branches are Git for data.** A branch is a new compute pointing at a copy-on-write snapshot **at a specific LSN**. LSN is the WAL position that uniquely identifies every committed state. No data is copied at creation. "Writable copy" means the branch is a full read-write Postgres database — COW ensures diverging writes never touch the parent. Cost ≈ compute + branch-unique deltas. (2.2)
+- **Scale-to-zero is real but not free.** Cold start ≈ 3–8s (compute boot + storage attach). After the cold start, cache warming adds ~60 seconds of elevated p99 as the local buffer cache fills with the hot working set. Disable both effects by disabling scale-to-zero on the production primary. Enable on dev/preview/CI. (2.3)
 - **HA protects compute, not storage.** Sync standby in another AZ. <30s failover. Connection strings stable. Read replicas share storage = zero replication lag. (2.4)
 - **OAuth tokens are the password.** ~1h TTL. Credential providers refresh automatically. Hardcoded tokens silently break after an hour. (2.5)
 
