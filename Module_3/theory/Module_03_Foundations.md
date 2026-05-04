@@ -1,7 +1,6 @@
 # Module 03 — Your First Lakebase Project: Concepts Behind the Lab
 
-> **Level:** Beginner → Intermediate · **Duration:** ~75 min (theory) + ~3h (hands-on lab) · **Format:** Conceptual primer
-> **Coverage:** Topics 3.1 → 3.6 — the *why* behind every step you'll execute in the Module 3 lab.
+> **Level:** Beginner → Intermediate · **Duration:** \~75 min (theory) + \~3h (hands-on lab) · **Format:** Conceptual primer **Coverage:** Topics 3.1 → 3.6 — the *why* behind every step you'll execute in the Module 3 lab.
 
 ---
 
@@ -65,7 +64,7 @@ The five things, in order:
 1. **API accepts the request** — the control plane validates your entitlement, capacity choice, and name uniqueness within the workspace. Returns a `uid` immediately. State: `PROVISIONING`.
 2. **Storage allocation** — a slice of the multi-tenant page server is reserved for your project. Page versions for the entire retention window will live here. This is *not* a per-customer S3 bucket; it's a logical tenant on a shared, hardened page server.
 3. **Compute spin-up** — a Postgres process at your chosen capacity (`CU_1` = 1 compute unit) is launched and attached to the storage tenant.
-4. **`main` branch creation** — every new project gets a `main` branch automatically. The branch is just a pointer record; no data movement.
+4. `main` **branch creation** — every new project gets a `main` branch automatically. The branch is just a pointer record; no data movement.
 5. **DNS publishing** — `read_write_dns` becomes resolvable and the connection endpoint accepts TLS handshakes. State transitions to `READY`.
 
 Total wall-clock: typically 60–90 seconds. The SDK call itself returns in under a second; the project object you receive has `uid` populated but you cannot connect until DNS resolves.
@@ -145,12 +144,12 @@ engine = create_engine(url, pool_pre_ping=True)
 
 Two things to internalize:
 
-- **`pool_pre_ping=True`** — before handing a pooled connection to your code, SQLAlchemy sends a cheap `SELECT 1`. If it fails (e.g., token expired between checkouts), SQLAlchemy discards and reopens. Costs ~1ms per checkout, saves you from the trap.
+- `pool_pre_ping=True` — before handing a pooled connection to your code, SQLAlchemy sends a cheap `SELECT 1`. If it fails (e.g., token expired between checkouts), SQLAlchemy discards and reopens. Costs \~1ms per checkout, saves you from the trap.
 - **Generate fresh credentials per-engine, not per-process** — when an engine is recreated (in long-running apps, on a TTL or after a failure), a fresh token is generated. Never bake a token into a config file.
 
 ### What raw psycopg looks like (and why we don't recommend it)
 
-Raw `psycopg.connect(host=..., user=..., password=token)` works for one-shot scripts. It does **not** work for anything that lives more than ~50 minutes. The lab uses SQLAlchemy because every later module's code (vector search, agent memory, app backend) needs pool management anyway.
+Raw `psycopg.connect(host=..., user=..., password=token)` works for one-shot scripts. It does **not** work for anything that lives more than \~50 minutes. The lab uses SQLAlchemy because every later module's code (vector search, agent memory, app backend) needs pool management anyway.
 
 ---
 
@@ -190,8 +189,8 @@ Customers, especially ones coming from proprietary databases, hear "managed Post
 
 Three things in this schema deserve highlighting because they pay off in later modules:
 
-- **`BIGSERIAL` for IDs.** Standard auto-incrementing 64-bit integer. Synced tables in Module 4 require a primary key; using `BIGSERIAL` from day one means you don't have to retrofit.
-- **`TIMESTAMPTZ DEFAULT now()`.** Always use timezone-aware timestamps in Lakebase. The page server's audit metadata is in UTC; mixing in naive `TIMESTAMP` columns leads to off-by-one debugging at 3am.
+- `BIGSERIAL` **for IDs.** Standard auto-incrementing 64-bit integer. Synced tables in Module 4 require a primary key; using `BIGSERIAL` from day one means you don't have to retrofit.
+- `TIMESTAMPTZ DEFAULT now()`**.** Always use timezone-aware timestamps in Lakebase. The page server's audit metadata is in UTC; mixing in naive `TIMESTAMP` columns leads to off-by-one debugging at 3am.
 - **Two indexes with different access patterns.** B-tree on `user_id` for point lookups ("show me this user's orders"). BRIN on `placed_at` because order time is monotonically increasing — BRIN is dramatically smaller and faster for time-range scans on append-only tables.
 
 ### Indexing reminder for Lakebase specifically
@@ -199,13 +198,13 @@ Three things in this schema deserve highlighting because they pay off in later m
 There is no Lakebase-specific indexing hint. `CREATE INDEX ... USING <type>` works exactly as in any modern Postgres:
 
 | Index type | Use when |
-|---|---|
+| --- | --- |
 | **B-tree** (default) | Equality, range scans on selective columns |
 | **BRIN** | Massive append-only columns where values correlate with insertion order (timestamps, monotonic IDs) |
 | **GIN** | JSONB, array containment, full-text search |
 | **HNSW** (via `pgvector`) | Vector similarity — you'll use this in Module 5 |
 
-The only Lakebase-specific advice: **don't over-index on the `main` branch in dev**. Branches share storage; indexes on `main` cost storage on every branch you ever spin off it. Build indexes on the production branch you'll eventually promote, not on the playground.
+The only Lakebase-specific advice: **don't over-index on the** `main` **branch in dev**. Branches share storage; indexes on `main` cost storage on every branch you ever spin off it. Build indexes on the production branch you'll eventually promote, not on the playground.
 
 ---
 
@@ -398,12 +397,12 @@ These six capabilities are what every later module assumes you have working hand
 ## Common pitfalls — the things RSAs forget
 
 | Pitfall | Why it happens | Fix |
-|---|---|---|
-| `read_write_dns` is `None` immediately after create | DNS publishes ~5–10s after `READY` | Poll project state until `READY`, then read `read_write_dns` |
+| --- | --- | --- |
+| `read_write_dns` is `None` immediately after create | DNS publishes \~5–10s after `READY` | Poll project state until `READY`, then read `read_write_dns` |
 | Connection works at first, fails after an hour | Hardcoded token in connection string | Always use `pool_pre_ping=True` and regenerate creds via SDK |
 | `CREATE INDEX` is slow on a small table | Table not actually small — old page versions counted | Confirm with `pg_total_relation_size`; consider `VACUUM FULL` on dev branches |
 | UC catalog created but DBSQL can't see tables | Permissions not granted in UC | `GRANT USE CATALOG, BROWSE ON CATALOG ...` to your user/group |
-| Branch creation hangs > 60s | First branch in a fresh project warming caches | Normal for the first one; subsequent branches are seconds |
+| Branch creation hangs &gt; 60s | First branch in a fresh project warming caches | Normal for the first one; subsequent branches are seconds |
 | PIT restore returns "timestamp out of retention window" | `retention_window_in_days` set too low at provision time | Cannot fix retroactively; recreate project with larger window for prod |
 
 ---

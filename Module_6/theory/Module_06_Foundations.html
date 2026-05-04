@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 06 — Lakebase as Memory Store for AI Agents: Concepts Behind the Lab</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #05080f;
@@ -513,6 +516,414 @@ td strong { color: var(--text); }
   .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
   .meta-item:last-child { border-bottom: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EDITORIAL OVERRIDE LAYER — Databricks Editorial-Technical theme.
+   Re-skins the dark-mode CSS above using cascade order; every rule below
+   targets the same selectors but maps them to the warm "paper" palette and
+   to Fraunces / Instrument Sans / JetBrains Mono.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --paper:       #F4F1EA;
+  --paper-deep:  #ECE6D9;
+  --paper-card:  #FBF9F4;
+  --ink:         #0E1F26;
+  --ink-soft:    #3A4A52;
+  --ink-mute:    #6A7880;
+  --lava:        #FF3621;
+  --lava-deep:   #C72D1A;
+  --lava-soft:   rgba(255, 54, 33, 0.08);
+  --tone-rust:        #B0532E;
+  --tone-rust-bg:     rgba(176, 83, 46, 0.08);
+  --tone-rust-line:   rgba(176, 83, 46, 0.30);
+  --tone-moss:        #4A6F3F;
+  --tone-moss-bg:     rgba(74, 111, 63, 0.09);
+  --tone-moss-line:   rgba(74, 111, 63, 0.28);
+  --tone-ochre:       #A37B1F;
+  --tone-ochre-bg:    rgba(163, 123, 31, 0.10);
+  --tone-ochre-line:  rgba(163, 123, 31, 0.30);
+  --tone-sepia:       #7A5F3A;
+  --tone-sepia-bg:    rgba(122, 95, 58, 0.09);
+  --tone-sepia-line:  rgba(122, 95, 58, 0.28);
+  --tone-clay:        #8E3A28;
+  --tone-clay-bg:     rgba(142, 58, 40, 0.07);
+  --tone-clay-line:   rgba(142, 58, 40, 0.25);
+  --rule:        rgba(14, 31, 38, 0.18);
+  --rule-faint:  rgba(14, 31, 38, 0.10);
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:    "Instrument Sans", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* re-map the dark-mode tokens declared at the top of this file */
+  --bg:            var(--paper);
+  --surface:       var(--paper-card);
+  --surface2:      var(--paper-deep);
+  --surface3:      var(--paper-deep);
+  --border:        var(--rule-faint);
+  --border2:       var(--rule);
+  --accent-orange: var(--lava);
+  --accent-teal:   var(--tone-moss);
+  --accent-blue:   var(--tone-rust);
+  --accent-purple: var(--tone-sepia);
+  --accent-yellow: var(--tone-ochre);
+  --accent-green:  var(--tone-moss);
+  --accent-red:    var(--lava-deep);
+  --text:          var(--ink);
+  --text-dim:      var(--ink-soft);
+  --text-muted:    var(--ink-mute);
+}
+
+/* base */
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background-image:
+    radial-gradient(1100px 550px at 92% -8%,  rgba(255, 54, 33, 0.05), transparent 60%),
+    radial-gradient(900px 500px  at -8% 108%, rgba(199, 167, 122, 0.20), transparent 60%);
+  background-attachment: fixed;
+}
+p { color: var(--ink-soft); line-height: 1.75; }
+p strong { color: var(--ink); font-weight: 600; }
+p em { color: var(--lava-deep); font-style: italic; }
+strong, b { color: var(--ink); }
+a { color: var(--lava); }
+a:hover { color: var(--lava-deep); }
+
+/* header / hero */
+header {
+  border-bottom: 1px solid var(--rule-faint);
+  background: var(--paper);
+}
+header::before {
+  background:
+    radial-gradient(800px 300px at 100% 0%, var(--lava-soft), transparent 60%),
+    radial-gradient(600px 240px at 0% 100%, rgba(199, 167, 122, 0.18), transparent 60%);
+}
+.crumb { color: var(--ink-mute); font-family: var(--font-mono); }
+.crumb .tag {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+}
+.crumb .sep { color: var(--ink-mute); }
+
+h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 420;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+h1 em { color: var(--lava); font-style: italic; }
+
+.lede {
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+}
+
+.meta-row { border-color: var(--rule-faint); }
+.meta-item { border-right-color: var(--rule-faint); }
+.meta-val { color: var(--lava-deep); font-family: var(--font-mono); }
+.meta-lbl { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* main */
+main { color: var(--ink); }
+
+/* TOC */
+.toc {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+}
+.toc-label { color: var(--lava); font-family: var(--font-mono); }
+.toc li {
+  border-bottom-color: var(--rule-faint);
+  color: var(--ink-soft);
+  /* override the generic li padding from the dark-mode block above */
+  padding: 8px 0;
+}
+.toc li::before {
+  /* the generic li::before above sets position:absolute + content:'›'.
+     Reset to a static, in-flow counter so it doesn't overlap link text. */
+  position: static;
+  content: counter(tc, decimal-leading-zero);
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  min-width: 26px;
+  display: inline-block;
+  top: auto;
+  left: auto;
+}
+.toc a { color: var(--ink); }
+.toc a:hover { color: var(--lava); }
+.toc .dur { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* topic banner */
+section.topic { color: var(--ink); }
+.topic-id {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+  font-family: var(--font-mono);
+}
+.topic-banner .line { background: var(--rule-faint); }
+.topic-banner .type { color: var(--tone-moss); font-family: var(--font-mono); }
+
+h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "SOFT" 30, "wght" 480;
+  color: var(--ink);
+}
+h2 em { color: var(--lava); font-style: italic; }
+
+h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 24, "SOFT" 25, "wght" 520;
+  color: var(--ink);
+}
+
+h4 {
+  color: var(--tone-moss);
+  font-family: var(--font-mono);
+}
+
+/* lists — keep arrow bullets in lava */
+li { color: var(--ink-soft); }
+li::before { color: var(--lava); }
+ol li::before { color: var(--lava); font-family: var(--font-mono); }
+
+/* code */
+code {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip .kw { color: var(--tone-sepia); }
+pre.code-snip .st { color: var(--tone-moss); }
+pre.code-snip .nu { color: var(--tone-ochre); }
+pre.code-snip .cm { color: var(--ink-mute); }
+pre.code-snip .fn { color: var(--tone-rust); }
+
+/* tables */
+.tbl-wrap { border-color: var(--rule-faint); background: var(--paper-card); }
+table { background: var(--paper-card); }
+th {
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  border-bottom-color: var(--rule);
+}
+td { color: var(--ink-soft); border-bottom-color: var(--rule-faint); }
+td strong { color: var(--ink); }
+.yes { color: var(--tone-moss); }
+.no  { color: var(--lava-deep); }
+.warn { color: var(--tone-ochre); }
+
+/* callouts */
+.callout { font-family: var(--font-body); }
+.callout strong { color: var(--ink); }
+.callout-note     { background: var(--tone-rust-bg);  border-left-color: var(--tone-rust);  color: var(--ink); }
+.callout-note     .callout-label { color: var(--tone-rust);  font-family: var(--font-mono); }
+.callout-warn     { background: var(--tone-ochre-bg); border-left-color: var(--tone-ochre); color: var(--ink); }
+.callout-warn     .callout-label { color: var(--tone-ochre); font-family: var(--font-mono); }
+.callout-checkpoint { background: var(--tone-moss-bg); border-left-color: var(--tone-moss); color: var(--ink); }
+.callout-checkpoint .callout-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* diagram shell */
+.diagram {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+}
+.diagram-header {
+  background: var(--paper-deep);
+  border-bottom-color: var(--rule-faint);
+}
+.diagram-title { color: var(--lava); font-family: var(--font-mono); }
+.diagram-hint { color: var(--ink-mute); font-family: var(--font-mono); }
+.diagram-hint::before { color: var(--tone-moss); }
+.diagram-info {
+  background: rgba(74, 111, 63, 0.05);
+  border-top-color: var(--rule-faint);
+  color: var(--ink-soft);
+}
+.diagram-info-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* stepper */
+.stepper {
+  background: var(--paper);
+  border-color: var(--rule-faint);
+}
+.stepper button {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.stepper button.active {
+  background: var(--lava);
+  color: var(--paper);
+}
+.stepper button:hover:not(.active) { color: var(--ink); }
+
+/* blockquote */
+blockquote {
+  border-left-color: var(--lava) !important;
+  color: var(--ink-soft) !important;
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+/* wrap-up */
+.wrap-up {
+  background: linear-gradient(135deg, var(--paper-card) 0%, var(--paper-deep) 100%);
+  border-color: var(--rule-faint);
+}
+.wrap-up::before {
+  background: radial-gradient(circle, rgba(255, 54, 33, 0.10) 0%, transparent 70%);
+}
+.wrap-up h3 { color: var(--ink); font-family: var(--font-display); font-style: italic; }
+.wrap-up h3 em { color: var(--lava); }
+
+/* progress bar */
+.progress { background: var(--lava); }
+
+/* scrollbar / selection */
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+::selection { background: var(--lava); color: var(--paper); }
+
+/* ── SVG color overrides ─────────────────────────────────────────────────
+   Re-map every dark-mode hex literal used in inline <svg> markup (and in
+   the JS that re-paints diagrams on stepper change) to the warm palette.
+   Attribute selectors stay reactive when JS calls setAttribute. */
+svg [fill="#05080f"]  { fill: var(--paper); }
+svg [fill="#0b0f1a"]  { fill: var(--paper); }
+svg [fill="#111827"]  { fill: var(--paper-card); }
+svg [fill="#1a2235"]  { fill: var(--paper-card); }
+svg [fill="#243550"]  { fill: var(--paper-deep); }
+svg [fill="#1e2d45"]  { fill: var(--paper-deep); }
+svg [fill="#0b1a14"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0b1a18"]  { fill: var(--tone-moss-bg); }
+svg [fill="#1a1014"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#e8edf5"]  { fill: var(--ink); }
+svg [fill="#8899bb"]  { fill: var(--ink-soft); }
+svg [fill="#4a5878"]  { fill: var(--ink-mute); }
+svg [fill="#fff"]     { fill: var(--paper); }
+svg [fill="#ffffff"]  { fill: var(--paper); }
+svg [fill="#ff6b35"]  { fill: var(--lava); }
+svg [fill="#22c55e"]  { fill: var(--tone-moss); }
+svg [fill="#ef4444"]  { fill: var(--lava-deep); }
+svg [fill="#fbbf24"]  { fill: var(--tone-ochre); }
+svg [fill="#a855f7"]  { fill: var(--tone-sepia); }
+svg [fill="#4a9eff"]  { fill: var(--tone-rust); }
+svg [fill="#00bfa5"]  { fill: var(--tone-moss); }
+
+svg [stroke="#243550"]  { stroke: var(--rule); }
+svg [stroke="#1e2d45"]  { stroke: var(--rule-faint); }
+svg [stroke="#ff6b35"]  { stroke: var(--lava); }
+svg [stroke="#22c55e"]  { stroke: var(--tone-moss); }
+svg [stroke="#ef4444"]  { stroke: var(--lava-deep); }
+svg [stroke="#fbbf24"]  { stroke: var(--tone-ochre); }
+svg [stroke="#a855f7"]  { stroke: var(--tone-sepia); }
+svg [stroke="#4a9eff"]  { stroke: var(--tone-rust); }
+svg [stroke="#00bfa5"]  { stroke: var(--tone-moss); }
+svg [stroke="#8899bb"]  { stroke: var(--ink-soft); }
+
+/* push inline-styled SVG typography to the editorial fonts */
+svg text[font-family*="Playfair"]     { font-family: var(--font-display); font-style: italic; }
+svg text[font-family*="IBM Plex Mono"] { font-family: var(--font-mono); }
+
+/* mobile */
+
+/* Additional dark-mode hex literals introduced by Modules 1, 2, 4, 5, 6, 7, 8, 9
+   — extends the base hex remap above with module-specific warm equivalents. */
+svg [fill="#1a1209"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a1810"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1208"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1611"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1612"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a230a"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a2a1f"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0a1f1c"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d1f17"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2010"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2925"]  { fill: var(--tone-moss-bg); }
+svg [fill="#3a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#1f0d12"]  { fill: var(--lava-soft); }
+svg [fill="#1a1010"]  { fill: var(--lava-soft); }
+svg [fill="#1a1230"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#1e1730"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#0f2440"]  { fill: var(--paper-deep); }
+svg [fill="#162039"]  { fill: var(--paper-card); }
+svg [fill="#0d1f2a"]  { fill: var(--paper-card); }
+svg [fill="#0a0e18"]  { fill: var(--paper); }
+svg [fill="#0e1422"]  { fill: var(--paper-card); }
+svg [fill="#fca5a5"]  { fill: var(--lava-deep); }
+svg [fill="#7ab3ff"]  { fill: var(--tone-rust); }
+svg [fill="#dceacc"]  { fill: var(--tone-moss); }
+svg [fill="#06b6d4"]  { fill: var(--tone-moss); }
+svg [fill="#6b7a99"]  { fill: var(--ink-mute); }
+
+svg [stroke="#06b6d4"]  { stroke: var(--tone-moss); }
+svg [stroke="#4a5878"]  { stroke: var(--ink-mute); }
+svg [stroke="#0b0f1a"]  { stroke: var(--rule-faint); }
+
+
+/* ── Diagram info text — bullet support inside hover/click info panels ── */
+.diagram-info-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.diagram-info-text strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lava);
+  margin-bottom: 0.45rem;
+  font-weight: 500;
+}
+.diagram-info-text ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.diagram-info-text ul li {
+  position: static;
+  padding: 0.12rem 0 0.12rem 1.1rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  border-bottom: none;
+}
+.diagram-info-text ul li::before {
+  content: "→";
+  position: absolute;
+  margin-left: -1.05rem;
+  color: var(--lava);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 720px) {
+  header { background-image: none; }
+}
+
 </style>
 </head>
 <body>
@@ -613,7 +1024,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Layer 1: Short-term -->
-          <g class="diag-node" id="lay-short" data-info="SHORT-TERM (working) — The current conversation. Lives in the messages table keyed by session_id. Lifetime: one session. Index: composite (session_id, created_at). Retrieved via 'last N messages' query at every turn.">
+          <g class="diag-node" id="lay-short" data-info="<strong>SHORT-TERM (working)</strong><ul><li>The current conversation.</li><li>Lives in the messages table keyed by session_id.</li><li>Lifetime: one session.</li><li>Index: composite (session_id, created_at).</li><li>Retrieved via 'last N messages' query at every turn.</li></ul>">
             <rect x="60" y="80" width="260" height="80" rx="8" fill="#0d1f2a" stroke="#4a9eff" stroke-width="2"/>
             <text x="80" y="104" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a9eff" letter-spacing="1.5">SHORT-TERM · WORKING</text>
             <text x="80" y="126" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#e8edf5">messages</text>
@@ -622,7 +1033,7 @@ td strong { color: var(--text); }
           <line x1="320" y1="120" x2="412" y2="190" stroke="#4a9eff" stroke-width="1.5" marker-end="url(#arrL)"/>
 
           <!-- Layer 2: Long-term episodic -->
-          <g class="diag-node" id="lay-long" data-info="LONG-TERM EPISODIC — Distilled summaries from past sessions, one user. Lives in the episodes table with vector(1024) embeddings + an importance score. Lifetime: pruned by policy. Retrieved via vector recall ranked by distance minus importance.">
+          <g class="diag-node" id="lay-long" data-info="<strong>LONG-TERM EPISODIC</strong><ul><li>Distilled summaries from past sessions, one user.</li><li>Lives in the episodes table with vector(1024) embeddings + an importance score.</li><li>Lifetime: pruned by policy.</li><li>Retrieved via vector recall ranked by distance minus importance.</li></ul>">
             <rect x="600" y="80" width="260" height="80" rx="8" fill="#1a1230" stroke="#a855f7" stroke-width="2"/>
             <text x="620" y="104" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="1.5">LONG-TERM · EPISODIC</text>
             <text x="620" y="126" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#e8edf5">episodes</text>
@@ -631,7 +1042,7 @@ td strong { color: var(--text); }
           <line x1="600" y1="120" x2="508" y2="190" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arrL)"/>
 
           <!-- Layer 3: Semantic -->
-          <g class="diag-node" id="lay-sem" data-info="SEMANTIC — Cross-user knowledge base. The exact documents table you built in Module 5, with HNSW + GIN indexes for hybrid retrieval. Lifetime: forever (or until business says otherwise). Accessed via the retrieve tool.">
+          <g class="diag-node" id="lay-sem" data-info="<strong>SEMANTIC</strong><ul><li>Cross-user knowledge base.</li><li>The exact documents table you built in Module 5, with HNSW + GIN indexes for hybrid retrieval.</li><li>Lifetime: forever (or until business says otherwise).</li><li>Accessed via the retrieve tool.</li></ul>">
             <rect x="60" y="280" width="260" height="80" rx="8" fill="#0d1f17" stroke="#22c55e" stroke-width="2"/>
             <text x="80" y="304" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="1.5">SEMANTIC · KNOWLEDGE</text>
             <text x="80" y="326" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#e8edf5">documents</text>
@@ -640,7 +1051,7 @@ td strong { color: var(--text); }
           <line x1="320" y1="320" x2="412" y2="240" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrL)"/>
 
           <!-- Layer 4: Procedural -->
-          <g class="diag-node" id="lay-proc" data-info="PROCEDURAL — Append-only audit trail of every tool call. Lives in the tool_calls table with args, result, duration_ms, ok, ts. Lifetime: retention policy (90d typical). Almost never queried at runtime; read by humans during incident review.">
+          <g class="diag-node" id="lay-proc" data-info="<strong>PROCEDURAL</strong><ul><li>Append-only audit trail of every tool call.</li><li>Lives in the tool_calls table with args, result, duration_ms, ok, ts.</li><li>Lifetime: retention policy (90d typical).</li><li>Almost never queried at runtime; read by humans during incident review.</li></ul>">
             <rect x="600" y="280" width="260" height="80" rx="8" fill="#1a1209" stroke="#fbbf24" stroke-width="2"/>
             <text x="620" y="304" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="1.5">PROCEDURAL · AUDIT</text>
             <text x="620" y="326" font-family="Playfair Display, serif" font-size="15" font-style="italic" fill="#e8edf5">tool_calls</text>
@@ -655,7 +1066,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Click any layer above</div>
-        <p id="layersInfo">Four memory layers, each with a different lifetime and access pattern, all served by one Postgres database. Click any layer card to see the table pattern, the index choice, and the typical query.</p>
+        <div id="layersInfo" class="diagram-info-text">Four memory layers, each with a different lifetime and access pattern, all served by one Postgres database. Click any layer card to see the table pattern, the index choice, and the typical query.</div>
       </div>
     </div>
 
@@ -870,7 +1281,7 @@ td strong { color: var(--text); }
           <text x="740" y="62" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="1.5">FINAL RANK</text>
 
           <!-- Episode A -->
-          <g class="diag-node" id="rec-a" data-info="EPISODE A — &quot;User likes detailed answers.&quot; Cosine distance 0.10 (very similar to query). Importance 0.3 (medium). Without the boost, this is the top hit. With the boost, it gets edged out by the high-importance email preference.">
+          <g class="diag-node" id="rec-a" data-info="<strong>EPISODE A</strong><ul><li>&quot;User likes detailed answers.&quot; Cosine distance 0.10 (very similar to query).</li><li>Importance 0.3 (medium).</li><li>Without the boost, this is the top hit.</li><li>With the boost, it gets edged out by the high-importance email preference.</li></ul>">
             <rect x="60" y="80" width="240" height="60" rx="6" fill="#0d1f2a" stroke="#4a9eff" stroke-width="1.5"/>
             <text x="80" y="103" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a9eff">EP A · LIKES DETAILED ANSWERS</text>
             <text x="80" y="124" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">"User prefers detailed replies"</text>
@@ -892,7 +1303,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Episode B -->
-          <g class="diag-node" id="rec-b" data-info="EPISODE B — &quot;User prefers email replies.&quot; Cosine distance 0.18 (still relevant). Importance 0.9 (very high — durable preference). Importance boost = 0.09. Final score 0.18 - 0.09 = 0.09. Beats Episode A's 0.10 - 0.03 = 0.07. Wait — A still wins by a hair. The lesson: importance shifts the order on close calls, doesn't override large semantic gaps.">
+          <g class="diag-node" id="rec-b" data-info="<strong>EPISODE B</strong><ul><li>&quot;User prefers email replies.&quot; Cosine distance 0.18 (still relevant).</li><li>Importance 0.9 (very high — durable preference).</li><li>Importance boost = 0.09.</li><li>Final score 0.18 - 0.09 = 0.09.</li><li>Beats Episode A's 0.10 - 0.03 = 0.07.</li><li>Wait — A still wins by a hair.</li><li>The lesson: importance shifts the order on close calls, doesn't override large semantic gaps.</li></ul>">
             <rect x="60" y="160" width="240" height="60" rx="6" fill="#1a1230" stroke="#a855f7" stroke-width="1.5"/>
             <text x="80" y="183" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7">EP B · PREFERS EMAIL</text>
             <text x="80" y="204" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">"User prefers email replies"</text>
@@ -914,7 +1325,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Episode C -->
-          <g class="diag-node" id="rec-c" data-info="EPISODE C — &quot;User asked about pricing once.&quot; Cosine distance 0.55 (weak match). Importance 0.1 (low — one-off question). Both modes: rank #3. Far enough off in semantics that no importance boost saves it. This is what should happen: low-signal, low-importance memories stay buried.">
+          <g class="diag-node" id="rec-c" data-info="<strong>EPISODE C</strong><ul><li>&quot;User asked about pricing once.&quot; Cosine distance 0.55 (weak match).</li><li>Importance 0.1 (low — one-off question).</li><li>Both modes: rank #3.</li><li>Far enough off in semantics that no importance boost saves it.</li><li>This is what should happen: low-signal, low-importance memories stay buried.</li></ul>">
             <rect x="60" y="240" width="240" height="60" rx="6" fill="#1f1612" stroke="#8899bb" stroke-width="1.5"/>
             <text x="80" y="263" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb">EP C · ASKED PRICING ONCE</text>
             <text x="80" y="284" font-family="Syne, sans-serif" font-size="11" fill="#8899bb">"Asked about pricing in May"</text>
@@ -936,7 +1347,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Toggle the importance boost</div>
-        <p id="recallInfo">Click "Distance only" then "Importance boost" to see how the recall ranking changes. The high-importance email preference (Ep B) overtakes the closer-but-less-important detailed-answer memory (Ep A). The low-relevance pricing question (Ep C) stays buried in both modes.</p>
+        <div id="recallInfo" class="diagram-info-text">Click "Distance only" then "Importance boost" to see how the recall ranking changes. The high-importance email preference (Ep B) overtakes the closer-but-less-important detailed-answer memory (Ep A). The low-relevance pricing question (Ep C) stays buried in both modes.</div>
       </div>
     </div>
 
@@ -1082,7 +1493,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Step through the loop</div>
-        <p id="loopInfo">Click each step button to see how a single agent turn flows through all four memory layers. Notice that long-term episodes enter at step 1 (system prompt), short-term history enters at step 2 (message stack), semantic knowledge enters at step 4 (retrieve tool), and procedural logging happens at step 4 (tool_calls write).</p>
+        <div id="loopInfo" class="diagram-info-text">Click each step button to see how a single agent turn flows through all four memory layers. Notice that long-term episodes enter at step 1 (system prompt), short-term history enters at step 2 (message stack), semantic knowledge enters at step 4 (retrieve tool), and procedural logging happens at step 4 (tool_calls write).</div>
       </div>
     </div>
 
@@ -1288,19 +1699,19 @@ window.addEventListener('scroll', () => {
 // ═══════════════ Diagram 6.1 — Four layers hover ═══════════════
 const layersData = {
   'lay-agent': 'THE AGENT — A stateless LLM call by itself has no memory. It needs the four layers below to behave like an agent: remember the conversation, recall past sessions, look up knowledge, log what it did.',
-  'lay-short': 'SHORT-TERM (working) — The current conversation. Lives in messages keyed by session_id. Lifetime: one session. Index: composite (session_id, created_at). Retrieved via "last N messages" at every turn.',
-  'lay-long':  'LONG-TERM EPISODIC — Distilled summaries from past sessions, one user. Lives in episodes with vector(1024) + importance score. Pruned by policy. Retrieved via vector recall ranked by distance minus importance.',
-  'lay-sem':   'SEMANTIC — Cross-user knowledge base. The exact documents table from Module 5 with HNSW + GIN. Lifetime: forever (or until business says otherwise). Accessed via the retrieve tool.',
+  'lay-short': '<strong>SHORT-TERM (working)</strong><ul><li>The current conversation.</li><li>Lives in messages keyed by session_id.</li><li>Lifetime: one session.</li><li>Index: composite (session_id, created_at).</li><li>Retrieved via "last N messages" at every turn.</li></ul>',
+  'lay-long':  '<strong>LONG-TERM EPISODIC</strong><ul><li>Distilled summaries from past sessions, one user.</li><li>Lives in episodes with vector(1024) + importance score.</li><li>Pruned by policy.</li><li>Retrieved via vector recall ranked by distance minus importance.</li></ul>',
+  'lay-sem':   '<strong>SEMANTIC</strong><ul><li>Cross-user knowledge base.</li><li>The exact documents table from Module 5 with HNSW + GIN.</li><li>Lifetime: forever (or until business says otherwise).</li><li>Accessed via the retrieve tool.</li></ul>',
   'lay-proc':  'PROCEDURAL — Append-only audit trail of every tool call. Lives in tool_calls (args, result, duration_ms, ok, ts). Retention 90d typical. Read by humans during incident review, not at runtime.'
 };
 document.querySelectorAll('#layersSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('layersInfo').textContent = info;
+    if (info) document.getElementById('layersInfo').innerHTML = info;
   });
   n.addEventListener('click', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('layersInfo').textContent = info;
+    if (info) document.getElementById('layersInfo').innerHTML = info;
   });
 });
 
@@ -1330,12 +1741,12 @@ function setRecall(mode) {
   document.getElementById('rec-b-rank-dist').style.display  = mode === 'dist'  ? 'block' : 'none';
   document.getElementById('rec-b-rank-boost').style.display = mode === 'boost' ? 'block' : 'none';
 
-  document.getElementById('recallInfo').textContent = recallHints[mode];
+  document.getElementById('recallInfo').innerHTML = recallHints[mode];
 }
 document.querySelectorAll('#recallSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('recallInfo').textContent = info;
+    if (info) document.getElementById('recallInfo').innerHTML = info;
   });
 });
 
@@ -1365,7 +1776,7 @@ function setLoop(step) {
     }
   }
   document.getElementById('loopStatus').textContent = loopStatuses[step];
-  document.getElementById('loopInfo').textContent = loopHints[step];
+  document.getElementById('loopInfo').innerHTML = loopHints[step];
 }
 
 // initialize all diagrams

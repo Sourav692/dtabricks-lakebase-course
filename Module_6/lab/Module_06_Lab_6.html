@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 06 · Lab 6 — Build a Memory-Aware AI Agent on Lakebase</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #05080f;
@@ -704,6 +707,414 @@ td code {
   .check-toggle { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
   .step-banner { flex-wrap: wrap; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EDITORIAL OVERRIDE LAYER — Databricks Editorial-Technical theme.
+   Re-skins the dark-mode CSS above using cascade order; every rule below
+   targets the same selectors but maps them to the warm "paper" palette and
+   to Fraunces / Instrument Sans / JetBrains Mono.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --paper:       #F4F1EA;
+  --paper-deep:  #ECE6D9;
+  --paper-card:  #FBF9F4;
+  --ink:         #0E1F26;
+  --ink-soft:    #3A4A52;
+  --ink-mute:    #6A7880;
+  --lava:        #FF3621;
+  --lava-deep:   #C72D1A;
+  --lava-soft:   rgba(255, 54, 33, 0.08);
+  --tone-rust:        #B0532E;
+  --tone-rust-bg:     rgba(176, 83, 46, 0.08);
+  --tone-rust-line:   rgba(176, 83, 46, 0.30);
+  --tone-moss:        #4A6F3F;
+  --tone-moss-bg:     rgba(74, 111, 63, 0.09);
+  --tone-moss-line:   rgba(74, 111, 63, 0.28);
+  --tone-ochre:       #A37B1F;
+  --tone-ochre-bg:    rgba(163, 123, 31, 0.10);
+  --tone-ochre-line:  rgba(163, 123, 31, 0.30);
+  --tone-sepia:       #7A5F3A;
+  --tone-sepia-bg:    rgba(122, 95, 58, 0.09);
+  --tone-sepia-line:  rgba(122, 95, 58, 0.28);
+  --tone-clay:        #8E3A28;
+  --tone-clay-bg:     rgba(142, 58, 40, 0.07);
+  --tone-clay-line:   rgba(142, 58, 40, 0.25);
+  --rule:        rgba(14, 31, 38, 0.18);
+  --rule-faint:  rgba(14, 31, 38, 0.10);
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:    "Instrument Sans", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* re-map the dark-mode tokens declared at the top of this file */
+  --bg:            var(--paper);
+  --surface:       var(--paper-card);
+  --surface2:      var(--paper-deep);
+  --surface3:      var(--paper-deep);
+  --border:        var(--rule-faint);
+  --border2:       var(--rule);
+  --accent-orange: var(--lava);
+  --accent-teal:   var(--tone-moss);
+  --accent-blue:   var(--tone-rust);
+  --accent-purple: var(--tone-sepia);
+  --accent-yellow: var(--tone-ochre);
+  --accent-green:  var(--tone-moss);
+  --accent-red:    var(--lava-deep);
+  --text:          var(--ink);
+  --text-dim:      var(--ink-soft);
+  --text-muted:    var(--ink-mute);
+}
+
+/* base */
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background-image:
+    radial-gradient(1100px 550px at 92% -8%,  rgba(255, 54, 33, 0.05), transparent 60%),
+    radial-gradient(900px 500px  at -8% 108%, rgba(199, 167, 122, 0.20), transparent 60%);
+  background-attachment: fixed;
+}
+p { color: var(--ink-soft); line-height: 1.75; }
+p strong { color: var(--ink); font-weight: 600; }
+p em { color: var(--lava-deep); font-style: italic; }
+strong, b { color: var(--ink); }
+a { color: var(--lava); }
+a:hover { color: var(--lava-deep); }
+
+/* header / hero */
+header {
+  border-bottom: 1px solid var(--rule-faint);
+  background: var(--paper);
+}
+header::before {
+  background:
+    radial-gradient(800px 300px at 100% 0%, var(--lava-soft), transparent 60%),
+    radial-gradient(600px 240px at 0% 100%, rgba(199, 167, 122, 0.18), transparent 60%);
+}
+.crumb { color: var(--ink-mute); font-family: var(--font-mono); }
+.crumb .tag {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+}
+.crumb .sep { color: var(--ink-mute); }
+
+h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 420;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+h1 em { color: var(--lava); font-style: italic; }
+
+.lede {
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+}
+
+.meta-row { border-color: var(--rule-faint); }
+.meta-item { border-right-color: var(--rule-faint); }
+.meta-val { color: var(--lava-deep); font-family: var(--font-mono); }
+.meta-lbl { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* main */
+main { color: var(--ink); }
+
+/* TOC */
+.toc {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+}
+.toc-label { color: var(--lava); font-family: var(--font-mono); }
+.toc li {
+  border-bottom-color: var(--rule-faint);
+  color: var(--ink-soft);
+  /* override the generic li padding from the dark-mode block above */
+  padding: 8px 0;
+}
+.toc li::before {
+  /* the generic li::before above sets position:absolute + content:'›'.
+     Reset to a static, in-flow counter so it doesn't overlap link text. */
+  position: static;
+  content: counter(tc, decimal-leading-zero);
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  min-width: 26px;
+  display: inline-block;
+  top: auto;
+  left: auto;
+}
+.toc a { color: var(--ink); }
+.toc a:hover { color: var(--lava); }
+.toc .dur { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* topic banner */
+section.topic { color: var(--ink); }
+.topic-id {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+  font-family: var(--font-mono);
+}
+.topic-banner .line { background: var(--rule-faint); }
+.topic-banner .type { color: var(--tone-moss); font-family: var(--font-mono); }
+
+h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "SOFT" 30, "wght" 480;
+  color: var(--ink);
+}
+h2 em { color: var(--lava); font-style: italic; }
+
+h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 24, "SOFT" 25, "wght" 520;
+  color: var(--ink);
+}
+
+h4 {
+  color: var(--tone-moss);
+  font-family: var(--font-mono);
+}
+
+/* lists — keep arrow bullets in lava */
+li { color: var(--ink-soft); }
+li::before { color: var(--lava); }
+ol li::before { color: var(--lava); font-family: var(--font-mono); }
+
+/* code */
+code {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip .kw { color: var(--tone-sepia); }
+pre.code-snip .st { color: var(--tone-moss); }
+pre.code-snip .nu { color: var(--tone-ochre); }
+pre.code-snip .cm { color: var(--ink-mute); }
+pre.code-snip .fn { color: var(--tone-rust); }
+
+/* tables */
+.tbl-wrap { border-color: var(--rule-faint); background: var(--paper-card); }
+table { background: var(--paper-card); }
+th {
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  border-bottom-color: var(--rule);
+}
+td { color: var(--ink-soft); border-bottom-color: var(--rule-faint); }
+td strong { color: var(--ink); }
+.yes { color: var(--tone-moss); }
+.no  { color: var(--lava-deep); }
+.warn { color: var(--tone-ochre); }
+
+/* callouts */
+.callout { font-family: var(--font-body); }
+.callout strong { color: var(--ink); }
+.callout-note     { background: var(--tone-rust-bg);  border-left-color: var(--tone-rust);  color: var(--ink); }
+.callout-note     .callout-label { color: var(--tone-rust);  font-family: var(--font-mono); }
+.callout-warn     { background: var(--tone-ochre-bg); border-left-color: var(--tone-ochre); color: var(--ink); }
+.callout-warn     .callout-label { color: var(--tone-ochre); font-family: var(--font-mono); }
+.callout-checkpoint { background: var(--tone-moss-bg); border-left-color: var(--tone-moss); color: var(--ink); }
+.callout-checkpoint .callout-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* diagram shell */
+.diagram {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+}
+.diagram-header {
+  background: var(--paper-deep);
+  border-bottom-color: var(--rule-faint);
+}
+.diagram-title { color: var(--lava); font-family: var(--font-mono); }
+.diagram-hint { color: var(--ink-mute); font-family: var(--font-mono); }
+.diagram-hint::before { color: var(--tone-moss); }
+.diagram-info {
+  background: rgba(74, 111, 63, 0.05);
+  border-top-color: var(--rule-faint);
+  color: var(--ink-soft);
+}
+.diagram-info-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* stepper */
+.stepper {
+  background: var(--paper);
+  border-color: var(--rule-faint);
+}
+.stepper button {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.stepper button.active {
+  background: var(--lava);
+  color: var(--paper);
+}
+.stepper button:hover:not(.active) { color: var(--ink); }
+
+/* blockquote */
+blockquote {
+  border-left-color: var(--lava) !important;
+  color: var(--ink-soft) !important;
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+/* wrap-up */
+.wrap-up {
+  background: linear-gradient(135deg, var(--paper-card) 0%, var(--paper-deep) 100%);
+  border-color: var(--rule-faint);
+}
+.wrap-up::before {
+  background: radial-gradient(circle, rgba(255, 54, 33, 0.10) 0%, transparent 70%);
+}
+.wrap-up h3 { color: var(--ink); font-family: var(--font-display); font-style: italic; }
+.wrap-up h3 em { color: var(--lava); }
+
+/* progress bar */
+.progress { background: var(--lava); }
+
+/* scrollbar / selection */
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+::selection { background: var(--lava); color: var(--paper); }
+
+/* ── SVG color overrides ─────────────────────────────────────────────────
+   Re-map every dark-mode hex literal used in inline <svg> markup (and in
+   the JS that re-paints diagrams on stepper change) to the warm palette.
+   Attribute selectors stay reactive when JS calls setAttribute. */
+svg [fill="#05080f"]  { fill: var(--paper); }
+svg [fill="#0b0f1a"]  { fill: var(--paper); }
+svg [fill="#111827"]  { fill: var(--paper-card); }
+svg [fill="#1a2235"]  { fill: var(--paper-card); }
+svg [fill="#243550"]  { fill: var(--paper-deep); }
+svg [fill="#1e2d45"]  { fill: var(--paper-deep); }
+svg [fill="#0b1a14"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0b1a18"]  { fill: var(--tone-moss-bg); }
+svg [fill="#1a1014"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#e8edf5"]  { fill: var(--ink); }
+svg [fill="#8899bb"]  { fill: var(--ink-soft); }
+svg [fill="#4a5878"]  { fill: var(--ink-mute); }
+svg [fill="#fff"]     { fill: var(--paper); }
+svg [fill="#ffffff"]  { fill: var(--paper); }
+svg [fill="#ff6b35"]  { fill: var(--lava); }
+svg [fill="#22c55e"]  { fill: var(--tone-moss); }
+svg [fill="#ef4444"]  { fill: var(--lava-deep); }
+svg [fill="#fbbf24"]  { fill: var(--tone-ochre); }
+svg [fill="#a855f7"]  { fill: var(--tone-sepia); }
+svg [fill="#4a9eff"]  { fill: var(--tone-rust); }
+svg [fill="#00bfa5"]  { fill: var(--tone-moss); }
+
+svg [stroke="#243550"]  { stroke: var(--rule); }
+svg [stroke="#1e2d45"]  { stroke: var(--rule-faint); }
+svg [stroke="#ff6b35"]  { stroke: var(--lava); }
+svg [stroke="#22c55e"]  { stroke: var(--tone-moss); }
+svg [stroke="#ef4444"]  { stroke: var(--lava-deep); }
+svg [stroke="#fbbf24"]  { stroke: var(--tone-ochre); }
+svg [stroke="#a855f7"]  { stroke: var(--tone-sepia); }
+svg [stroke="#4a9eff"]  { stroke: var(--tone-rust); }
+svg [stroke="#00bfa5"]  { stroke: var(--tone-moss); }
+svg [stroke="#8899bb"]  { stroke: var(--ink-soft); }
+
+/* push inline-styled SVG typography to the editorial fonts */
+svg text[font-family*="Playfair"]     { font-family: var(--font-display); font-style: italic; }
+svg text[font-family*="IBM Plex Mono"] { font-family: var(--font-mono); }
+
+/* mobile */
+
+/* Additional dark-mode hex literals introduced by Modules 1, 2, 4, 5, 6, 7, 8, 9
+   — extends the base hex remap above with module-specific warm equivalents. */
+svg [fill="#1a1209"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a1810"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1208"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1611"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1612"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a230a"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a2a1f"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0a1f1c"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d1f17"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2010"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2925"]  { fill: var(--tone-moss-bg); }
+svg [fill="#3a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#1f0d12"]  { fill: var(--lava-soft); }
+svg [fill="#1a1010"]  { fill: var(--lava-soft); }
+svg [fill="#1a1230"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#1e1730"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#0f2440"]  { fill: var(--paper-deep); }
+svg [fill="#162039"]  { fill: var(--paper-card); }
+svg [fill="#0d1f2a"]  { fill: var(--paper-card); }
+svg [fill="#0a0e18"]  { fill: var(--paper); }
+svg [fill="#0e1422"]  { fill: var(--paper-card); }
+svg [fill="#fca5a5"]  { fill: var(--lava-deep); }
+svg [fill="#7ab3ff"]  { fill: var(--tone-rust); }
+svg [fill="#dceacc"]  { fill: var(--tone-moss); }
+svg [fill="#06b6d4"]  { fill: var(--tone-moss); }
+svg [fill="#6b7a99"]  { fill: var(--ink-mute); }
+
+svg [stroke="#06b6d4"]  { stroke: var(--tone-moss); }
+svg [stroke="#4a5878"]  { stroke: var(--ink-mute); }
+svg [stroke="#0b0f1a"]  { stroke: var(--rule-faint); }
+
+
+/* ── Diagram info text — bullet support inside hover/click info panels ── */
+.diagram-info-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.diagram-info-text strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lava);
+  margin-bottom: 0.45rem;
+  font-weight: 500;
+}
+.diagram-info-text ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.diagram-info-text ul li {
+  position: static;
+  padding: 0.12rem 0 0.12rem 1.1rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  border-bottom: none;
+}
+.diagram-info-text ul li::before {
+  content: "→";
+  position: absolute;
+  margin-left: -1.05rem;
+  color: var(--lava);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 720px) {
+  header { background-image: none; }
+}
+
 </style>
 </head>
 <body>

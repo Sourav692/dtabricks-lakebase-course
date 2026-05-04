@@ -46,6 +46,86 @@ Corpus size is the headline number, but it is rarely the only number that matter
 - **Transactional consistency.** If embeddings must be in the **same row** as the source document — committed in the same transaction, dropped in the same delete, isolated by the same MVCC snapshot — pgvector is the only option. Mosaic AI Vector Search has eventual consistency between the Delta source and the index.
 - **Co-location.** If your app already has a Lakebase connection open for users, sessions, and orders, adding a `documents` table with an `embedding` column is **zero new infrastructure**. Adding Mosaic AI Vector Search is a new service, a new endpoint, a new client, and a new auth path.
 
+### The three tiebreakers in depth
+
+These three points override the corpus-size rule. Even with only 2 million vectors — well under the 5M threshold — if any of them apply, pgvector is the obvious call. They are also the three reasons a customer who's "already on Mosaic AI Vector Search" might end up adding pgvector for a specific subset of workloads.
+
+#### Tiebreaker 1 — Hybrid SQL filters: vector search PLUS arbitrary predicates, in one plan
+
+A real product-search query rarely asks for "just the most similar." It asks for "most similar **that also satisfies** a tenant ID, a stock flag, a date window, and a row-level security policy":
+
+```sql
+SELECT product_id, name
+FROM products
+WHERE tenant_id = 42
+  AND in_stock = true
+  AND created_at > now() - interval '30 days'
+  AND visible_to(current_user)        -- RLS policy
+ORDER BY embedding <=> :qv
+LIMIT 10;
+```
+
+In pgvector, this is **one Postgres query, one execution plan**. The planner uses GIN/B-tree indexes to prune candidates and the HNSW index for the similarity walk — all in the same pass, all on the same data.
+
+In a separate vector service, you have two bad options:
+
+- **Over-fetch then filter** — ask for top 100 (or 1000) and hope enough satisfy your `WHERE`. Wrong top-K when filters are selective.
+- **Pre-filter then search** — send candidate IDs to the vector service and ask "rank these by similarity." Most services don't expose this efficiently, and you've now made two network hops per query.
+
+> **Plain takeaway.** When "find similar X *that also satisfies* Y, Z, and W" is your normal query shape, pgvector is the only option that does it in a single, indexed, correct pass.
+
+#### Tiebreaker 2 — Transactional consistency: embedding lives and dies with the row
+
+When a document changes, its embedding must change. When a document is deleted, its embedding must be gone — *immediately*, not in 15 seconds. In pgvector the embedding is just another column on the same row, so MVCC handles it for free:
+
+```sql
+BEGIN;
+INSERT INTO documents (id, body, embedding)
+VALUES (123, 'new doc text', '[0.12, -0.44, ...]');
+COMMIT;
+-- Readers see BOTH the body and the embedding, or NEITHER. No window.
+
+DELETE FROM documents WHERE id = 123;
+-- Embedding gone in the same instant.
+```
+
+Mosaic AI Vector Search is **eventually consistent** with its Delta source. Updates propagate from the Delta table to the index asynchronously — typically seconds, sometimes longer. For most analytics and recommendation workloads, that's fine. For these it isn't:
+
+- A user deletes sensitive content — it must be ungettable from search **immediately**, not after the next sync.
+- Healthcare, finance, or regulated industries that need atomic, auditable deletes provable from a single transaction log.
+- Stale embeddings being served alongside an updated document body, producing answers the body itself contradicts.
+
+> **Plain takeaway.** Pick pgvector when the embedding and the document are the same thing — born together, deleted together, no daylight between them.
+
+#### Tiebreaker 3 — Co-location: zero new infrastructure
+
+If your app already opens a Lakebase connection for users, sessions, and orders, adding semantic search is **adding a column**, not adding a service:
+
+| Architecture piece | Separate vector service | pgvector in Lakebase |
+|---|---|---|
+| Connection pool | Postgres + new HTTP client | Postgres only |
+| Auth flow | Postgres OAuth + service-specific tokens | Postgres OAuth only |
+| Failure modes | "Postgres down" + "vector service down" + "vector service slow" | "Postgres down" |
+| On-call surface | Two systems | One system |
+| New SDK / client library | Yes | No |
+| Network policy / firewall rule | New endpoint | None |
+
+Every new service carries a hidden tax — auth flows to debug at 2am, SDKs to version, dashboards to wire up, bills to reconcile. For small teams or fast prototypes, that tax is often the difference between shipping and not shipping.
+
+> **Plain takeaway.** If Lakebase is already in the architecture, pgvector is "free" — no new infrastructure to provision, monitor, or pay for.
+
+#### Putting the three tiebreakers together
+
+| Tiebreaker | The question to ask the customer | If "yes" → |
+|---|---|---|
+| **Hybrid SQL filters** | Will every search be combined with filters like tenant, status, date, or RLS? | pgvector |
+| **Transactional consistency** | Do embeddings need to live and die in the same transaction as the source row? | pgvector |
+| **Co-location** | Does the app already have a Lakebase connection open? | pgvector |
+
+Even with 2 million vectors (well below the 5M cutoff), if all three answers are "yes," pgvector isn't just the right call — it's the *obvious* call. Conversely, if you have 4 million vectors but the corpus already lives in Delta, is updated by Spark jobs, and is read by 50 different services, **none of the three pgvector advantages apply** — Mosaic AI Vector Search is the better choice.
+
+> **The one-sentence customer pitch.** *"Use pgvector when the vector search is part of a SQL workload, when the embedding must be transactionally tied to the row, or when you already have Lakebase in the architecture — otherwise, use Mosaic AI Vector Search."*
+
 ### When pgvector is the wrong call
 
 Be honest with the customer. Recommend Mosaic AI Vector Search when:

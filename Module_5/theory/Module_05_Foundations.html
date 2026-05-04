@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 05 — Lakebase as a Vector Store: Concepts Behind the Lab</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #05080f;
@@ -495,6 +498,414 @@ td strong { color: var(--text); }
   .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
   .meta-item:last-child { border-bottom: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EDITORIAL OVERRIDE LAYER — Databricks Editorial-Technical theme.
+   Re-skins the dark-mode CSS above using cascade order; every rule below
+   targets the same selectors but maps them to the warm "paper" palette and
+   to Fraunces / Instrument Sans / JetBrains Mono.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --paper:       #F4F1EA;
+  --paper-deep:  #ECE6D9;
+  --paper-card:  #FBF9F4;
+  --ink:         #0E1F26;
+  --ink-soft:    #3A4A52;
+  --ink-mute:    #6A7880;
+  --lava:        #FF3621;
+  --lava-deep:   #C72D1A;
+  --lava-soft:   rgba(255, 54, 33, 0.08);
+  --tone-rust:        #B0532E;
+  --tone-rust-bg:     rgba(176, 83, 46, 0.08);
+  --tone-rust-line:   rgba(176, 83, 46, 0.30);
+  --tone-moss:        #4A6F3F;
+  --tone-moss-bg:     rgba(74, 111, 63, 0.09);
+  --tone-moss-line:   rgba(74, 111, 63, 0.28);
+  --tone-ochre:       #A37B1F;
+  --tone-ochre-bg:    rgba(163, 123, 31, 0.10);
+  --tone-ochre-line:  rgba(163, 123, 31, 0.30);
+  --tone-sepia:       #7A5F3A;
+  --tone-sepia-bg:    rgba(122, 95, 58, 0.09);
+  --tone-sepia-line:  rgba(122, 95, 58, 0.28);
+  --tone-clay:        #8E3A28;
+  --tone-clay-bg:     rgba(142, 58, 40, 0.07);
+  --tone-clay-line:   rgba(142, 58, 40, 0.25);
+  --rule:        rgba(14, 31, 38, 0.18);
+  --rule-faint:  rgba(14, 31, 38, 0.10);
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:    "Instrument Sans", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* re-map the dark-mode tokens declared at the top of this file */
+  --bg:            var(--paper);
+  --surface:       var(--paper-card);
+  --surface2:      var(--paper-deep);
+  --surface3:      var(--paper-deep);
+  --border:        var(--rule-faint);
+  --border2:       var(--rule);
+  --accent-orange: var(--lava);
+  --accent-teal:   var(--tone-moss);
+  --accent-blue:   var(--tone-rust);
+  --accent-purple: var(--tone-sepia);
+  --accent-yellow: var(--tone-ochre);
+  --accent-green:  var(--tone-moss);
+  --accent-red:    var(--lava-deep);
+  --text:          var(--ink);
+  --text-dim:      var(--ink-soft);
+  --text-muted:    var(--ink-mute);
+}
+
+/* base */
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background-image:
+    radial-gradient(1100px 550px at 92% -8%,  rgba(255, 54, 33, 0.05), transparent 60%),
+    radial-gradient(900px 500px  at -8% 108%, rgba(199, 167, 122, 0.20), transparent 60%);
+  background-attachment: fixed;
+}
+p { color: var(--ink-soft); line-height: 1.75; }
+p strong { color: var(--ink); font-weight: 600; }
+p em { color: var(--lava-deep); font-style: italic; }
+strong, b { color: var(--ink); }
+a { color: var(--lava); }
+a:hover { color: var(--lava-deep); }
+
+/* header / hero */
+header {
+  border-bottom: 1px solid var(--rule-faint);
+  background: var(--paper);
+}
+header::before {
+  background:
+    radial-gradient(800px 300px at 100% 0%, var(--lava-soft), transparent 60%),
+    radial-gradient(600px 240px at 0% 100%, rgba(199, 167, 122, 0.18), transparent 60%);
+}
+.crumb { color: var(--ink-mute); font-family: var(--font-mono); }
+.crumb .tag {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+}
+.crumb .sep { color: var(--ink-mute); }
+
+h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 420;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+h1 em { color: var(--lava); font-style: italic; }
+
+.lede {
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+}
+
+.meta-row { border-color: var(--rule-faint); }
+.meta-item { border-right-color: var(--rule-faint); }
+.meta-val { color: var(--lava-deep); font-family: var(--font-mono); }
+.meta-lbl { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* main */
+main { color: var(--ink); }
+
+/* TOC */
+.toc {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+}
+.toc-label { color: var(--lava); font-family: var(--font-mono); }
+.toc li {
+  border-bottom-color: var(--rule-faint);
+  color: var(--ink-soft);
+  /* override the generic li padding from the dark-mode block above */
+  padding: 8px 0;
+}
+.toc li::before {
+  /* the generic li::before above sets position:absolute + content:'›'.
+     Reset to a static, in-flow counter so it doesn't overlap link text. */
+  position: static;
+  content: counter(tc, decimal-leading-zero);
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  min-width: 26px;
+  display: inline-block;
+  top: auto;
+  left: auto;
+}
+.toc a { color: var(--ink); }
+.toc a:hover { color: var(--lava); }
+.toc .dur { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* topic banner */
+section.topic { color: var(--ink); }
+.topic-id {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+  font-family: var(--font-mono);
+}
+.topic-banner .line { background: var(--rule-faint); }
+.topic-banner .type { color: var(--tone-moss); font-family: var(--font-mono); }
+
+h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "SOFT" 30, "wght" 480;
+  color: var(--ink);
+}
+h2 em { color: var(--lava); font-style: italic; }
+
+h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 24, "SOFT" 25, "wght" 520;
+  color: var(--ink);
+}
+
+h4 {
+  color: var(--tone-moss);
+  font-family: var(--font-mono);
+}
+
+/* lists — keep arrow bullets in lava */
+li { color: var(--ink-soft); }
+li::before { color: var(--lava); }
+ol li::before { color: var(--lava); font-family: var(--font-mono); }
+
+/* code */
+code {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip .kw { color: var(--tone-sepia); }
+pre.code-snip .st { color: var(--tone-moss); }
+pre.code-snip .nu { color: var(--tone-ochre); }
+pre.code-snip .cm { color: var(--ink-mute); }
+pre.code-snip .fn { color: var(--tone-rust); }
+
+/* tables */
+.tbl-wrap { border-color: var(--rule-faint); background: var(--paper-card); }
+table { background: var(--paper-card); }
+th {
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  border-bottom-color: var(--rule);
+}
+td { color: var(--ink-soft); border-bottom-color: var(--rule-faint); }
+td strong { color: var(--ink); }
+.yes { color: var(--tone-moss); }
+.no  { color: var(--lava-deep); }
+.warn { color: var(--tone-ochre); }
+
+/* callouts */
+.callout { font-family: var(--font-body); }
+.callout strong { color: var(--ink); }
+.callout-note     { background: var(--tone-rust-bg);  border-left-color: var(--tone-rust);  color: var(--ink); }
+.callout-note     .callout-label { color: var(--tone-rust);  font-family: var(--font-mono); }
+.callout-warn     { background: var(--tone-ochre-bg); border-left-color: var(--tone-ochre); color: var(--ink); }
+.callout-warn     .callout-label { color: var(--tone-ochre); font-family: var(--font-mono); }
+.callout-checkpoint { background: var(--tone-moss-bg); border-left-color: var(--tone-moss); color: var(--ink); }
+.callout-checkpoint .callout-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* diagram shell */
+.diagram {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+}
+.diagram-header {
+  background: var(--paper-deep);
+  border-bottom-color: var(--rule-faint);
+}
+.diagram-title { color: var(--lava); font-family: var(--font-mono); }
+.diagram-hint { color: var(--ink-mute); font-family: var(--font-mono); }
+.diagram-hint::before { color: var(--tone-moss); }
+.diagram-info {
+  background: rgba(74, 111, 63, 0.05);
+  border-top-color: var(--rule-faint);
+  color: var(--ink-soft);
+}
+.diagram-info-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* stepper */
+.stepper {
+  background: var(--paper);
+  border-color: var(--rule-faint);
+}
+.stepper button {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.stepper button.active {
+  background: var(--lava);
+  color: var(--paper);
+}
+.stepper button:hover:not(.active) { color: var(--ink); }
+
+/* blockquote */
+blockquote {
+  border-left-color: var(--lava) !important;
+  color: var(--ink-soft) !important;
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+/* wrap-up */
+.wrap-up {
+  background: linear-gradient(135deg, var(--paper-card) 0%, var(--paper-deep) 100%);
+  border-color: var(--rule-faint);
+}
+.wrap-up::before {
+  background: radial-gradient(circle, rgba(255, 54, 33, 0.10) 0%, transparent 70%);
+}
+.wrap-up h3 { color: var(--ink); font-family: var(--font-display); font-style: italic; }
+.wrap-up h3 em { color: var(--lava); }
+
+/* progress bar */
+.progress { background: var(--lava); }
+
+/* scrollbar / selection */
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+::selection { background: var(--lava); color: var(--paper); }
+
+/* ── SVG color overrides ─────────────────────────────────────────────────
+   Re-map every dark-mode hex literal used in inline <svg> markup (and in
+   the JS that re-paints diagrams on stepper change) to the warm palette.
+   Attribute selectors stay reactive when JS calls setAttribute. */
+svg [fill="#05080f"]  { fill: var(--paper); }
+svg [fill="#0b0f1a"]  { fill: var(--paper); }
+svg [fill="#111827"]  { fill: var(--paper-card); }
+svg [fill="#1a2235"]  { fill: var(--paper-card); }
+svg [fill="#243550"]  { fill: var(--paper-deep); }
+svg [fill="#1e2d45"]  { fill: var(--paper-deep); }
+svg [fill="#0b1a14"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0b1a18"]  { fill: var(--tone-moss-bg); }
+svg [fill="#1a1014"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#e8edf5"]  { fill: var(--ink); }
+svg [fill="#8899bb"]  { fill: var(--ink-soft); }
+svg [fill="#4a5878"]  { fill: var(--ink-mute); }
+svg [fill="#fff"]     { fill: var(--paper); }
+svg [fill="#ffffff"]  { fill: var(--paper); }
+svg [fill="#ff6b35"]  { fill: var(--lava); }
+svg [fill="#22c55e"]  { fill: var(--tone-moss); }
+svg [fill="#ef4444"]  { fill: var(--lava-deep); }
+svg [fill="#fbbf24"]  { fill: var(--tone-ochre); }
+svg [fill="#a855f7"]  { fill: var(--tone-sepia); }
+svg [fill="#4a9eff"]  { fill: var(--tone-rust); }
+svg [fill="#00bfa5"]  { fill: var(--tone-moss); }
+
+svg [stroke="#243550"]  { stroke: var(--rule); }
+svg [stroke="#1e2d45"]  { stroke: var(--rule-faint); }
+svg [stroke="#ff6b35"]  { stroke: var(--lava); }
+svg [stroke="#22c55e"]  { stroke: var(--tone-moss); }
+svg [stroke="#ef4444"]  { stroke: var(--lava-deep); }
+svg [stroke="#fbbf24"]  { stroke: var(--tone-ochre); }
+svg [stroke="#a855f7"]  { stroke: var(--tone-sepia); }
+svg [stroke="#4a9eff"]  { stroke: var(--tone-rust); }
+svg [stroke="#00bfa5"]  { stroke: var(--tone-moss); }
+svg [stroke="#8899bb"]  { stroke: var(--ink-soft); }
+
+/* push inline-styled SVG typography to the editorial fonts */
+svg text[font-family*="Playfair"]     { font-family: var(--font-display); font-style: italic; }
+svg text[font-family*="IBM Plex Mono"] { font-family: var(--font-mono); }
+
+/* mobile */
+
+/* Additional dark-mode hex literals introduced by Modules 1, 2, 4, 5, 6, 7, 8, 9
+   — extends the base hex remap above with module-specific warm equivalents. */
+svg [fill="#1a1209"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a1810"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1208"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1611"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1612"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a230a"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a2a1f"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0a1f1c"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d1f17"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2010"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2925"]  { fill: var(--tone-moss-bg); }
+svg [fill="#3a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#1f0d12"]  { fill: var(--lava-soft); }
+svg [fill="#1a1010"]  { fill: var(--lava-soft); }
+svg [fill="#1a1230"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#1e1730"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#0f2440"]  { fill: var(--paper-deep); }
+svg [fill="#162039"]  { fill: var(--paper-card); }
+svg [fill="#0d1f2a"]  { fill: var(--paper-card); }
+svg [fill="#0a0e18"]  { fill: var(--paper); }
+svg [fill="#0e1422"]  { fill: var(--paper-card); }
+svg [fill="#fca5a5"]  { fill: var(--lava-deep); }
+svg [fill="#7ab3ff"]  { fill: var(--tone-rust); }
+svg [fill="#dceacc"]  { fill: var(--tone-moss); }
+svg [fill="#06b6d4"]  { fill: var(--tone-moss); }
+svg [fill="#6b7a99"]  { fill: var(--ink-mute); }
+
+svg [stroke="#06b6d4"]  { stroke: var(--tone-moss); }
+svg [stroke="#4a5878"]  { stroke: var(--ink-mute); }
+svg [stroke="#0b0f1a"]  { stroke: var(--rule-faint); }
+
+
+/* ── Diagram info text — bullet support inside hover/click info panels ── */
+.diagram-info-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.diagram-info-text strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lava);
+  margin-bottom: 0.45rem;
+  font-weight: 500;
+}
+.diagram-info-text ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.diagram-info-text ul li {
+  position: static;
+  padding: 0.12rem 0 0.12rem 1.1rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  border-bottom: none;
+}
+.diagram-info-text ul li::before {
+  content: "→";
+  position: absolute;
+  margin-left: -1.05rem;
+  color: var(--lava);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 720px) {
+  header { background-image: none; }
+}
+
 </style>
 </head>
 <body>
@@ -582,7 +993,7 @@ td strong { color: var(--text); }
           <text x="460" y="28" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="2">▸ START · Customer says "we need vector search"</text>
 
           <!-- Q1: corpus size -->
-          <g class="diag-node" id="dec-q1" data-info="Q1 · CORPUS SIZE — The single most predictive number. Below 5M vectors, pgvector almost always wins on TCO and operational simplicity. Above 10M, Mosaic AI Vector Search is purpose-built for scale. Between, query patterns matter more than count.">
+          <g class="diag-node" id="dec-q1" data-info="<strong>Q1 · CORPUS SIZE</strong><ul><li>The single most predictive number.</li><li>Below 5M vectors, pgvector almost always wins on TCO and operational simplicity.</li><li>Above 10M, Mosaic AI Vector Search is purpose-built for scale.</li><li>Between, query patterns matter more than count.</li></ul>">
             <rect x="340" y="50" width="240" height="60" rx="6" fill="#1a2235" stroke="#ff6b35" stroke-width="2"/>
             <text x="460" y="78" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" letter-spacing="1.5">QUESTION 1</text>
             <text x="460" y="98" text-anchor="middle" font-family="Syne, sans-serif" font-size="13" fill="#e8edf5">How many vectors?</text>
@@ -598,7 +1009,7 @@ td strong { color: var(--text); }
           <text x="650" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444">&gt; 10M</text>
 
           <!-- Small corpus -->
-          <g class="diag-node" id="dec-small" data-info="SMALL CORPUS — Under 5M vectors, pgvector with HNSW handles app-tier latency easily. You get hybrid SQL filters, transactional consistency, and zero new infrastructure. This is the sweet spot.">
+          <g class="diag-node" id="dec-small" data-info="<strong>SMALL CORPUS</strong><ul><li>Under 5M vectors, pgvector with HNSW handles app-tier latency easily.</li><li>You get hybrid SQL filters, transactional consistency, and zero new infrastructure.</li><li>This is the sweet spot.</li></ul>">
             <rect x="80" y="160" width="220" height="60" rx="6" fill="#0d1f17" stroke="#22c55e" stroke-width="1.5"/>
             <text x="190" y="185" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1">SMALL CORPUS</text>
             <text x="190" y="205" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" fill="#e8edf5">pgvector wins</text>
@@ -620,7 +1031,7 @@ td strong { color: var(--text); }
 
           <!-- Q2: hybrid filters? (only meaningful for mid) -->
           <line x1="460" y1="220" x2="460" y2="265" stroke="#8899bb" stroke-width="1.5" marker-end="url(#arrA)"/>
-          <g class="diag-node" id="dec-q2" data-info="Q2 · HYBRID FILTERS — Does the query mix vector similarity with SQL predicates? Tenant ID, time window, RLS, JOINs to other tables? If yes, pgvector lets these filter rows BEFORE the HNSW walk — using your GIN index. Mosaic AI Vector Search supports filters but cannot do arbitrary JOINs.">
+          <g class="diag-node" id="dec-q2" data-info="<strong>Q2 · HYBRID FILTERS</strong><ul><li>Does the query mix vector similarity with SQL predicates?</li><li>Tenant ID, time window, RLS, JOINs to other tables?</li><li>If yes, pgvector lets these filter rows BEFORE the HNSW walk — using your GIN index.</li><li>Mosaic AI Vector Search supports filters but cannot do arbitrary JOINs.</li></ul>">
             <rect x="340" y="270" width="240" height="60" rx="6" fill="#1a2235" stroke="#a855f7" stroke-width="2"/>
             <text x="460" y="295" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="1.5">QUESTION 2</text>
             <text x="460" y="315" text-anchor="middle" font-family="Syne, sans-serif" font-size="13" fill="#e8edf5">Hybrid SQL filters?</text>
@@ -632,7 +1043,7 @@ td strong { color: var(--text); }
           <text x="300" y="355" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">YES · joins / RLS</text>
           <text x="620" y="355" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a855f7">NO · pure similarity</text>
 
-          <g class="diag-node" id="dec-pg" data-info="OUTCOME · pgvector — The hybrid filter advantage is decisive. Your GIN index on metadata prunes rows before HNSW runs. Cosine similarity, BM25, and SQL predicates all live in one query plan, one transaction, one set of GRANTs.">
+          <g class="diag-node" id="dec-pg" data-info="<strong>OUTCOME · pgvector</strong><ul><li>The hybrid filter advantage is decisive.</li><li>Your GIN index on metadata prunes rows before HNSW runs.</li><li>Cosine similarity, BM25, and SQL predicates all live in one query plan, one transaction, one set of GRANTs.</li></ul>">
             <rect x="120" y="380" width="240" height="60" rx="6" fill="#0d1f17" stroke="#22c55e" stroke-width="2"/>
             <text x="240" y="405" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="1.5">▸ RECOMMEND</text>
             <text x="240" y="425" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Lakebase + pgvector</text>
@@ -647,7 +1058,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Hover a node above</div>
-        <p id="decisionInfo">Three numbers (corpus size) and two architecture facts (hybrid filters, transactional consistency) drive the decision. Hover each box to see the reasoning behind the branch.</p>
+        <div id="decisionInfo" class="diagram-info-text">Three numbers (corpus size) and two architecture facts (hybrid filters, transactional consistency) drive the decision. Hover each box to see the reasoning behind the branch.</div>
       </div>
     </div>
 
@@ -815,7 +1226,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Toggle m above</div>
-        <p id="hnswInfo">m controls edges per node. Higher m = denser graph = better recall = more memory. Click the buttons to see the graph density change. Hover any node for detail.</p>
+        <div id="hnswInfo" class="diagram-info-text">m controls edges per node. Higher m = denser graph = better recall = more memory. Click the buttons to see the graph density change. Hover any node for detail.</div>
       </div>
     </div>
 
@@ -982,7 +1393,7 @@ score(doc) = Σ over lists L  of  <span class="nu">1</span> / (k + rank_L(doc))<
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Step through fusion</div>
-        <p id="rrfInfo">Click 1 → 2 → 3 to see how each ranked list contributes to the fused output. The takeaway: doc C surfaces in the top-3 even though vector missed it entirely, because BM25 ranked it #1.</p>
+        <div id="rrfInfo" class="diagram-info-text">Click 1 → 2 → 3 to see how each ranked list contributes to the fused output. The takeaway: doc C surfaces in the top-3 even though vector missed it entirely, because BM25 ranked it #1.</div>
       </div>
     </div>
 
@@ -1090,17 +1501,17 @@ window.addEventListener('scroll', () => {
 // ═══════════════ Diagram 5.1 — Decision tree hover ═══════════════
 const decisionData = {
   'dec-q1': 'Q1 · CORPUSE SIZE — Below 5M, pgvector almost always wins. Above 10M, Mosaic AI Vector Search is purpose-built. Between, query patterns matter more than count.',
-  'dec-small': 'SMALL CORPUS (<5M) — pgvector with HNSW handles app-tier latency easily. Hybrid SQL filters, transactional consistency, zero new infrastructure. The sweet spot.',
+  'dec-small': '<strong>SMALL CORPUS (&lt;5M)</strong><ul><li>pgvector with HNSW handles app-tier latency easily.</li><li>Hybrid SQL filters, transactional consistency, zero new infrastructure.</li><li>The sweet spot.</li></ul>',
   'dec-mid': 'MID CORPUS (5M–10M) — Run a benchmark: latency at p95, recall at k=10, and cost over a representative query mix. Often pgvector still wins with hybrid-filter needs.',
   'dec-large': 'LARGE CORPUS (>10M) — Mosaic AI Vector Search is purpose-built. UC governance comes for free, the index lives where the Delta source lives, sub-50ms p99 at scale.',
-  'dec-q2': 'Q2 · HYBRID FILTERS — Tenant ID, time window, RLS, JOINs to other tables? If yes, pgvector lets these filter rows BEFORE HNSW runs. Mosaic supports filters but not arbitrary JOINs.',
-  'dec-pg': 'OUTCOME · pgvector — Hybrid filter advantage is decisive. GIN index on metadata prunes before HNSW. Cosine, BM25, and SQL predicates in one plan, one transaction, one set of GRANTs.',
+  'dec-q2': '<strong>Q2 · HYBRID FILTERS</strong><ul><li>Tenant ID, time window, RLS, JOINs to other tables?</li><li>If yes, pgvector lets these filter rows BEFORE HNSW runs.</li><li>Mosaic supports filters but not arbitrary JOINs.</li></ul>',
+  'dec-pg': '<strong>OUTCOME · pgvector</strong><ul><li>Hybrid filter advantage is decisive.</li><li>GIN index on metadata prunes before HNSW.</li><li>Cosine, BM25, and SQL predicates in one plan, one transaction, one set of GRANTs.</li></ul>',
   'dec-mosaic': 'OUTCOME · Mosaic AI Vector Search — At 5–10M without hybrid-filter need, the dedicated service is operationally simpler. UC governance automatic, index updates from Delta, no HNSW tuning.'
 };
 document.querySelectorAll('#decisionSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('decisionInfo').textContent = info;
+    if (info) document.getElementById('decisionInfo').innerHTML = info;
   });
 });
 
@@ -1121,12 +1532,12 @@ function setHnsw(mode) {
   document.getElementById('edges-mid').style.display = mode === 'mid' ? 'block' : 'none';
   document.getElementById('edges-hi').style.display  = mode === 'hi'  ? 'block' : 'none';
   document.getElementById('hnswStatLine').textContent = hnswStats[mode];
-  document.getElementById('hnswInfo').textContent = hnswHints[mode];
+  document.getElementById('hnswInfo').innerHTML = hnswHints[mode];
 }
 document.querySelectorAll('#hnswSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('hnswInfo').textContent = info;
+    if (info) document.getElementById('hnswInfo').innerHTML = info;
   });
 });
 
@@ -1147,12 +1558,12 @@ function setRrf(step) {
   document.getElementById('rrf-arr2').style.opacity  = step >= 3 ? 1 : 0;
   document.getElementById('rrf-calc').style.opacity  = step >= 3 ? 1 : 0.25;
 
-  document.getElementById('rrfInfo').textContent = rrfHints[step];
+  document.getElementById('rrfInfo').innerHTML = rrfHints[step];
 }
 document.querySelectorAll('#rrfSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('rrfInfo').textContent = info;
+    if (info) document.getElementById('rrfInfo').innerHTML = info;
   });
 });
 

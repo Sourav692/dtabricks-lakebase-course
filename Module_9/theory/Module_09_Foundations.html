@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 09 — RSA Toolkit: Comparison, Best Practices &amp; Limitations</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #05080f;
@@ -540,6 +543,414 @@ td strong { color: var(--text); }
   .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
   .meta-item:last-child { border-bottom: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EDITORIAL OVERRIDE LAYER — Databricks Editorial-Technical theme.
+   Re-skins the dark-mode CSS above using cascade order; every rule below
+   targets the same selectors but maps them to the warm "paper" palette and
+   to Fraunces / Instrument Sans / JetBrains Mono.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --paper:       #F4F1EA;
+  --paper-deep:  #ECE6D9;
+  --paper-card:  #FBF9F4;
+  --ink:         #0E1F26;
+  --ink-soft:    #3A4A52;
+  --ink-mute:    #6A7880;
+  --lava:        #FF3621;
+  --lava-deep:   #C72D1A;
+  --lava-soft:   rgba(255, 54, 33, 0.08);
+  --tone-rust:        #B0532E;
+  --tone-rust-bg:     rgba(176, 83, 46, 0.08);
+  --tone-rust-line:   rgba(176, 83, 46, 0.30);
+  --tone-moss:        #4A6F3F;
+  --tone-moss-bg:     rgba(74, 111, 63, 0.09);
+  --tone-moss-line:   rgba(74, 111, 63, 0.28);
+  --tone-ochre:       #A37B1F;
+  --tone-ochre-bg:    rgba(163, 123, 31, 0.10);
+  --tone-ochre-line:  rgba(163, 123, 31, 0.30);
+  --tone-sepia:       #7A5F3A;
+  --tone-sepia-bg:    rgba(122, 95, 58, 0.09);
+  --tone-sepia-line:  rgba(122, 95, 58, 0.28);
+  --tone-clay:        #8E3A28;
+  --tone-clay-bg:     rgba(142, 58, 40, 0.07);
+  --tone-clay-line:   rgba(142, 58, 40, 0.25);
+  --rule:        rgba(14, 31, 38, 0.18);
+  --rule-faint:  rgba(14, 31, 38, 0.10);
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:    "Instrument Sans", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* re-map the dark-mode tokens declared at the top of this file */
+  --bg:            var(--paper);
+  --surface:       var(--paper-card);
+  --surface2:      var(--paper-deep);
+  --surface3:      var(--paper-deep);
+  --border:        var(--rule-faint);
+  --border2:       var(--rule);
+  --accent-orange: var(--lava);
+  --accent-teal:   var(--tone-moss);
+  --accent-blue:   var(--tone-rust);
+  --accent-purple: var(--tone-sepia);
+  --accent-yellow: var(--tone-ochre);
+  --accent-green:  var(--tone-moss);
+  --accent-red:    var(--lava-deep);
+  --text:          var(--ink);
+  --text-dim:      var(--ink-soft);
+  --text-muted:    var(--ink-mute);
+}
+
+/* base */
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background-image:
+    radial-gradient(1100px 550px at 92% -8%,  rgba(255, 54, 33, 0.05), transparent 60%),
+    radial-gradient(900px 500px  at -8% 108%, rgba(199, 167, 122, 0.20), transparent 60%);
+  background-attachment: fixed;
+}
+p { color: var(--ink-soft); line-height: 1.75; }
+p strong { color: var(--ink); font-weight: 600; }
+p em { color: var(--lava-deep); font-style: italic; }
+strong, b { color: var(--ink); }
+a { color: var(--lava); }
+a:hover { color: var(--lava-deep); }
+
+/* header / hero */
+header {
+  border-bottom: 1px solid var(--rule-faint);
+  background: var(--paper);
+}
+header::before {
+  background:
+    radial-gradient(800px 300px at 100% 0%, var(--lava-soft), transparent 60%),
+    radial-gradient(600px 240px at 0% 100%, rgba(199, 167, 122, 0.18), transparent 60%);
+}
+.crumb { color: var(--ink-mute); font-family: var(--font-mono); }
+.crumb .tag {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+}
+.crumb .sep { color: var(--ink-mute); }
+
+h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 420;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+h1 em { color: var(--lava); font-style: italic; }
+
+.lede {
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+}
+
+.meta-row { border-color: var(--rule-faint); }
+.meta-item { border-right-color: var(--rule-faint); }
+.meta-val { color: var(--lava-deep); font-family: var(--font-mono); }
+.meta-lbl { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* main */
+main { color: var(--ink); }
+
+/* TOC */
+.toc {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+}
+.toc-label { color: var(--lava); font-family: var(--font-mono); }
+.toc li {
+  border-bottom-color: var(--rule-faint);
+  color: var(--ink-soft);
+  /* override the generic li padding from the dark-mode block above */
+  padding: 8px 0;
+}
+.toc li::before {
+  /* the generic li::before above sets position:absolute + content:'›'.
+     Reset to a static, in-flow counter so it doesn't overlap link text. */
+  position: static;
+  content: counter(tc, decimal-leading-zero);
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  min-width: 26px;
+  display: inline-block;
+  top: auto;
+  left: auto;
+}
+.toc a { color: var(--ink); }
+.toc a:hover { color: var(--lava); }
+.toc .dur { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* topic banner */
+section.topic { color: var(--ink); }
+.topic-id {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+  font-family: var(--font-mono);
+}
+.topic-banner .line { background: var(--rule-faint); }
+.topic-banner .type { color: var(--tone-moss); font-family: var(--font-mono); }
+
+h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "SOFT" 30, "wght" 480;
+  color: var(--ink);
+}
+h2 em { color: var(--lava); font-style: italic; }
+
+h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 24, "SOFT" 25, "wght" 520;
+  color: var(--ink);
+}
+
+h4 {
+  color: var(--tone-moss);
+  font-family: var(--font-mono);
+}
+
+/* lists — keep arrow bullets in lava */
+li { color: var(--ink-soft); }
+li::before { color: var(--lava); }
+ol li::before { color: var(--lava); font-family: var(--font-mono); }
+
+/* code */
+code {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip .kw { color: var(--tone-sepia); }
+pre.code-snip .st { color: var(--tone-moss); }
+pre.code-snip .nu { color: var(--tone-ochre); }
+pre.code-snip .cm { color: var(--ink-mute); }
+pre.code-snip .fn { color: var(--tone-rust); }
+
+/* tables */
+.tbl-wrap { border-color: var(--rule-faint); background: var(--paper-card); }
+table { background: var(--paper-card); }
+th {
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  border-bottom-color: var(--rule);
+}
+td { color: var(--ink-soft); border-bottom-color: var(--rule-faint); }
+td strong { color: var(--ink); }
+.yes { color: var(--tone-moss); }
+.no  { color: var(--lava-deep); }
+.warn { color: var(--tone-ochre); }
+
+/* callouts */
+.callout { font-family: var(--font-body); }
+.callout strong { color: var(--ink); }
+.callout-note     { background: var(--tone-rust-bg);  border-left-color: var(--tone-rust);  color: var(--ink); }
+.callout-note     .callout-label { color: var(--tone-rust);  font-family: var(--font-mono); }
+.callout-warn     { background: var(--tone-ochre-bg); border-left-color: var(--tone-ochre); color: var(--ink); }
+.callout-warn     .callout-label { color: var(--tone-ochre); font-family: var(--font-mono); }
+.callout-checkpoint { background: var(--tone-moss-bg); border-left-color: var(--tone-moss); color: var(--ink); }
+.callout-checkpoint .callout-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* diagram shell */
+.diagram {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+}
+.diagram-header {
+  background: var(--paper-deep);
+  border-bottom-color: var(--rule-faint);
+}
+.diagram-title { color: var(--lava); font-family: var(--font-mono); }
+.diagram-hint { color: var(--ink-mute); font-family: var(--font-mono); }
+.diagram-hint::before { color: var(--tone-moss); }
+.diagram-info {
+  background: rgba(74, 111, 63, 0.05);
+  border-top-color: var(--rule-faint);
+  color: var(--ink-soft);
+}
+.diagram-info-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* stepper */
+.stepper {
+  background: var(--paper);
+  border-color: var(--rule-faint);
+}
+.stepper button {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.stepper button.active {
+  background: var(--lava);
+  color: var(--paper);
+}
+.stepper button:hover:not(.active) { color: var(--ink); }
+
+/* blockquote */
+blockquote {
+  border-left-color: var(--lava) !important;
+  color: var(--ink-soft) !important;
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+/* wrap-up */
+.wrap-up {
+  background: linear-gradient(135deg, var(--paper-card) 0%, var(--paper-deep) 100%);
+  border-color: var(--rule-faint);
+}
+.wrap-up::before {
+  background: radial-gradient(circle, rgba(255, 54, 33, 0.10) 0%, transparent 70%);
+}
+.wrap-up h3 { color: var(--ink); font-family: var(--font-display); font-style: italic; }
+.wrap-up h3 em { color: var(--lava); }
+
+/* progress bar */
+.progress { background: var(--lava); }
+
+/* scrollbar / selection */
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+::selection { background: var(--lava); color: var(--paper); }
+
+/* ── SVG color overrides ─────────────────────────────────────────────────
+   Re-map every dark-mode hex literal used in inline <svg> markup (and in
+   the JS that re-paints diagrams on stepper change) to the warm palette.
+   Attribute selectors stay reactive when JS calls setAttribute. */
+svg [fill="#05080f"]  { fill: var(--paper); }
+svg [fill="#0b0f1a"]  { fill: var(--paper); }
+svg [fill="#111827"]  { fill: var(--paper-card); }
+svg [fill="#1a2235"]  { fill: var(--paper-card); }
+svg [fill="#243550"]  { fill: var(--paper-deep); }
+svg [fill="#1e2d45"]  { fill: var(--paper-deep); }
+svg [fill="#0b1a14"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0b1a18"]  { fill: var(--tone-moss-bg); }
+svg [fill="#1a1014"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#e8edf5"]  { fill: var(--ink); }
+svg [fill="#8899bb"]  { fill: var(--ink-soft); }
+svg [fill="#4a5878"]  { fill: var(--ink-mute); }
+svg [fill="#fff"]     { fill: var(--paper); }
+svg [fill="#ffffff"]  { fill: var(--paper); }
+svg [fill="#ff6b35"]  { fill: var(--lava); }
+svg [fill="#22c55e"]  { fill: var(--tone-moss); }
+svg [fill="#ef4444"]  { fill: var(--lava-deep); }
+svg [fill="#fbbf24"]  { fill: var(--tone-ochre); }
+svg [fill="#a855f7"]  { fill: var(--tone-sepia); }
+svg [fill="#4a9eff"]  { fill: var(--tone-rust); }
+svg [fill="#00bfa5"]  { fill: var(--tone-moss); }
+
+svg [stroke="#243550"]  { stroke: var(--rule); }
+svg [stroke="#1e2d45"]  { stroke: var(--rule-faint); }
+svg [stroke="#ff6b35"]  { stroke: var(--lava); }
+svg [stroke="#22c55e"]  { stroke: var(--tone-moss); }
+svg [stroke="#ef4444"]  { stroke: var(--lava-deep); }
+svg [stroke="#fbbf24"]  { stroke: var(--tone-ochre); }
+svg [stroke="#a855f7"]  { stroke: var(--tone-sepia); }
+svg [stroke="#4a9eff"]  { stroke: var(--tone-rust); }
+svg [stroke="#00bfa5"]  { stroke: var(--tone-moss); }
+svg [stroke="#8899bb"]  { stroke: var(--ink-soft); }
+
+/* push inline-styled SVG typography to the editorial fonts */
+svg text[font-family*="Playfair"]     { font-family: var(--font-display); font-style: italic; }
+svg text[font-family*="IBM Plex Mono"] { font-family: var(--font-mono); }
+
+/* mobile */
+
+/* Additional dark-mode hex literals introduced by Modules 1, 2, 4, 5, 6, 7, 8, 9
+   — extends the base hex remap above with module-specific warm equivalents. */
+svg [fill="#1a1209"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a1810"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1208"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1611"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1612"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a230a"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a2a1f"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0a1f1c"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d1f17"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2010"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2925"]  { fill: var(--tone-moss-bg); }
+svg [fill="#3a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#1f0d12"]  { fill: var(--lava-soft); }
+svg [fill="#1a1010"]  { fill: var(--lava-soft); }
+svg [fill="#1a1230"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#1e1730"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#0f2440"]  { fill: var(--paper-deep); }
+svg [fill="#162039"]  { fill: var(--paper-card); }
+svg [fill="#0d1f2a"]  { fill: var(--paper-card); }
+svg [fill="#0a0e18"]  { fill: var(--paper); }
+svg [fill="#0e1422"]  { fill: var(--paper-card); }
+svg [fill="#fca5a5"]  { fill: var(--lava-deep); }
+svg [fill="#7ab3ff"]  { fill: var(--tone-rust); }
+svg [fill="#dceacc"]  { fill: var(--tone-moss); }
+svg [fill="#06b6d4"]  { fill: var(--tone-moss); }
+svg [fill="#6b7a99"]  { fill: var(--ink-mute); }
+
+svg [stroke="#06b6d4"]  { stroke: var(--tone-moss); }
+svg [stroke="#4a5878"]  { stroke: var(--ink-mute); }
+svg [stroke="#0b0f1a"]  { stroke: var(--rule-faint); }
+
+
+/* ── Diagram info text — bullet support inside hover/click info panels ── */
+.diagram-info-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.diagram-info-text strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lava);
+  margin-bottom: 0.45rem;
+  font-weight: 500;
+}
+.diagram-info-text ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.diagram-info-text ul li {
+  position: static;
+  padding: 0.12rem 0 0.12rem 1.1rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  border-bottom: none;
+}
+.diagram-info-text ul li::before {
+  content: "→";
+  position: absolute;
+  margin-left: -1.05rem;
+  color: var(--lava);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 720px) {
+  header { background-image: none; }
+}
+
 </style>
 </head>
 <body>
@@ -703,7 +1114,7 @@ td strong { color: var(--text); }
       <div class="diagram-stage">
         <svg id="compareSvg" viewBox="0 0 920 380" width="100%" style="max-width: 900px;">
           <!-- Lakebase node (left, fixed) -->
-          <g class="diag-node" data-info="LAKEBASE — A Postgres governed and synchronized as part of a lakehouse. Autoscale + scale-to-zero, native branching, UC governance, OBO identity, pgvector, single bill on Databricks. Designed for the canonical app/agent on Databricks.">
+          <g class="diag-node" data-info="<strong>LAKEBASE</strong><ul><li>A Postgres governed and synchronized as part of a lakehouse.</li><li>Autoscale + scale-to-zero, native branching, UC governance, OBO identity, pgvector, single bill on Databricks.</li><li>Designed for the canonical app/agent on Databricks.</li></ul>">
             <rect x="40" y="140" width="180" height="100" rx="10" fill="#1a2235" stroke="#ff6b35" stroke-width="2"/>
             <text x="130" y="175" text-anchor="middle" font-family="Playfair Display, serif" font-size="22" font-style="italic" fill="#ff6b35">Lakebase</text>
             <text x="130" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#8899bb" letter-spacing="2">LAKEHOUSE-NATIVE</text>
@@ -753,7 +1164,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Click any competitor box</div>
-        <p id="cmpInfo">Each comparison highlights what Lakebase wins and where the alternative is the right call. The framing matters more than the feature count — Lakebase is a different product class, not a "better Aurora."</p>
+        <div id="cmpInfo" class="diagram-info-text">Each comparison highlights what Lakebase wins and where the alternative is the right call. The framing matters more than the feature count — Lakebase is a different product class, not a "better Aurora."</div>
       </div>
     </div>
 
@@ -1034,7 +1445,7 @@ td strong { color: var(--text); }
       <div class="diagram-stage">
         <svg id="treeSvg" viewBox="0 0 920 440" width="100%" style="max-width: 900px;">
           <!-- Root question Q1 -->
-          <g class="diag-node" id="tree-q1" data-info="Q1 · ON DATABRICKS? — The single biggest filter. Lakebase is for customers already on the Databricks platform. If they're not, the lakehouse-integration argument doesn't apply — recommend Aurora / Neon / Supabase based on their actual stack.">
+          <g class="diag-node" id="tree-q1" data-info="<strong>Q1 · ON DATABRICKS?</strong><ul><li>The single biggest filter.</li><li>Lakebase is for customers already on the Databricks platform.</li><li>If they're not, the lakehouse-integration argument doesn't apply — recommend Aurora / Neon / Supabase based on their actual stack.</li></ul>">
             <rect x="340" y="20" width="240" height="60" rx="8" fill="#1a2235" stroke="#ff6b35" stroke-width="2"/>
             <text x="460" y="45" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="2">Q1</text>
             <text x="460" y="65" text-anchor="middle" font-family="Syne, sans-serif" font-size="14" font-weight="500" fill="#e8edf5">Customer on Databricks?</text>
@@ -1047,14 +1458,14 @@ td strong { color: var(--text); }
           <text x="660" y="105" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ef4444" letter-spacing="1">NO</text>
 
           <!-- Q2 -->
-          <g class="diag-node tree-q2" id="tree-q2" data-info="Q2 · WORKLOAD FITS PG + LIMITS? — Postgres dialect required, working set within Lakebase limits (multi-TB / ~50k QPS / 10M vectors), region supported. If yes, keep walking. If no, recommend the right tool — MySQL/Oracle compat, 200k+ QPS, billion vectors all push to alternatives." style="opacity: 0.25;">
+          <g class="diag-node tree-q2" id="tree-q2" data-info="<strong>Q2 · WORKLOAD FITS PG + LIMITS?</strong><ul><li>Postgres dialect required, working set within Lakebase limits (multi-TB / ~50k QPS / 10M vectors), region supported.</li><li>If yes, keep walking.</li><li>If no, recommend the right tool — MySQL/Oracle compat, 200k+ QPS, billion vectors all push to alternatives.</li></ul>" style="opacity: 0.25;">
             <rect x="120" y="130" width="280" height="60" rx="8" fill="#1a2235" stroke="#ff6b35" stroke-width="1.5"/>
             <text x="260" y="155" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="2">Q2</text>
             <text x="260" y="175" text-anchor="middle" font-family="Syne, sans-serif" font-size="13" fill="#e8edf5">Fits Postgres + within limits?</text>
           </g>
 
           <!-- Honest NO (right side) -->
-          <g class="diag-node tree-no1" id="tree-no1" data-info="HONEST NO — Customer not on Databricks. The lakehouse-integration argument doesn't apply. Recommend the right tool for their stack: Aurora if AWS, Cloud SQL if GCP, Supabase if mobile/JAMstack. Be honest. The trust you keep is worth more than the deal you force.">
+          <g class="diag-node tree-no1" id="tree-no1" data-info="<strong>HONEST NO</strong><ul><li>Customer not on Databricks.</li><li>The lakehouse-integration argument doesn't apply.</li><li>Recommend the right tool for their stack: Aurora if AWS, Cloud SQL if GCP, Supabase if mobile/JAMstack.</li><li>Be honest.</li><li>The trust you keep is worth more than the deal you force.</li></ul>">
             <rect x="660" y="130" width="240" height="60" rx="8" fill="#1a1010" stroke="#ef4444" stroke-width="2"/>
             <text x="780" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" letter-spacing="2">VERDICT</text>
             <text x="780" y="173" text-anchor="middle" font-family="Playfair Display, serif" font-style="italic" font-size="16" fill="#ef4444">Honest NO</text>
@@ -1069,14 +1480,14 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Q3 -->
-          <g class="diag-node tree-q3" id="tree-q3" data-info="Q3 · BIG EXISTING OLTP? — Does the customer have a 100M-row Aurora footprint they're already running? Migration cost is real and Lakebase doesn't make their existing app faster. Coexist with Lakebase for new apps, plan a multi-quarter transition for the old one. Don't forklift." style="opacity: 0.25;">
+          <g class="diag-node tree-q3" id="tree-q3" data-info="<strong>Q3 · BIG EXISTING OLTP?</strong><ul><li>Does the customer have a 100M-row Aurora footprint they're already running?</li><li>Migration cost is real and Lakebase doesn't make their existing app faster.</li><li>Coexist with Lakebase for new apps, plan a multi-quarter transition for the old one.</li><li>Don't forklift.</li></ul>" style="opacity: 0.25;">
             <rect x="0" y="250" width="240" height="60" rx="8" fill="#1a2235" stroke="#ff6b35" stroke-width="1.5"/>
             <text x="120" y="275" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="2">Q3</text>
             <text x="120" y="295" text-anchor="middle" font-family="Syne, sans-serif" font-size="13" fill="#e8edf5">Big existing OLTP today?</text>
           </g>
 
           <!-- Honest NO (limits exceeded, middle) -->
-          <g class="diag-node tree-no2" id="tree-no2" data-info="HONEST NO (limits) — Workload exceeds Lakebase limits. Multi-TB hot working set, 50k+ QPS, billion-vector index, MySQL/Oracle dialect, unsupported region. Recommend Aurora / Snowflake / Mosaic Vector Search depending on what they're trying to do. Don't force-fit." style="opacity: 0.25;">
+          <g class="diag-node tree-no2" id="tree-no2" data-info="<strong>HONEST NO (limits)</strong><ul><li>Workload exceeds Lakebase limits.</li><li>Multi-TB hot working set, 50k+ QPS, billion-vector index, MySQL/Oracle dialect, unsupported region.</li><li>Recommend Aurora / Snowflake / Mosaic Vector Search depending on what they're trying to do.</li><li>Don't force-fit.</li></ul>" style="opacity: 0.25;">
             <rect x="380" y="250" width="240" height="60" rx="8" fill="#1a1010" stroke="#ef4444" stroke-width="2"/>
             <text x="500" y="273" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" letter-spacing="2">VERDICT</text>
             <text x="500" y="293" text-anchor="middle" font-family="Playfair Display, serif" font-style="italic" font-size="16" fill="#ef4444">Honest NO (limits)</text>
@@ -1091,14 +1502,14 @@ td strong { color: var(--text); }
           </g>
 
           <!-- MIXED (bottom-left) -->
-          <g class="diag-node tree-mixed" id="tree-mixed" data-info="MIXED — Big existing Aurora footprint. Migration cost is real. Recommend Lakebase for new apps in the same workspace; coexist with the legacy stack. Plan a 6–12 month transition, not a forklift. The customer who hears 'coexist' once will trust you on the next call." style="opacity: 0.25;">
+          <g class="diag-node tree-mixed" id="tree-mixed" data-info="<strong>MIXED</strong><ul><li>Big existing Aurora footprint.</li><li>Migration cost is real.</li><li>Recommend Lakebase for new apps in the same workspace; coexist with the legacy stack.</li><li>Plan a 6–12 month transition, not a forklift.</li><li>The customer who hears 'coexist' once will trust you on the next call.</li></ul>" style="opacity: 0.25;">
             <rect x="0" y="380" width="180" height="50" rx="8" fill="#1a1810" stroke="#fbbf24" stroke-width="2"/>
             <text x="90" y="400" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="2">VERDICT</text>
             <text x="90" y="418" text-anchor="middle" font-family="Playfair Display, serif" font-style="italic" font-size="15" fill="#fbbf24">Mixed</text>
           </g>
 
           <!-- STRONG YES (bottom-mid) -->
-          <g class="diag-node tree-yes" id="tree-yes" data-info="STRONG YES — On Databricks, fits Postgres, within limits, no big legacy OLTP. This is the canonical Lakebase customer the entire roadmap was built for. Pitch the five reasons (9.6), walk the limit checklist (9.4), build a Module 8-style architecture together." style="opacity: 0.25;">
+          <g class="diag-node tree-yes" id="tree-yes" data-info="<strong>STRONG YES</strong><ul><li>On Databricks, fits Postgres, within limits, no big legacy OLTP.</li><li>This is the canonical Lakebase customer the entire roadmap was built for.</li><li>Pitch the five reasons (9.6), walk the limit checklist (9.4), build a Module 8-style architecture together.</li></ul>" style="opacity: 0.25;">
             <rect x="200" y="380" width="220" height="50" rx="8" fill="#0d2010" stroke="#22c55e" stroke-width="2"/>
             <text x="310" y="400" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" letter-spacing="2">VERDICT</text>
             <text x="310" y="418" text-anchor="middle" font-family="Playfair Display, serif" font-style="italic" font-size="15" fill="#22c55e">Strong YES</text>
@@ -1107,7 +1518,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Walk the tree</div>
-        <p id="treeInfo">Q1 · CUSTOMER ON DATABRICKS? — The single biggest filter. Lakebase is for customers already on the Databricks platform. If they're not, the lakehouse-integration argument doesn't apply — recommend Aurora / Neon / Supabase based on their actual stack. Click "Q2" or "All" to expand the tree.</p>
+        <div id="treeInfo" class="diagram-info-text">Q1 · CUSTOMER ON DATABRICKS? — The single biggest filter. Lakebase is for customers already on the Databricks platform. If they're not, the lakehouse-integration argument doesn't apply — recommend Aurora / Neon / Supabase based on their actual stack. Click "Q2" or "All" to expand the tree.</div>
       </div>
     </div>
 
@@ -1161,7 +1572,7 @@ td strong { color: var(--text); }
           <line x1="540" y1="80" x2="800" y2="160" stroke="#1e2d45" stroke-width="1" stroke-dasharray="2,2"/>
 
           <!-- Pillar 1 — Governance -->
-          <g class="diag-node" id="pillar-1" data-info="PILLAR 1 · GOVERNANCE — Lakebase tables register in Unity Catalog. Same RBAC, tags, lineage, audit logs as Delta tables. Without it: separate IAM, separate audit, compliance team tracking events across two systems.">
+          <g class="diag-node" id="pillar-1" data-info="<strong>PILLAR 1 · GOVERNANCE</strong><ul><li>Lakebase tables register in Unity Catalog.</li><li>Same RBAC, tags, lineage, audit logs as Delta tables.</li><li>Without it: separate IAM, separate audit, compliance team tracking events across two systems.</li></ul>">
             <rect x="40" y="160" width="160" height="180" rx="8" fill="#0b0f1a" stroke="#22c55e" stroke-width="2"/>
             <rect x="40" y="160" width="160" height="36" rx="8" fill="#22c55e" opacity="0.15"/>
             <text x="120" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e" letter-spacing="2">PILLAR 01</text>
@@ -1173,7 +1584,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Pillar 2 — Zero-ETL -->
-          <g class="diag-node" id="pillar-2" data-info="PILLAR 2 · ZERO ETL — Synced tables flow Delta → Lakebase automatically. No Fivetran, no Hightouch, no hand-written Spark jobs. Without it: reverse-ETL pipelines you maintain, schema drift, separate billing line for the integration platform.">
+          <g class="diag-node" id="pillar-2" data-info="<strong>PILLAR 2 · ZERO ETL</strong><ul><li>Synced tables flow Delta → Lakebase automatically.</li><li>No Fivetran, no Hightouch, no hand-written Spark jobs.</li><li>Without it: reverse-ETL pipelines you maintain, schema drift, separate billing line for the integration platform.</li></ul>">
             <rect x="220" y="160" width="160" height="180" rx="8" fill="#0b0f1a" stroke="#4a9eff" stroke-width="2"/>
             <rect x="220" y="160" width="160" height="36" rx="8" fill="#4a9eff" opacity="0.15"/>
             <text x="300" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a9eff" letter-spacing="2">PILLAR 02</text>
@@ -1185,7 +1596,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Pillar 3 — Identity -->
-          <g class="diag-node" id="pillar-3" data-info="PILLAR 3 · IDENTITY — Apps connect on behalf of the end user. Workspace OAuth flows through to Postgres. RLS works against workspace identity automatically. Without it: a mapping layer between AWS IAM and Postgres roles you maintain forever.">
+          <g class="diag-node" id="pillar-3" data-info="<strong>PILLAR 3 · IDENTITY</strong><ul><li>Apps connect on behalf of the end user.</li><li>Workspace OAuth flows through to Postgres.</li><li>RLS works against workspace identity automatically.</li><li>Without it: a mapping layer between AWS IAM and Postgres roles you maintain forever.</li></ul>">
             <rect x="400" y="160" width="160" height="180" rx="8" fill="#0b0f1a" stroke="#a855f7" stroke-width="2"/>
             <rect x="400" y="160" width="160" height="36" rx="8" fill="#a855f7" opacity="0.15"/>
             <text x="480" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7" letter-spacing="2">PILLAR 03</text>
@@ -1197,7 +1608,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Pillar 4 — Branching -->
-          <g class="diag-node" id="pillar-4" data-info="PILLAR 4 · BRANCHING — Copy-on-write branches in seconds. Every PR gets its own database. Schema migrations test against real data. Without it: a staging RDS last refreshed six weeks ago, manual ALTER TABLE rollouts at midnight.">
+          <g class="diag-node" id="pillar-4" data-info="<strong>PILLAR 4 · BRANCHING</strong><ul><li>Copy-on-write branches in seconds.</li><li>Every PR gets its own database.</li><li>Schema migrations test against real data.</li><li>Without it: a staging RDS last refreshed six weeks ago, manual ALTER TABLE rollouts at midnight.</li></ul>">
             <rect x="580" y="160" width="160" height="180" rx="8" fill="#0b0f1a" stroke="#fbbf24" stroke-width="2"/>
             <rect x="580" y="160" width="160" height="36" rx="8" fill="#fbbf24" opacity="0.15"/>
             <text x="660" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="2">PILLAR 04</text>
@@ -1209,7 +1620,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Pillar 5 — Single Bill -->
-          <g class="diag-node" id="pillar-5" data-info="PILLAR 5 · SINGLE BILL — Compute, storage, vectors, models, apps — all on Databricks. One vendor, one contract, one capacity plan. Without it: three invoices a month, three support contracts, three procurement cycles, three sets of SLA paperwork.">
+          <g class="diag-node" id="pillar-5" data-info="<strong>PILLAR 5 · SINGLE BILL</strong><ul><li>Compute, storage, vectors, models, apps — all on Databricks.</li><li>One vendor, one contract, one capacity plan.</li><li>Without it: three invoices a month, three support contracts, three procurement cycles, three sets of SLA paperwork.</li></ul>">
             <rect x="760" y="160" width="160" height="180" rx="8" fill="#0b0f1a" stroke="#00bfa5" stroke-width="2"/>
             <rect x="760" y="160" width="160" height="36" rx="8" fill="#00bfa5" opacity="0.15"/>
             <text x="840" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#00bfa5" letter-spacing="2">PILLAR 05</text>
@@ -1514,14 +1925,14 @@ function setComparison(key) {
   document.getElementById('cmpR1').setAttribute('fill', data.rightColor);
   document.getElementById('cmpR2').textContent = data.rightText;
   document.getElementById('cmpVerdict').textContent = data.verdict;
-  document.getElementById('cmpInfo').textContent = data.info;
+  document.getElementById('cmpInfo').innerHTML = data.info;
 }
 
 document.querySelectorAll('#compareSvg .diag-node[id^="comp-"]').forEach(n => {
   n.addEventListener('click', () => setComparison(n.id));
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('cmpInfo').textContent = info;
+    if (info) document.getElementById('cmpInfo').innerHTML = info;
   });
 });
 // Initialize with Aurora highlighted
@@ -1547,7 +1958,7 @@ function setTree(step) {
   document.querySelector('#tree-no2').style.opacity = step >= 2 ? 1 : 0.25;
   document.querySelector('#tree-mixed').style.opacity = step >= 3 ? 1 : 0.25;
   document.querySelector('#tree-yes').style.opacity = step >= 3 ? 1 : 0.25;
-  document.getElementById('treeInfo').textContent = treeHints[step];
+  document.getElementById('treeInfo').innerHTML = treeHints[step];
 }
 document.querySelectorAll('#treeStepper button').forEach(b => {
   b.addEventListener('click', () => setTree(+b.dataset.step));
@@ -1555,22 +1966,22 @@ document.querySelectorAll('#treeStepper button').forEach(b => {
 document.querySelectorAll('#treeSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('treeInfo').textContent = info;
+    if (info) document.getElementById('treeInfo').innerHTML = info;
   });
 });
 
 // ═══════════════ Diagram 9.6 — Five Pillars hover ═══════════════
 const pillarHints = {
-  'pillar-1': 'PILLAR 1 · GOVERNANCE — Lakebase tables register in Unity Catalog. Same RBAC, tags, lineage, audit logs as Delta tables. Without it: separate IAM, separate audit, compliance team tracking events across two systems.',
-  'pillar-2': 'PILLAR 2 · ZERO ETL — Synced tables flow Delta → Lakebase automatically. No Fivetran, no Hightouch, no hand-written Spark jobs. Without it: reverse-ETL pipelines you maintain, schema drift, separate billing line.',
-  'pillar-3': 'PILLAR 3 · IDENTITY — Apps connect on behalf of the end user. Workspace OAuth flows through to Postgres. RLS works against workspace identity automatically. Without it: a mapping layer between IAM and PG roles you maintain forever.',
-  'pillar-4': 'PILLAR 4 · BRANCHING — Copy-on-write branches in seconds. Every PR gets its own database. Schema migrations test against real data. Without it: a staging RDS last refreshed six weeks ago.',
+  'pillar-1': '<strong>PILLAR 1 · GOVERNANCE</strong><ul><li>Lakebase tables register in Unity Catalog.</li><li>Same RBAC, tags, lineage, audit logs as Delta tables.</li><li>Without it: separate IAM, separate audit, compliance team tracking events across two systems.</li></ul>',
+  'pillar-2': '<strong>PILLAR 2 · ZERO ETL</strong><ul><li>Synced tables flow Delta → Lakebase automatically.</li><li>No Fivetran, no Hightouch, no hand-written Spark jobs.</li><li>Without it: reverse-ETL pipelines you maintain, schema drift, separate billing line.</li></ul>',
+  'pillar-3': '<strong>PILLAR 3 · IDENTITY</strong><ul><li>Apps connect on behalf of the end user.</li><li>Workspace OAuth flows through to Postgres.</li><li>RLS works against workspace identity automatically.</li><li>Without it: a mapping layer between IAM and PG roles you maintain forever.</li></ul>',
+  'pillar-4': '<strong>PILLAR 4 · BRANCHING</strong><ul><li>Copy-on-write branches in seconds.</li><li>Every PR gets its own database.</li><li>Schema migrations test against real data.</li><li>Without it: a staging RDS last refreshed six weeks ago.</li></ul>',
   'pillar-5': 'PILLAR 5 · SINGLE BILL — Compute, storage, vectors, models, apps — all on Databricks. One vendor, one contract, one capacity plan. Without it: three invoices, three support contracts, three procurement cycles.'
 };
 document.querySelectorAll('#pillarsSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = pillarHints[n.id];
-    if (info) document.getElementById('pillarInfo').textContent = info;
+    if (info) document.getElementById('pillarInfo').innerHTML = info;
   });
 });
 

@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 03 — Your First Lakebase Project: Concepts Behind the Lab</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #05080f;
@@ -495,6 +498,413 @@ td strong { color: var(--text); }
   .meta-item { border-right: none; border-bottom: 1px solid var(--border); }
   .meta-item:last-child { border-bottom: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EDITORIAL OVERRIDE LAYER — Databricks Editorial-Technical theme.
+   Re-skins the dark-mode CSS above using cascade order; every rule below
+   targets the same selectors but maps them to the warm "paper" palette and
+   to Fraunces / Instrument Sans / JetBrains Mono.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --paper:       #F4F1EA;
+  --paper-deep:  #ECE6D9;
+  --paper-card:  #FBF9F4;
+  --ink:         #0E1F26;
+  --ink-soft:    #3A4A52;
+  --ink-mute:    #6A7880;
+  --lava:        #FF3621;
+  --lava-deep:   #C72D1A;
+  --lava-soft:   rgba(255, 54, 33, 0.08);
+  --tone-rust:        #B0532E;
+  --tone-rust-bg:     rgba(176, 83, 46, 0.08);
+  --tone-rust-line:   rgba(176, 83, 46, 0.30);
+  --tone-moss:        #4A6F3F;
+  --tone-moss-bg:     rgba(74, 111, 63, 0.09);
+  --tone-moss-line:   rgba(74, 111, 63, 0.28);
+  --tone-ochre:       #A37B1F;
+  --tone-ochre-bg:    rgba(163, 123, 31, 0.10);
+  --tone-ochre-line:  rgba(163, 123, 31, 0.30);
+  --tone-sepia:       #7A5F3A;
+  --tone-sepia-bg:    rgba(122, 95, 58, 0.09);
+  --tone-sepia-line:  rgba(122, 95, 58, 0.28);
+  --tone-clay:        #8E3A28;
+  --tone-clay-bg:     rgba(142, 58, 40, 0.07);
+  --tone-clay-line:   rgba(142, 58, 40, 0.25);
+  --rule:        rgba(14, 31, 38, 0.18);
+  --rule-faint:  rgba(14, 31, 38, 0.10);
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:    "Instrument Sans", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* re-map the dark-mode tokens declared at the top of this file */
+  --bg:            var(--paper);
+  --surface:       var(--paper-card);
+  --surface2:      var(--paper-deep);
+  --surface3:      var(--paper-deep);
+  --border:        var(--rule-faint);
+  --border2:       var(--rule);
+  --accent-orange: var(--lava);
+  --accent-teal:   var(--tone-moss);
+  --accent-blue:   var(--tone-rust);
+  --accent-purple: var(--tone-sepia);
+  --accent-yellow: var(--tone-ochre);
+  --accent-green:  var(--tone-moss);
+  --accent-red:    var(--lava-deep);
+  --text:          var(--ink);
+  --text-dim:      var(--ink-soft);
+  --text-muted:    var(--ink-mute);
+}
+
+/* base */
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background-image:
+    radial-gradient(1100px 550px at 92% -8%,  rgba(255, 54, 33, 0.05), transparent 60%),
+    radial-gradient(900px 500px  at -8% 108%, rgba(199, 167, 122, 0.20), transparent 60%);
+  background-attachment: fixed;
+}
+p { color: var(--ink-soft); line-height: 1.75; }
+p strong { color: var(--ink); font-weight: 600; }
+p em { color: var(--lava-deep); font-style: italic; }
+strong, b { color: var(--ink); }
+a { color: var(--lava); }
+a:hover { color: var(--lava-deep); }
+
+/* header / hero */
+header {
+  border-bottom: 1px solid var(--rule-faint);
+  background: var(--paper);
+}
+header::before {
+  background:
+    radial-gradient(800px 300px at 100% 0%, var(--lava-soft), transparent 60%),
+    radial-gradient(600px 240px at 0% 100%, rgba(199, 167, 122, 0.18), transparent 60%);
+}
+.crumb { color: var(--ink-mute); font-family: var(--font-mono); }
+.crumb .tag {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+}
+.crumb .sep { color: var(--ink-mute); }
+
+h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 420;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+h1 em { color: var(--lava); font-style: italic; }
+
+.lede {
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+}
+
+.meta-row { border-color: var(--rule-faint); }
+.meta-item { border-right-color: var(--rule-faint); }
+.meta-val { color: var(--lava-deep); font-family: var(--font-mono); }
+.meta-lbl { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* main */
+main { color: var(--ink); }
+
+/* TOC */
+.toc {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+}
+.toc-label { color: var(--lava); font-family: var(--font-mono); }
+.toc li {
+  border-bottom-color: var(--rule-faint);
+  color: var(--ink-soft);
+  /* override the generic li padding from the dark-mode block above */
+  padding: 8px 0;
+}
+.toc li::before {
+  /* the generic li::before above sets position:absolute + content:'›'.
+     Reset to a static, in-flow counter so it doesn't overlap link text. */
+  position: static;
+  content: counter(tc, decimal-leading-zero);
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  min-width: 26px;
+  display: inline-block;
+  top: auto;
+  left: auto;
+}
+.toc a { color: var(--ink); }
+.toc a:hover { color: var(--lava); }
+.toc .dur { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* topic banner */
+section.topic { color: var(--ink); }
+.topic-id {
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+  font-family: var(--font-mono);
+}
+.topic-banner .line { background: var(--rule-faint); }
+.topic-banner .type { color: var(--tone-moss); font-family: var(--font-mono); }
+
+h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "SOFT" 30, "wght" 480;
+  color: var(--ink);
+}
+h2 em { color: var(--lava); font-style: italic; }
+
+h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 24, "SOFT" 25, "wght" 520;
+  color: var(--ink);
+}
+
+h4 {
+  color: var(--tone-moss);
+  font-family: var(--font-mono);
+}
+
+/* lists — keep arrow bullets in lava */
+li { color: var(--ink-soft); }
+li::before { color: var(--lava); }
+ol li::before { color: var(--lava); font-family: var(--font-mono); }
+
+/* code */
+code {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  border-left-color: var(--lava);
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+pre.code-snip .kw { color: var(--tone-sepia); }
+pre.code-snip .st { color: var(--tone-moss); }
+pre.code-snip .nu { color: var(--tone-ochre); }
+pre.code-snip .cm { color: var(--ink-mute); }
+pre.code-snip .fn { color: var(--tone-rust); }
+
+/* tables */
+.tbl-wrap { border-color: var(--rule-faint); background: var(--paper-card); }
+table { background: var(--paper-card); }
+th {
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  border-bottom-color: var(--rule);
+}
+td { color: var(--ink-soft); border-bottom-color: var(--rule-faint); }
+td strong { color: var(--ink); }
+.yes { color: var(--tone-moss); }
+.no  { color: var(--lava-deep); }
+.warn { color: var(--tone-ochre); }
+
+/* callouts */
+.callout { font-family: var(--font-body); }
+.callout strong { color: var(--ink); }
+.callout-note     { background: var(--tone-rust-bg);  border-left-color: var(--tone-rust);  color: var(--ink); }
+.callout-note     .callout-label { color: var(--tone-rust);  font-family: var(--font-mono); }
+.callout-warn     { background: var(--tone-ochre-bg); border-left-color: var(--tone-ochre); color: var(--ink); }
+.callout-warn     .callout-label { color: var(--tone-ochre); font-family: var(--font-mono); }
+.callout-checkpoint { background: var(--tone-moss-bg); border-left-color: var(--tone-moss); color: var(--ink); }
+.callout-checkpoint .callout-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* diagram shell */
+.diagram {
+  background: var(--paper-card);
+  border-color: var(--rule-faint);
+}
+.diagram-header {
+  background: var(--paper-deep);
+  border-bottom-color: var(--rule-faint);
+}
+.diagram-title { color: var(--lava); font-family: var(--font-mono); }
+.diagram-hint { color: var(--ink-mute); font-family: var(--font-mono); }
+.diagram-hint::before { color: var(--tone-moss); }
+.diagram-info {
+  background: rgba(74, 111, 63, 0.05);
+  border-top-color: var(--rule-faint);
+  color: var(--ink-soft);
+}
+.diagram-info-label { color: var(--tone-moss); font-family: var(--font-mono); }
+
+/* stepper */
+.stepper {
+  background: var(--paper);
+  border-color: var(--rule-faint);
+}
+.stepper button {
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.stepper button.active {
+  background: var(--lava);
+  color: var(--paper);
+}
+.stepper button:hover:not(.active) { color: var(--ink); }
+
+/* blockquote */
+blockquote {
+  border-left-color: var(--lava) !important;
+  color: var(--ink-soft) !important;
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+/* wrap-up */
+.wrap-up {
+  background: linear-gradient(135deg, var(--paper-card) 0%, var(--paper-deep) 100%);
+  border-color: var(--rule-faint);
+}
+.wrap-up::before {
+  background: radial-gradient(circle, rgba(255, 54, 33, 0.10) 0%, transparent 70%);
+}
+.wrap-up h3 { color: var(--ink); font-family: var(--font-display); font-style: italic; }
+.wrap-up h3 em { color: var(--lava); }
+
+/* progress bar */
+.progress { background: var(--lava); }
+
+/* scrollbar / selection */
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+::selection { background: var(--lava); color: var(--paper); }
+
+/* ── SVG color overrides ─────────────────────────────────────────────────
+   Re-map every dark-mode hex literal used in inline <svg> markup (and in
+   the JS that re-paints diagrams on stepper change) to the warm palette.
+   Attribute selectors stay reactive when JS calls setAttribute. */
+svg [fill="#05080f"]  { fill: var(--paper); }
+svg [fill="#0b0f1a"]  { fill: var(--paper); }
+svg [fill="#111827"]  { fill: var(--paper-card); }
+svg [fill="#1a2235"]  { fill: var(--paper-card); }
+svg [fill="#243550"]  { fill: var(--paper-deep); }
+svg [fill="#1e2d45"]  { fill: var(--paper-deep); }
+svg [fill="#0b1a14"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0b1a18"]  { fill: var(--tone-moss-bg); }
+svg [fill="#1a1014"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#e8edf5"]  { fill: var(--ink); }
+svg [fill="#8899bb"]  { fill: var(--ink-soft); }
+svg [fill="#4a5878"]  { fill: var(--ink-mute); }
+svg [fill="#fff"]     { fill: var(--paper); }
+svg [fill="#ffffff"]  { fill: var(--paper); }
+svg [fill="#ff6b35"]  { fill: var(--lava); }
+svg [fill="#22c55e"]  { fill: var(--tone-moss); }
+svg [fill="#ef4444"]  { fill: var(--lava-deep); }
+svg [fill="#fbbf24"]  { fill: var(--tone-ochre); }
+svg [fill="#a855f7"]  { fill: var(--tone-sepia); }
+svg [fill="#4a9eff"]  { fill: var(--tone-rust); }
+svg [fill="#00bfa5"]  { fill: var(--tone-moss); }
+
+svg [stroke="#243550"]  { stroke: var(--rule); }
+svg [stroke="#1e2d45"]  { stroke: var(--rule-faint); }
+svg [stroke="#ff6b35"]  { stroke: var(--lava); }
+svg [stroke="#22c55e"]  { stroke: var(--tone-moss); }
+svg [stroke="#ef4444"]  { stroke: var(--lava-deep); }
+svg [stroke="#fbbf24"]  { stroke: var(--tone-ochre); }
+svg [stroke="#a855f7"]  { stroke: var(--tone-sepia); }
+svg [stroke="#4a9eff"]  { stroke: var(--tone-rust); }
+svg [stroke="#00bfa5"]  { stroke: var(--tone-moss); }
+svg [stroke="#8899bb"]  { stroke: var(--ink-soft); }
+
+/* push inline-styled SVG typography to the editorial fonts */
+svg text[font-family*="Playfair"]     { font-family: var(--font-display); font-style: italic; }
+svg text[font-family*="IBM Plex Mono"] { font-family: var(--font-mono); }
+
+/* mobile */
+
+/* Additional dark-mode hex literals introduced by Modules 1, 2, 4, 5, 6, 7, 8, 9
+   — extends the base hex remap above with module-specific warm equivalents. */
+svg [fill="#1a1209"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a1810"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1208"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1611"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1f1612"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#2a230a"]  { fill: var(--tone-ochre-bg); }
+svg [fill="#1a2a1f"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0a1f1c"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d1f17"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2010"]  { fill: var(--tone-moss-bg); }
+svg [fill="#0d2925"]  { fill: var(--tone-moss-bg); }
+svg [fill="#3a1a14"]  { fill: var(--lava-soft); }
+svg [fill="#1f0d12"]  { fill: var(--lava-soft); }
+svg [fill="#1a1010"]  { fill: var(--lava-soft); }
+svg [fill="#1a1230"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#1e1730"]  { fill: var(--tone-sepia-bg); }
+svg [fill="#0f2440"]  { fill: var(--paper-deep); }
+svg [fill="#162039"]  { fill: var(--paper-card); }
+svg [fill="#0d1f2a"]  { fill: var(--paper-card); }
+svg [fill="#0a0e18"]  { fill: var(--paper); }
+svg [fill="#0e1422"]  { fill: var(--paper-card); }
+svg [fill="#fca5a5"]  { fill: var(--lava-deep); }
+svg [fill="#7ab3ff"]  { fill: var(--tone-rust); }
+svg [fill="#dceacc"]  { fill: var(--tone-moss); }
+svg [fill="#06b6d4"]  { fill: var(--tone-moss); }
+svg [fill="#6b7a99"]  { fill: var(--ink-mute); }
+
+svg [stroke="#06b6d4"]  { stroke: var(--tone-moss); }
+svg [stroke="#4a5878"]  { stroke: var(--ink-mute); }
+svg [stroke="#0b0f1a"]  { stroke: var(--rule-faint); }
+
+
+/* ── Diagram info text — bullet support inside hover/click info panels ── */
+.diagram-info-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.diagram-info-text strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lava);
+  margin-bottom: 0.45rem;
+  font-weight: 500;
+}
+.diagram-info-text ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.diagram-info-text ul li {
+  position: static;
+  padding: 0.12rem 0 0.12rem 1.1rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  border-bottom: none;
+}
+.diagram-info-text ul li::before {
+  content: "→";
+  position: absolute;
+  margin-left: -1.05rem;
+  color: var(--lava);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 720px) {
+  header { background-image: none; }
+}
 </style>
 </head>
 <body>
@@ -601,7 +1011,7 @@ td strong { color: var(--text); }
           <text x="820" y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="end">READY</text>
 
           <!-- Stage boxes -->
-          <g class="diag-node" id="prov-1" data-info="STAGE 1 · API ACCEPT — The control plane validates entitlement, capacity, and name uniqueness within the workspace. Returns a uid immediately. State: PROVISIONING. The SDK call returns in under a second.">
+          <g class="diag-node" id="prov-1" data-info="<strong>STAGE 1 · API ACCEPT</strong><ul><li>The control plane validates entitlement, capacity, and name uniqueness within the workspace.</li><li>Returns a uid immediately.</li><li>State: PROVISIONING.</li><li>The SDK call returns in under a second.</li></ul>">
             <rect x="40" y="80" width="140" height="160" rx="6" fill="#1a2235" stroke="#ff6b35" stroke-width="2"/>
             <text x="110" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1.5">STAGE 1</text>
             <text x="110" y="138" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">Accept</text>
@@ -611,7 +1021,7 @@ td strong { color: var(--text); }
             <text x="110" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#fbbf24">~&lt;1 sec</text>
           </g>
 
-          <g class="diag-node" id="prov-2" data-info="STAGE 2 · STORAGE — A slice of the multi-tenant page server is reserved for your project. Page versions for the entire retention window will live here. This is NOT a per-customer S3 bucket; it is a logical tenant on a shared, hardened page server.">
+          <g class="diag-node" id="prov-2" data-info="<strong>STAGE 2 · STORAGE</strong><ul><li>A slice of the multi-tenant page server is reserved for your project.</li><li>Page versions for the entire retention window will live here.</li><li>This is NOT a per-customer S3 bucket; it is a logical tenant on a shared, hardened page server.</li></ul>">
             <rect x="200" y="80" width="140" height="160" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
             <text x="270" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 2</text>
             <text x="270" y="138" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#8899bb" font-style="italic">Storage</text>
@@ -631,7 +1041,7 @@ td strong { color: var(--text); }
             <text x="430" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">~30–40 sec</text>
           </g>
 
-          <g class="diag-node" id="prov-4" data-info="STAGE 4 · MAIN BRANCH — Every new project gets a `main` branch automatically. The branch is just a pointer record into the storage layer; no data movement. From this branch, you will create dev, staging, recovery branches in seconds.">
+          <g class="diag-node" id="prov-4" data-info="<strong>STAGE 4 · MAIN BRANCH</strong><ul><li>Every new project gets a `main` branch automatically.</li><li>The branch is just a pointer record into the storage layer; no data movement.</li><li>From this branch, you will create dev, staging, recovery branches in seconds.</li></ul>">
             <rect x="520" y="80" width="140" height="160" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
             <text x="590" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 4</text>
             <text x="590" y="138" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#8899bb" font-style="italic">Branch</text>
@@ -641,7 +1051,7 @@ td strong { color: var(--text); }
             <text x="590" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">~2–5 sec</text>
           </g>
 
-          <g class="diag-node" id="prov-5" data-info="STAGE 5 · DNS — The read_write_dns endpoint becomes resolvable and the connection accepts TLS handshakes. State transitions to READY. Until DNS publishes (~5–10s after compute is up), connection attempts will fail with name resolution errors.">
+          <g class="diag-node" id="prov-5" data-info="<strong>STAGE 5 · DNS</strong><ul><li>The read_write_dns endpoint becomes resolvable and the connection accepts TLS handshakes.</li><li>State transitions to READY.</li><li>Until DNS publishes (~5–10s after compute is up), connection attempts will fail with name resolution errors.</li></ul>">
             <rect x="680" y="80" width="140" height="160" rx="6" fill="#0b0f1a" stroke="#243550" stroke-width="1.5"/>
             <text x="750" y="110" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" letter-spacing="1.5">STAGE 5</text>
             <text x="750" y="138" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#8899bb" font-style="italic">DNS</text>
@@ -664,7 +1074,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Click a stage above</div>
-        <p id="provInfo">Five things happen between your SDK call and a usable database. Click each stage to see what's actually running on the control plane during those 60–90 seconds.</p>
+        <div id="provInfo" class="diagram-info-text">Five things happen between your SDK call and a usable database. Click each stage to see what's actually running on the control plane during those 60–90 seconds.</div>
       </div>
     </div>
 
@@ -816,7 +1226,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Click a circle on the timeline</div>
-        <p id="ttlInfo">Toggle between the trap and the fix. The trap: a hardcoded token works for an hour, then every new connection fails. The fix: pool_pre_ping + fresh credentials makes rotation invisible.</p>
+        <div id="ttlInfo" class="diagram-info-text">Toggle between the trap and the fix. The trap: a hardcoded token works for an hour, then every new connection fails. The fix: pool_pre_ping + fresh credentials makes rotation invisible.</div>
       </div>
     </div>
 
@@ -866,7 +1276,7 @@ td strong { color: var(--text); }
           </defs>
 
           <!-- USERS table -->
-          <g class="diag-node" data-info="USERS TABLE — the parent of the relationship. Standard pattern: surrogate primary key, unique business key (email), audit timestamp. This is exactly the schema you would build for any operational app.">
+          <g class="diag-node" data-info="<strong>USERS TABLE</strong><ul><li>the parent of the relationship.</li><li>Standard pattern: surrogate primary key, unique business key (email), audit timestamp.</li><li>This is exactly the schema you would build for any operational app.</li></ul>">
             <rect x="50" y="60" width="300" height="220" rx="8" fill="#1a2235" stroke="#4a9eff" stroke-width="1.5"/>
             <rect x="50" y="60" width="300" height="32" rx="8" fill="#243550"/>
             <text x="200" y="80" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">users</text>
@@ -921,7 +1331,7 @@ td strong { color: var(--text); }
             <text x="610" y="194" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">TEXT</text>
             <text x="780" y="194" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e" text-anchor="middle">NN</text>
           </g>
-          <g class="diag-node" data-info="qty INT CHECK (qty > 0) — INTEGER with a CHECK constraint. The constraint is enforced server-side; bad app code cannot insert qty=0 or qty=-5 by mistake. CHECK constraints are cheap and you should use them liberally.">
+          <g class="diag-node" data-info="qty INT CHECK (qty &gt; 0) — INTEGER with a CHECK constraint. The constraint is enforced server-side; bad app code cannot insert qty=0 or qty=-5 by mistake. CHECK constraints are cheap and you should use them liberally.">
             <rect x="500" y="206" width="320" height="32" fill="transparent"/>
             <text x="515" y="228" font-family="IBM Plex Mono, monospace" font-size="11" fill="#fbbf24">qty</text>
             <text x="610" y="228" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a855f7">INT</text>
@@ -956,7 +1366,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Click any field, table, or index</div>
-        <p id="schemaInfo">Three things in this schema deserve highlighting because they pay off in later modules: BIGSERIAL ids (synced tables need PKs), TIMESTAMPTZ (avoid timezone bugs), and indexes matched to access patterns (B-tree for lookups, BRIN for time-series).</p>
+        <div id="schemaInfo" class="diagram-info-text">Three things in this schema deserve highlighting because they pay off in later modules: BIGSERIAL ids (synced tables need PKs), TIMESTAMPTZ (avoid timezone bugs), and indexes matched to access patterns (B-tree for lookups, BRIN for time-series).</div>
       </div>
     </div>
 
@@ -1013,7 +1423,7 @@ td strong { color: var(--text); }
           </defs>
 
           <!-- Lakebase project (always shown) -->
-          <g class="diag-node" data-info="THE LAKEBASE PROJECT — your live Postgres 17 process. Reachable on the wire from any Postgres client at all times. UC registration does not change anything about the database itself.">
+          <g class="diag-node" data-info="<strong>THE LAKEBASE PROJECT</strong><ul><li>your live Postgres 17 process.</li><li>Reachable on the wire from any Postgres client at all times.</li><li>UC registration does not change anything about the database itself.</li></ul>">
             <rect x="340" y="280" width="200" height="80" rx="8" fill="#2a1a14" stroke="#ff6b35" stroke-width="2"/>
             <text x="440" y="312" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">Lakebase Project</text>
             <text x="440" y="332" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1.5">POSTGRES 17 · LIVE DNS</text>
@@ -1038,19 +1448,19 @@ td strong { color: var(--text); }
             <text x="440" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#00bfa5" letter-spacing="2">▸ AFTER — UNITY CATALOG SEES IT</text>
 
             <!-- UC band -->
-            <g class="diag-node" data-info="UNITY CATALOG — the governance plane. Once Lakebase is registered, UC sees it as a first-class catalog object alongside Delta catalogs. Permissions, audit, and discovery all converge here.">
+            <g class="diag-node" data-info="<strong>UNITY CATALOG</strong><ul><li>the governance plane.</li><li>Once Lakebase is registered, UC sees it as a first-class catalog object alongside Delta catalogs.</li><li>Permissions, audit, and discovery all converge here.</li></ul>">
               <rect x="60" y="70" width="760" height="60" rx="6" fill="#0b1a18" stroke="#00bfa5" stroke-width="1.5"/>
               <text x="440" y="95" text-anchor="middle" font-family="Playfair Display, serif" font-size="14" fill="#e8edf5" font-style="italic">Unity Catalog</text>
               <text x="440" y="115" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="2">CATALOG: lakebase_tutorial</text>
             </g>
 
             <!-- 7 unlocks -->
-            <g class="diag-node" data-info="DBSQL via federation — Run SELECTs against lakebase_tutorial.public.users from a SQL warehouse. Live data, no copy. Joins across Delta and Lakebase work natively in DBSQL.">
+            <g class="diag-node" data-info="<strong>DBSQL via federation</strong><ul><li>Run SELECTs against lakebase_tutorial.public.users from a SQL warehouse.</li><li>Live data, no copy.</li><li>Joins across Delta and Lakebase work natively in DBSQL.</li></ul>">
               <rect x="60"  y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#a855f7" stroke-width="1.2"/>
               <text x="110" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7">DBSQL</text>
               <text x="110" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">federation</text>
             </g>
-            <g class="diag-node" data-info="AI/BI Dashboards — Build dashboards directly against Lakebase tables. No ETL into Delta required. The dashboard query reads live OLTP data through the federation path.">
+            <g class="diag-node" data-info="<strong>AI/BI Dashboards</strong><ul><li>Build dashboards directly against Lakebase tables.</li><li>No ETL into Delta required.</li><li>The dashboard query reads live OLTP data through the federation path.</li></ul>">
               <rect x="170" y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#a855f7" stroke-width="1.2"/>
               <text x="220" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7">AI/BI</text>
               <text x="220" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">dashboards</text>
@@ -1065,12 +1475,12 @@ td strong { color: var(--text); }
               <text x="440" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a855f7">Notebooks</text>
               <text x="440" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">catalog UI</text>
             </g>
-            <g class="diag-node" data-info="Synced Tables — UC Delta tables can now be synced INTO Lakebase via managed CDC. Module 4 builds on this. Without UC registration, synced tables cannot target your DB.">
+            <g class="diag-node" data-info="<strong>Synced Tables</strong><ul><li>UC Delta tables can now be synced INTO Lakebase via managed CDC.</li><li>Module 4 builds on this.</li><li>Without UC registration, synced tables cannot target your DB.</li></ul>">
               <rect x="500" y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#22c55e" stroke-width="1.2"/>
               <text x="550" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#22c55e">Synced</text>
               <text x="550" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">tables target</text>
             </g>
-            <g class="diag-node" data-info="GRANT/REVOKE in UC — Workspace identity-based access control. GRANT SELECT ON CATALOG lakebase_tutorial TO `analysts`. UC permissions and Postgres GRANTs compose; the more restrictive wins.">
+            <g class="diag-node" data-info="<strong>GRANT/REVOKE in UC</strong><ul><li>Workspace identity-based access control.</li><li>GRANT SELECT ON CATALOG lakebase_tutorial TO `analysts`.</li><li>UC permissions and Postgres GRANTs compose; the more restrictive wins.</li></ul>">
               <rect x="610" y="160" width="100" height="50" rx="4" fill="#1a2235" stroke="#fbbf24" stroke-width="1.2"/>
               <text x="660" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fbbf24">UC GRANT</text>
               <text x="660" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#8899bb">permissions</text>
@@ -1100,7 +1510,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Toggle and click any tile</div>
-        <p id="ucInfo">One CREATE CATALOG command flips seven dependent capabilities on at once. This is the structural difference between Lakebase and a sidecar Postgres — there is no equivalent of this command for RDS.</p>
+        <div id="ucInfo" class="diagram-info-text">One CREATE CATALOG command flips seven dependent capabilities on at once. This is the structural difference between Lakebase and a sidecar Postgres — there is no equivalent of this command for RDS.</div>
       </div>
     </div>
 
@@ -1171,7 +1581,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- main branch (always visible) -->
-          <g class="diag-node" data-info="MAIN BRANCH — the project's primary branch. A compute process attached to a snapshot of the page server. Reads pages from storage as needed. This is your 'production' line in the Git analogy.">
+          <g class="diag-node" data-info="<strong>MAIN BRANCH</strong><ul><li>the project's primary branch.</li><li>A compute process attached to a snapshot of the page server.</li><li>Reads pages from storage as needed.</li><li>This is your 'production' line in the Git analogy.</li></ul>">
             <rect x="100" y="80" width="220" height="80" rx="8" fill="#2a1a14" stroke="#ff6b35" stroke-width="2"/>
             <text x="210" y="110" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">main</text>
             <text x="210" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ff6b35" letter-spacing="1.5">PG PROCESS A</text>
@@ -1188,7 +1598,7 @@ td strong { color: var(--text); }
 
           <!-- dev branch (visible from step 2) -->
           <g id="devBranch" style="display:none">
-            <g class="diag-node" data-info="DEV BRANCH — a new compute (PG process B) attached to a copy-on-write SNAPSHOT of the same storage. Created in seconds. No data is copied. Same pages, different compute, different DNS.">
+            <g class="diag-node" data-info="<strong>DEV BRANCH</strong><ul><li>a new compute (PG process B) attached to a copy-on-write SNAPSHOT of the same storage.</li><li>Created in seconds.</li><li>No data is copied.</li><li>Same pages, different compute, different DNS.</li></ul>">
               <rect x="560" y="80" width="220" height="80" rx="8" fill="#0b1a18" stroke="#00bfa5" stroke-width="2"/>
               <text x="670" y="110" text-anchor="middle" font-family="Playfair Display, serif" font-size="16" fill="#e8edf5" font-style="italic">dev</text>
               <text x="670" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#00bfa5" letter-spacing="1.5">PG PROCESS B</text>
@@ -1213,7 +1623,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Step through branching</div>
-        <p id="branchInfo">Step 1: only main exists. Step 2: dev branch is created — both branches point at the same physical pages. Step 3: dev writes to page 2 — only dev's version diverges; main is untouched.</p>
+        <div id="branchInfo" class="diagram-info-text">Step 1: only main exists. Step 2: dev branch is created — both branches point at the same physical pages. Step 3: dev writes to page 2 — only dev's version diverges; main is untouched.</div>
       </div>
     </div>
 
@@ -1280,8 +1690,7 @@ td strong { color: var(--text); }
             </marker>
           </defs>
 
-          <!-- Time axis -->
-          <line x1="60" y1="290" x2="820" y2="290" stroke="#243550" stroke-width="1.5"/>
+          <!-- Time axis (line removed; ticks/labels remain) -->
           <text x="60"  y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878">t = -7d</text>
           <text x="320" y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#4a5878" text-anchor="middle">t = -5min (good state)</text>
           <text x="600" y="315" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444" text-anchor="middle">t = -1min (corrupted)</text>
@@ -1296,7 +1705,7 @@ td strong { color: var(--text); }
           <text x="40" y="184" font-family="IBM Plex Mono, monospace" font-size="10" fill="#ff6b35" text-anchor="end">main</text>
 
           <!-- Step 1 marker - corruption -->
-          <g class="diag-node" id="pitStep1" data-info="STEP 1 · CORRUPT — On main, run UPDATE users SET email='oops' WHERE id=1. The bad value is now in the live DB. The original page version still exists in storage; the new corrupted page is just the latest version.">
+          <g class="diag-node" id="pitStep1" data-info="<strong>STEP 1 · CORRUPT</strong><ul><li>On main, run UPDATE users SET email='oops' WHERE id=1.</li><li>The bad value is now in the live DB.</li><li>The original page version still exists in storage; the new corrupted page is just the latest version.</li></ul>">
             <circle cx="600" cy="180" r="10" fill="#ef4444"/>
             <text x="600" y="184" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#fff" font-weight="700">!</text>
             <text x="600" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ef4444">corruption</text>
@@ -1309,7 +1718,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Step 3: recovery branch -->
-          <g class="diag-node" id="pitStep3" data-info="STEP 3 · BRANCH FROM TIMESTAMP — CREATE BRANCH recovery FROM TIMESTAMP (now() - 5 min). A new compute spins up, pointed at the storage state from 5 minutes ago. Read-write, just like main. Takes ~30 seconds. Email='oops' did not exist yet at that timestamp, so the branch has the original good value.">
+          <g class="diag-node" id="pitStep3" data-info="<strong>STEP 3 · BRANCH FROM TIMESTAMP</strong><ul><li>CREATE BRANCH recovery FROM TIMESTAMP (now() - 5 min).</li><li>A new compute spins up, pointed at the storage state from 5 minutes ago.</li><li>Read-write, just like main.</li><li>Takes ~30 seconds.</li><li>Email='oops' did not exist yet at that timestamp, so the branch has the original good value.</li></ul>">
             <line x1="320" y1="180" x2="320" y2="100" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="3,2"/>
             <line x1="320" y1="100" x2="450" y2="100" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrPit)"/>
             <rect x="450" y="80" width="160" height="40" rx="6" fill="#0b1a18" stroke="#22c55e" stroke-width="1.5"/>
@@ -1318,7 +1727,7 @@ td strong { color: var(--text); }
           </g>
 
           <!-- Step 4: copy back -->
-          <g class="diag-node" id="pitStep4" data-info="STEP 4 · RECOVER — From main: UPDATE users SET email = (SELECT email FROM recovery.users WHERE id=1) WHERE id=1. The good row is copied back into main. Then DROP BRANCH recovery to clean up. Total resolution time: ~2 minutes from incident.">
+          <g class="diag-node" id="pitStep4" data-info="<strong>STEP 4 · RECOVER</strong><ul><li>From main: UPDATE users SET email = (SELECT email FROM recovery.users WHERE id=1) WHERE id=1.</li><li>The good row is copied back into main.</li><li>Then DROP BRANCH recovery to clean up.</li><li>Total resolution time: ~2 minutes from incident.</li></ul>">
             <line x1="530" y1="120" x2="530" y2="180" stroke="#22c55e" stroke-width="1.2" stroke-dasharray="3,2"/>
             <line x1="530" y1="180" x2="820" y2="180" stroke="#22c55e" stroke-width="2" marker-end="url(#arrPit)"/>
             <text x="700" y="170" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#22c55e">copy good row back</text>
@@ -1334,7 +1743,7 @@ td strong { color: var(--text); }
       </div>
       <div class="diagram-info">
         <div class="diagram-info-label">▸ Step through the recovery</div>
-        <p id="pitInfo">PIT restore is just branching from a timestamp. The retention window keeps every page version; you create a new branch at any past second; you copy the rows you need back to main; you drop the branch.</p>
+        <div id="pitInfo" class="diagram-info-text">PIT restore is just branching from a timestamp. The retention window keeps every page version; you create a new branch at any past second; you copy the rows you need back to main; you drop the branch.</div>
       </div>
     </div>
 
@@ -1446,12 +1855,12 @@ function setProv(step) {
       if (idx >= 2) t.setAttribute('fill', isActive ? (idx === 5 ? '#fbbf24' : '#8899bb') : '#4a5878');
     });
   }
-  document.getElementById('provInfo').textContent = provData[step];
+  document.getElementById('provInfo').innerHTML = provData[step];
 }
 document.querySelectorAll('#provSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('provInfo').textContent = info;
+    if (info) document.getElementById('provInfo').innerHTML = info;
   });
 });
 
@@ -1460,14 +1869,14 @@ function setTtl(mode) {
   document.querySelectorAll('#ttlStepper button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
   document.getElementById('ttlTrap').style.display = mode === 'trap' ? 'block' : 'none';
   document.getElementById('ttlFix').style.display  = mode === 'fix'  ? 'block' : 'none';
-  document.getElementById('ttlInfo').textContent = mode === 'trap'
+  document.getElementById('ttlInfo').innerHTML = mode === 'trap'
     ? 'THE TRAP — A hardcoded token works for an hour, then every NEW connection fails. The pool kept the original socket alive past expiry; the next checkout that needs a fresh socket dies on auth.'
     : 'THE FIX — pool_pre_ping=True checks each connection before handing it over. App refreshes credentials before token expiry. The rotation is invisible to application code.';
 }
 document.querySelectorAll('#ttlSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('ttlInfo').textContent = info;
+    if (info) document.getElementById('ttlInfo').innerHTML = info;
   });
 });
 
@@ -1475,11 +1884,11 @@ document.querySelectorAll('#ttlSvg .diag-node').forEach(n => {
 document.querySelectorAll('#schemaSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('schemaInfo').textContent = info;
+    if (info) document.getElementById('schemaInfo').innerHTML = info;
   });
   n.addEventListener('click', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('schemaInfo').textContent = info;
+    if (info) document.getElementById('schemaInfo').innerHTML = info;
   });
 });
 
@@ -1488,14 +1897,14 @@ function setUc(mode) {
   document.querySelectorAll('#ucStepper button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
   document.getElementById('ucBefore').style.display = mode === 'before' ? 'block' : 'none';
   document.getElementById('ucAfter').style.display  = mode === 'after'  ? 'block' : 'none';
-  document.getElementById('ucInfo').textContent = mode === 'before'
+  document.getElementById('ucInfo').innerHTML = mode === 'before'
     ? 'BEFORE REGISTRATION — Lakebase is reachable on the wire from any Postgres client. Useful, but it is just a managed Postgres — the same as RDS. None of the lakehouse-native capabilities are available yet.'
     : 'AFTER REGISTRATION — One CREATE CATALOG command flips seven dependent capabilities ON at once. This is the structural difference between Lakebase and a sidecar Postgres. There is no equivalent of this command for RDS.';
 }
 document.querySelectorAll('#ucSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('ucInfo').textContent = info;
+    if (info) document.getElementById('ucInfo').innerHTML = info;
   });
 });
 
@@ -1523,12 +1932,12 @@ function setBranch(step) {
       devLineP2.setAttribute('stroke', '#00bfa5');
     }
   }
-  document.getElementById('branchInfo').textContent = branchData[step];
+  document.getElementById('branchInfo').innerHTML = branchData[step];
 }
 document.querySelectorAll('#branchSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('branchInfo').textContent = info;
+    if (info) document.getElementById('branchInfo').innerHTML = info;
   });
 });
 
@@ -1546,12 +1955,12 @@ function setPit(step) {
   document.getElementById('pitStep2').style.opacity = step >= 2 ? 1 : 0.25;
   document.getElementById('pitStep3').style.opacity = step >= 3 ? 1 : 0.25;
   document.getElementById('pitStep4').style.opacity = step >= 4 ? 1 : 0.25;
-  document.getElementById('pitInfo').textContent = pitData[step];
+  document.getElementById('pitInfo').innerHTML = pitData[step];
 }
 document.querySelectorAll('#pitSvg .diag-node').forEach(n => {
   n.addEventListener('mouseenter', () => {
     const info = n.dataset.info;
-    if (info) document.getElementById('pitInfo').textContent = info;
+    if (info) document.getElementById('pitInfo').innerHTML = info;
   });
 });
 
