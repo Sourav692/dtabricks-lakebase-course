@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lakebase Mastery — Course Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0b0f1a;
+  --surface2: #111827;
+  --surface3: #1a2235;
+  --border: #1e2d45;
+  --border2: #243550;
+  --accent-orange: #ff6b35;
+  --accent-teal: #00bfa5;
+  --accent-blue: #4a9eff;
+  --accent-purple: #a855f7;
+  --accent-yellow: #fbbf24;
+  --text: #e8edf5;
+  --text-dim: #8899bb;
+  --text-muted: #4a5878;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --orange: #f97316;
+
+  --l0: #22c55e;
+  --l1: #3b82f6;
+  --l2: #f59e0b;
+  --l3: #f97316;
+  --l4: #ef4444;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  position: relative;
+  padding: 64px 48px 56px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 50%, rgba(255,107,53,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 20%, rgba(0,191,165,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 30% 40% at 60% 80%, rgba(74,158,255,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.header-inner { max-width: 1140px; margin: 0 auto; position: relative; }
+
+.header-eyebrow {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+}
+
+.eyebrow-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--accent-orange);
+  padding: 5px 14px;
+  border: 1px solid rgba(255,107,53,0.3);
+  border-radius: 2px;
+  background: rgba(255,107,53,0.06);
+}
+
+.eyebrow-line {
+  height: 1px; width: 48px;
+  background: linear-gradient(to right, rgba(255,107,53,0.4), transparent);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5.5vw, 68px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  font-weight: 700;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--accent-orange);
+}
+
+.header-sub {
+  font-size: 16px; color: var(--text-dim);
+  max-width: 720px; line-height: 1.75;
+  margin-bottom: 40px;
+}
+
+.meta-row {
+  display: flex; gap: 0; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.meta-item {
+  padding: 14px 24px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.meta-item:last-child { border-right: none; }
+
+.meta-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 22px; font-weight: 500;
+  color: var(--accent-teal);
+}
+
+.meta-lbl {
+  font-size: 11px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ── ROADMAP BANNER ── */
+.roadmap-bar {
+  background: rgba(74,158,255,0.04);
+  border-bottom: 1px solid rgba(74,158,255,0.15);
+  padding: 14px 48px;
+}
+
+.roadmap-inner {
+  max-width: 1140px; margin: 0 auto;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+
+.roadmap-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--accent-blue);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.roadmap-link {
+  color: var(--text);
+  font-size: 13px;
+  text-decoration: none;
+  border-bottom: 1px dashed var(--accent-blue);
+  padding-bottom: 1px;
+  transition: color 0.2s;
+}
+.roadmap-link:hover { color: var(--accent-blue); }
+
+/* ── LEGEND ── */
+.legend-strip {
+  padding: 16px 48px;
+  border-bottom: 1px solid var(--border);
+}
+
+.legend-strip-inner {
+  max-width: 1140px; margin: 0 auto;
+  display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+}
+
+.leg-group { display: flex; gap: 16px; align-items: center; }
+.leg-sep { width: 1px; height: 18px; background: var(--border); }
+
+.leg { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-dim); }
+.leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.leg-title {
+  font-size: 11px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── MAIN ── */
+main { max-width: 1140px; margin: 0 auto; padding: 48px 48px 100px; }
+
+.section-banner {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 32px; margin-top: 8px;
+}
+
+.section-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text-muted);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+
+.section-line { flex: 1; height: 1px; background: var(--border); }
+
+/* ── MODULE ── */
+.module {
+  margin-bottom: 28px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.module:hover { border-color: var(--border2); }
+
+.mod-header {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 0;
+}
+
+.mod-num-col {
+  display: flex; align-items: center; justify-content: center;
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  writing-mode: vertical-rl;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; letter-spacing: 0.18em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.mod-main {
+  padding: 22px 28px 20px;
+}
+
+.mod-level {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; font-weight: 500;
+  padding: 3px 10px; border-radius: 2px;
+  margin-bottom: 10px;
+  border: 1px solid;
+}
+
+.lv0 { color: var(--l0); background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2); }
+.lv1 { color: var(--l1); background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); }
+.lv2 { color: var(--l2); background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.2); }
+.lv3 { color: var(--l3); background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.2); }
+.lv4 { color: var(--l4); background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+
+.mod-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; line-height: 1.2;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.mod-title em {
+  font-style: italic;
+  color: var(--accent-orange);
+}
+
+.mod-subtitle {
+  font-size: 13.5px; color: var(--text-dim); line-height: 1.55;
+  max-width: 760px;
+}
+
+/* ── SECTIONS GRID (Theory / Lab) ── */
+.mod-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--border);
+}
+
+.mod-section {
+  padding: 22px 28px 24px;
+  position: relative;
+}
+
+.mod-section + .mod-section {
+  border-left: 1px solid var(--border);
+}
+
+.mod-section-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+
+.mod-section-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; font-weight: 500;
+  padding: 4px 11px; border-radius: 2px;
+  border: 1px solid;
+}
+
+.tag-theory {
+  color: var(--accent-teal);
+  background: rgba(0,191,165,0.07);
+  border-color: rgba(0,191,165,0.25);
+}
+
+.tag-lab {
+  color: var(--accent-purple);
+  background: rgba(168,85,247,0.07);
+  border-color: rgba(168,85,247,0.25);
+}
+
+.mod-section-line { flex: 1; height: 1px; background: var(--border); }
+
+.resources { display: flex; flex-direction: column; gap: 8px; }
+
+.resource {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.18s;
+}
+
+.resource:hover {
+  border-color: var(--border2);
+  background: var(--surface3);
+  transform: translateX(2px);
+}
+
+.resource.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.res-icon {
+  width: 28px; height: 28px;
+  border-radius: 5px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.resource:hover .res-icon { color: var(--text); }
+
+.res-body { flex: 1; min-width: 0; }
+
+.res-title {
+  font-size: 14px; line-height: 1.35;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.res-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px; color: var(--text-muted);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.res-arrow {
+  color: var(--text-muted);
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: transform 0.18s, color 0.18s;
+}
+
+.resource:hover .res-arrow { color: var(--accent-orange); transform: translateX(3px); }
+
+.empty-note {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.012);
+  text-align: center;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 48px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.08em;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 760px) {
+  header { padding: 48px 24px 40px; }
+  .legend-strip, .roadmap-bar { padding: 14px 24px; }
+  main { padding: 36px 24px 80px; }
+  .mod-sections { grid-template-columns: 1fr; }
+  .mod-section + .mod-section {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  .mod-main { padding: 18px 22px 18px; }
+  .mod-section { padding: 18px 22px 22px; }
+  footer { padding: 24px; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   EDITORIAL OVERRIDE — Databricks editorial-technical paper theme
+   Loaded after the dark-mode rules above; cascade re-skins the page.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* paper palette */
+  --paper:       #F4F1EA;
+  --paper-deep:  #ECE6D9;
+  --paper-card:  #FBF9F4;
+  --ink:         #0E1F26;
+  --ink-soft:    #3A4A52;
+  --ink-mute:    #6A7880;
+  --lava:        #FF3621;
+  --lava-deep:   #C72D1A;
+  --lava-soft:   rgba(255, 54, 33, 0.08);
+  --tone-rust:   #B0532E;
+  --tone-rust-bg:    rgba(176, 83, 46, 0.08);
+  --tone-rust-line:  rgba(176, 83, 46, 0.30);
+  --tone-moss:   #4A6F3F;
+  --tone-moss-bg:    rgba(74, 111, 63, 0.09);
+  --tone-moss-line:  rgba(74, 111, 63, 0.28);
+  --tone-ochre:  #A37B1F;
+  --tone-ochre-bg:   rgba(163, 123, 31, 0.10);
+  --tone-ochre-line: rgba(163, 123, 31, 0.30);
+  --tone-sepia:  #7A5F3A;
+  --tone-sepia-bg:   rgba(122, 95, 58, 0.09);
+  --tone-sepia-line: rgba(122, 95, 58, 0.28);
+  --tone-clay:   #8E3A28;
+  --tone-clay-bg:    rgba(142, 58, 40, 0.07);
+  --tone-clay-line:  rgba(142, 58, 40, 0.25);
+  --rule:        rgba(14, 31, 38, 0.18);
+  --rule-faint:  rgba(14, 31, 38, 0.10);
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:    "Instrument Sans", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* re-map the dark-mode tokens used everywhere in the inline CSS */
+  --bg:            var(--paper);
+  --surface:       var(--paper-card);
+  --surface2:      var(--paper);
+  --surface3:      var(--paper-deep);
+  --border:        var(--rule-faint);
+  --border2:       var(--rule);
+  --accent-orange: var(--lava);
+  --accent-teal:   var(--tone-moss);
+  --accent-blue:   var(--tone-rust);
+  --accent-purple: var(--tone-sepia);
+  --accent-yellow: var(--tone-ochre);
+  --text:          var(--ink);
+  --text-dim:      var(--ink-soft);
+  --text-muted:    var(--ink-mute);
+  --green:         var(--tone-moss);
+  --amber:         var(--tone-ochre);
+  --red:           var(--lava-deep);
+  --orange:        var(--tone-ochre);
+  --l0:            var(--tone-moss);
+  --l1:            var(--tone-rust);
+  --l2:            var(--tone-ochre);
+  --l3:            var(--lava);
+  --l4:            var(--lava-deep);
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background-image:
+    radial-gradient(1100px 550px at 92% -8%,  rgba(255, 54, 33, 0.05), transparent 60%),
+    radial-gradient(900px 500px  at -8% 108%, rgba(199, 167, 122, 0.20), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* ── Header / hero band ── */
+header {
+  border-bottom: 1px solid var(--rule-faint);
+  background: transparent;
+}
+header::before {
+  background:
+    radial-gradient(800px 300px at 100% 0%, var(--lava-soft), transparent 60%),
+    radial-gradient(600px 240px at 0% 100%, rgba(199, 167, 122, 0.18), transparent 60%);
+}
+
+.eyebrow-tag {
+  font-family: var(--font-mono);
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+}
+.eyebrow-line { background: linear-gradient(to right, rgba(255,54,33,0.4), transparent); }
+
+h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 420;
+  font-weight: 420;
+  color: var(--ink);
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+h1 em {
+  font-style: italic;
+  color: var(--lava);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "wght" 400;
+}
+
+.header-sub {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+  color: var(--ink-soft);
+  font-size: 17px;
+}
+.header-sub strong { color: var(--ink); }
+
+.meta-row {
+  border: 1px solid var(--rule-faint);
+  background: var(--paper-card);
+}
+.meta-item { border-right: 1px solid var(--rule-faint); }
+.meta-val {
+  font-family: var(--font-mono);
+  color: var(--lava);
+  font-weight: 500;
+}
+.meta-lbl {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+}
+
+/* ── Roadmap banner ── */
+.roadmap-bar {
+  background: var(--paper-card);
+  border-bottom: 1px solid var(--rule-faint);
+}
+.roadmap-label {
+  font-family: var(--font-mono);
+  color: var(--lava);
+}
+.roadmap-link {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+  font-size: 14px;
+  border-bottom-color: var(--lava);
+}
+.roadmap-link:hover { color: var(--lava-deep); }
+
+/* ── Legend strip ── */
+.legend-strip {
+  border-bottom: 1px solid var(--rule-faint);
+  background: var(--paper);
+}
+.leg { color: var(--ink-soft); font-family: var(--font-mono); font-size: 11px; }
+.leg-title {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+  letter-spacing: 0.14em;
+}
+.leg-sep { background: var(--rule-faint); }
+
+/* ── Section banner ── */
+.section-num {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+}
+.section-line { background: var(--rule-faint); }
+
+/* ── Module card ── */
+.module {
+  border: 1px solid var(--rule-faint);
+  background: var(--paper-card);
+  box-shadow: 0 1px 0 rgba(14, 31, 38, 0.025);
+  border-radius: 8px;
+}
+.module:hover { border-color: var(--rule); }
+
+.mod-num-col {
+  border-right: 1px solid var(--rule-faint);
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+}
+
+.mod-level {
+  font-family: var(--font-mono);
+  border-radius: 3px;
+}
+.lv0 { color: var(--tone-moss);  background: var(--tone-moss-bg);  border-color: var(--tone-moss-line); }
+.lv1 { color: var(--tone-rust);  background: var(--tone-rust-bg);  border-color: var(--tone-rust-line); }
+.lv2 { color: var(--tone-ochre); background: var(--tone-ochre-bg); border-color: var(--tone-ochre-line); }
+.lv3 { color: var(--lava);       background: var(--lava-soft);     border-color: rgba(255,54,33,0.28); }
+.lv4 { color: var(--lava-deep);  background: var(--tone-clay-bg);  border-color: var(--tone-clay-line); }
+
+.mod-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "SOFT" 30, "wght" 480;
+  font-weight: 480;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+}
+.mod-title em {
+  font-style: italic;
+  color: var(--lava);
+  font-variation-settings: "opsz" 36, "SOFT" 50, "wght" 440;
+}
+
+.mod-subtitle {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+}
+
+/* ── Sections grid (Theory / Lab columns) ── */
+.mod-sections {
+  border-top: 1px solid var(--rule-faint);
+  background: var(--paper);
+}
+.mod-section + .mod-section {
+  border-left: 1px solid var(--rule-faint);
+}
+
+.mod-section-tag {
+  font-family: var(--font-mono);
+  border-radius: 3px;
+}
+.tag-theory {
+  color: var(--tone-moss);
+  background: var(--tone-moss-bg);
+  border-color: var(--tone-moss-line);
+}
+.tag-lab {
+  color: var(--tone-sepia);
+  background: var(--tone-sepia-bg);
+  border-color: var(--tone-sepia-line);
+}
+.mod-section-line { background: var(--rule-faint); }
+
+/* ── Resource link cards ── */
+.resource {
+  background: var(--paper-card);
+  border: 1px solid var(--rule-faint);
+  color: var(--ink);
+  border-radius: 4px;
+}
+.resource:hover {
+  background: var(--paper);
+  border-color: var(--lava);
+}
+.res-icon {
+  background: var(--paper);
+  border: 1px solid var(--rule-faint);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.resource:hover .res-icon {
+  color: var(--lava);
+  border-color: var(--lava);
+}
+.res-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 18, "wght" 540;
+  font-weight: 540;
+  color: var(--ink);
+  font-size: 14.5px;
+}
+.res-meta {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+}
+.res-arrow {
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+}
+.resource:hover .res-arrow { color: var(--lava); }
+
+/* ── Empty-state note (no lab) ── */
+.empty-note {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+  border: 1px dashed var(--rule-faint);
+  background: var(--paper-card);
+}
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--rule-faint);
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  background: var(--paper);
+}
+
+/* ── Selection ── */
+::selection { background: var(--lava); color: var(--paper); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-eyebrow">
+      <span class="eyebrow-tag">Course Index · 9 Modules</span>
+      <span class="eyebrow-line"></span>
+    </div>
+    <h1>Lakebase <em>Mastery</em><br>From Mental Model to Production.</h1>
+    <p class="header-sub">
+      A complete tutorial on Databricks Lakebase — covering the conceptual mental model,
+      architecture deep dives, hands-on labs, and a capstone project. Each module pairs
+      <strong style="color: var(--accent-teal);">Theory</strong> with a runnable
+      <strong style="color: var(--accent-purple);">Lab</strong>.
+    </p>
+    <div class="meta-row">
+      <div class="meta-item">
+        <span class="meta-val">9</span>
+        <span class="meta-lbl">Modules</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-val">11</span>
+        <span class="meta-lbl">Theory Pages</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-val">7</span>
+        <span class="meta-lbl">Labs</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-val">1</span>
+        <span class="meta-lbl">Capstone</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="roadmap-bar">
+  <div class="roadmap-inner">
+    <span class="roadmap-label">▸ Full Course Roadmap</span>
+    <a class="roadmap-link" href="Lakebase_Roadmap_RSA.html">Open the master roadmap — all modules, levels, and topics in one view →</a>
+  </div>
+</div>
+
+<div class="legend-strip">
+  <div class="legend-strip-inner">
+    <span class="leg-title">Difficulty</span>
+    <div class="leg-group">
+      <span class="leg"><span class="leg-dot" style="background: var(--l0);"></span>Beginner</span>
+      <span class="leg"><span class="leg-dot" style="background: var(--l1);"></span>Beginner-Int</span>
+      <span class="leg"><span class="leg-dot" style="background: var(--l2);"></span>Intermediate</span>
+      <span class="leg"><span class="leg-dot" style="background: var(--l3);"></span>Advanced</span>
+      <span class="leg"><span class="leg-dot" style="background: var(--l4);"></span>Expert</span>
+    </div>
+    <span class="leg-sep"></span>
+    <span class="leg-title">Content</span>
+    <div class="leg-group">
+      <span class="leg"><span class="leg-dot" style="background: var(--accent-teal);"></span>Theory</span>
+      <span class="leg"><span class="leg-dot" style="background: var(--accent-purple);"></span>Lab</span>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <div class="section-banner">
+    <span class="section-num">§ 01 — 09 · Course Modules</span>
+    <span class="section-line"></span>
+  </div>
+
+  <!-- MODULE 1 -->
+  <article class="module">
+    <div class="mod-header">
+      <div class="mod-num-col">Module · 01</div>
+      <div class="mod-main">
+        <span class="mod-level lv0">Beginner</span>
+        <h2 class="mod-title">Foundations &amp; the Lakebase <em>Mental Model</em></h2>
+        <p class="mod-subtitle">Build the conceptual scaffolding: what Lakebase is, why it matters, and how it relates to the rest of the Databricks platform.</p>
+      </div>
+    </div>
+    <div class="mod-sections">
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-theory">Theory</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_1/theory/Module_01_Foundations.html">
+            <span class="res-icon">01</span>
+            <div class="res-body">
+              <div class="res-title">Foundations &amp; the Lakebase Mental Model</div>
+              <div class="res-meta">Editorial · ~25 min read</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+          <a class="resource" href="Module_1/theory/Module_01_Interactive_Diagram.html">
+            <span class="res-icon">◇</span>
+            <div class="res-body">
+              <div class="res-title">Interactive Diagram — Mental Model</div>
+              <div class="res-meta">Interactive · click-through</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-lab">Lab</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_1/lab/Module_01_Lab_14.html">
+            <span class="res-icon">L</span>
+            <div class="res-body">
+              <div class="res-title">Lab 1.4 — Workspace Prerequisites &amp; Sanity Check</div>
+              <div class="res-meta">Hands-on · workspace setup</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 2 -->
+  <article class="module">
+    <div class="mod-header">
+      <div class="mod-num-col">Module · 02</div>
+      <div class="mod-main">
+        <span class="mod-level lv1">Beginner-Int</span>
+        <h2 class="mod-title">Architecture <em>Deep Dive</em>: Compute, Storage, Branches</h2>
+        <p class="mod-subtitle">Inside Lakebase's separation of compute and storage, the role of LSNs, and how branches give you instant zero-copy environments.</p>
+      </div>
+    </div>
+    <div class="mod-sections">
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-theory">Theory</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_2/theory/Module_02_Architecture.html">
+            <span class="res-icon">02</span>
+            <div class="res-body">
+              <div class="res-title">Architecture Deep Dive: Compute, Storage, Branches</div>
+              <div class="res-meta">Editorial · ~30 min read</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+          <a class="resource" href="Module_2/theory/Module_02_Interactive.html">
+            <span class="res-icon">◇</span>
+            <div class="res-body">
+              <div class="res-title">Interactive Concepts — Lakebase Architecture</div>
+              <div class="res-meta">Interactive · click-through</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-lab">Lab</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <div class="empty-note">// concept-only module — no lab</div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 3 -->
+  <article class="module">
+    <div class="mod-header">
+      <div class="mod-num-col">Module · 03</div>
+      <div class="mod-main">
+        <span class="mod-level lv1">Beginner-Int</span>
+        <h2 class="mod-title">Your First Lakebase <em>Project</em>: Concepts Behind the Lab</h2>
+        <p class="mod-subtitle">Stand up your first Lakebase instance end-to-end — provisioning, connecting, schema setup, and first queries.</p>
+      </div>
+    </div>
+    <div class="mod-sections">
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-theory">Theory</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_3/theory/Module_03_Foundations.html">
+            <span class="res-icon">03</span>
+            <div class="res-body">
+              <div class="res-title">Your First Lakebase Project — Concepts Behind the Lab</div>
+              <div class="res-meta">Editorial · concepts</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-lab">Lab</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_3/lab/Module_03_Lab_3.html">
+            <span class="res-icon">L</span>
+            <div class="res-body">
+              <div class="res-title">Lab 3 — Your First Lakebase Project, End-to-End</div>
+              <div class="res-meta">Hands-on · provision &amp; query</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 4 -->
+  <article class="module">
+    <div class="mod-header">
+      <div class="mod-num-col">Module · 04</div>
+      <div class="mod-main">
+        <span class="mod-level lv2">Intermediate</span>
+        <h2 class="mod-title">Sync, Federate &amp; <em>Unify</em>: Concepts Behind the Lab</h2>
+        <p class="mod-subtitle">Move data between Lakebase and the lakehouse — sync tables, federation, and unified query patterns.</p>
+      </div>
+    </div>
+    <div class="mod-sections">
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-theory">Theory</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_4/theory/Module_04_Foundations.html">
+            <span class="res-icon">04</span>
+            <div class="res-body">
+              <div class="res-title">Sync, Federate &amp; Unify — Concepts Behind the Lab</div>
+              <div class="res-meta">Editorial · concepts</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-lab">Lab</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_4/lab/Module_04_Lab_4.html">
+            <span class="res-icon">L</span>
+            <div class="res-body">
+              <div class="res-title">Lab 4 — Sync, Federate &amp; Unify, End-to-End</div>
+              <div class="res-meta">Hands-on · sync &amp; federation</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 5 -->
+  <article class="module">
+    <div class="mod-header">
+      <div class="mod-num-col">Module · 05</div>
+      <div class="mod-main">
+        <span class="mod-level lv2">Intermediate</span>
+        <h2 class="mod-title">Lakebase as a <em>Vector Store</em>: Concepts Behind the Lab</h2>
+        <p class="mod-subtitle">Use pgvector inside Lakebase to power production RAG — embeddings, indexes, and hybrid retrieval.</p>
+      </div>
+    </div>
+    <div class="mod-sections">
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-theory">Theory</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_5/theory/Module_05_Foundations.html">
+            <span class="res-icon">05</span>
+            <div class="res-body">
+              <div class="res-title">Lakebase as a Vector Store — Concepts Behind the Lab</div>
+              <div class="res-meta">Editorial · concepts</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-lab">Lab</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_5/lab/Module_05_Lab_5.html">
+            <span class="res-icon">L</span>
+            <div class="res-body">
+              <div class="res-title">Lab 5 — Build a Production RAG Pipeline on pgvector</div>
+              <div class="res-meta">Hands-on · RAG with pgvector</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 6 -->
+  <article class="module">
+    <div class="mod-header">
+      <div class="mod-num-col">Module · 06</div>
+      <div class="mod-main">
+        <span class="mod-level lv3">Advanced</span>
+        <h2 class="mod-title">Lakebase as <em>Memory Store</em> for AI Agents: Concepts Behind the Lab</h2>
+        <p class="mod-subtitle">Give agents durable state — short-term scratchpads, long-term memory, and the schema patterns that scale.</p>
+      </div>
+    </div>
+    <div class="mod-sections">
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-theory">Theory</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_6/theory/Module_06_Foundations.html">
+            <span class="res-icon">06</span>
+            <div class="res-body">
+              <div class="res-title">Lakebase as Memory Store for AI Agents — Concepts Behind the Lab</div>
+              <div class="res-meta">Editorial · concepts</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-lab">Lab</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_6/lab/Module_06_Lab_6.html">
+            <span class="res-icon">L</span>
+            <div class="res-body">
+              <div class="res-title">Lab 6 — Build a Memory-Aware AI Agent on Lakebase</div>
+              <div class="res-meta">Hands-on · agent memory</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 7 -->
+  <article class="module">
+    <div class="mod-header">
+      <div class="mod-num-col">Module · 07</div>
+      <div class="mod-main">
+        <span class="mod-level lv3">Advanced</span>
+        <h2 class="mod-title">Powering Databricks <em>Apps</em> with Lakebase: Concepts Behind the Lab</h2>
+        <p class="mod-subtitle">Connect a Databricks App to Lakebase — auth, connection pooling, secrets, and shipping a real user-facing experience.</p>
+      </div>
+    </div>
+    <div class="mod-sections">
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-theory">Theory</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_7/theory/Module_07_Foundations.html">
+            <span class="res-icon">07</span>
+            <div class="res-body">
+              <div class="res-title">Powering Databricks Apps with Lakebase — Concepts Behind the Lab</div>
+              <div class="res-meta">Editorial · concepts</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-lab">Lab</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_7/lab/Module_07_Lab_7.html">
+            <span class="res-icon">L</span>
+            <div class="res-body">
+              <div class="res-title">Lab 7 — Powering a Databricks App with Lakebase, End-to-End</div>
+              <div class="res-meta">Hands-on · ship an app</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 8 -->
+  <article class="module">
+    <div class="mod-header">
+      <div class="mod-num-col">Module · 08</div>
+      <div class="mod-main">
+        <span class="mod-level lv4">Capstone</span>
+        <h2 class="mod-title">Capstone: Build <em>"AskMyOrders"</em> End-to-End</h2>
+        <p class="mod-subtitle">A five-phase capstone that combines sync tables, RAG, agent memory, and a Databricks App into one shippable product.</p>
+      </div>
+    </div>
+    <div class="mod-sections">
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-theory">Theory</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_8/theory/Module_08_Capstone.html">
+            <span class="res-icon">08</span>
+            <div class="res-body">
+              <div class="res-title">Capstone — Build "AskMyOrders" End-to-End</div>
+              <div class="res-meta">Editorial · capstone brief</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-lab">Lab · 5 Phases</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_8/lab/Module_08_Phase_1_Foundation.md">
+            <span class="res-icon">P1</span>
+            <div class="res-body">
+              <div class="res-title">Phase 1 — Foundation</div>
+              <div class="res-meta">Markdown · setup &amp; provisioning</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+          <a class="resource" href="Module_8/lab/Module_08_Phase_2_Sync_Tables.md">
+            <span class="res-icon">P2</span>
+            <div class="res-body">
+              <div class="res-title">Phase 2 — Sync Tables</div>
+              <div class="res-meta">Markdown · lakehouse → lakebase</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+          <a class="resource" href="Module_8/lab/Module_08_Phase_3_Knowledge_Base.md">
+            <span class="res-icon">P3</span>
+            <div class="res-body">
+              <div class="res-title">Phase 3 — Knowledge Base</div>
+              <div class="res-meta">Markdown · RAG &amp; pgvector</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+          <a class="resource" href="Module_8/lab/Module_08_Phase_4_Agent_Memory.md">
+            <span class="res-icon">P4</span>
+            <div class="res-body">
+              <div class="res-title">Phase 4 — Agent Memory</div>
+              <div class="res-meta">Markdown · durable agent state</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+          <a class="resource" href="Module_8/lab/Module_08_Phase_5_Ship_App.md">
+            <span class="res-icon">P5</span>
+            <div class="res-body">
+              <div class="res-title">Phase 5 — Ship the App</div>
+              <div class="res-meta">Markdown · Databricks App delivery</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- MODULE 9 -->
+  <article class="module">
+    <div class="mod-header">
+      <div class="mod-num-col">Module · 09</div>
+      <div class="mod-main">
+        <span class="mod-level lv3">Advanced</span>
+        <h2 class="mod-title">RSA Toolkit: Comparison, <em>Best Practices</em> &amp; Limitations</h2>
+        <p class="mod-subtitle">Field-ready reference — when to recommend Lakebase, when not to, and how to position it against the alternatives.</p>
+      </div>
+    </div>
+    <div class="mod-sections">
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-theory">Theory</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <a class="resource" href="Module_9/theory/Module_09_Foundations.html">
+            <span class="res-icon">09</span>
+            <div class="res-body">
+              <div class="res-title">RSA Toolkit — Comparison, Best Practices &amp; Limitations</div>
+              <div class="res-meta">Editorial · field reference</div>
+            </div>
+            <span class="res-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      <div class="mod-section">
+        <div class="mod-section-head">
+          <span class="mod-section-tag tag-lab">Lab</span>
+          <span class="mod-section-line"></span>
+        </div>
+        <div class="resources">
+          <div class="empty-note">// reference module — no lab</div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<footer>
+  Lakebase Mastery · Course Index · Databricks RSA Curriculum
+</footer>
+
+</body>
+</html>

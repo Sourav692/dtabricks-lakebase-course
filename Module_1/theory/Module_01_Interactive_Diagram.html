@@ -884,6 +884,162 @@ svg [stroke="#0b0f1a"]  { stroke: var(--rule-faint); }
   header { background-image: none; }
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   MENTAL-MODEL DIAGRAM — paper-theme legibility refinements
+   The dark-mode SVG was designed against #05080f. On cream paper the
+   grid lines become visible blue cross-hatch and several translucent
+   fills (Project wash, plane bands) become muddy patches that hide
+   text. This block kills the grid and re-skins the static SVG fills
+   that don't go through the [fill="#…"] attribute remap above.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* 1. Remove the dark-mode grid "guidelines" — clean paper background. */
+.stage {
+  background: var(--paper-card) !important;
+  background-image: none !important;
+  border-radius: 0 0 10px 10px;
+}
+
+/* 2. Plane bands: replace the rgba(*,0.04) washes with a near-invisible
+      warm tint so the diagram reads as zones, not muddy stripes.        */
+.plane-band > rect:first-of-type {
+  fill: transparent !important;
+  stroke: var(--rule-faint) !important;
+  stroke-dasharray: 4 4;
+}
+.plane-band[data-plane="core"] > rect:first-of-type {
+  fill: var(--lava-soft) !important;
+  stroke: var(--lava) !important;
+  stroke-opacity: 0.30;
+  stroke-dasharray: 0;
+}
+.plane-band[data-plane="storage"] > rect:first-of-type {
+  fill: var(--tone-rust-bg) !important;
+  stroke: var(--tone-rust) !important;
+  stroke-opacity: 0.30;
+  stroke-dasharray: 0;
+}
+
+/* 3. Plane-tag chips (the small APPLICATION / OPERATIONAL / … eyebrows). */
+.plane-band[data-plane="app"]     .plane-tag rect { fill: var(--tone-sepia-bg) !important; stroke: var(--tone-sepia-line) !important; }
+.plane-band[data-plane="op"]      .plane-tag rect { fill: var(--tone-rust-bg)  !important; stroke: var(--tone-rust-line)  !important; }
+.plane-band[data-plane="int"]     .plane-tag rect { fill: var(--tone-moss-bg)  !important; stroke: var(--tone-moss-line)  !important; }
+.plane-band[data-plane="core"]    .plane-tag rect { fill: var(--lava-soft)     !important; stroke: rgba(255,54,33,0.30)   !important; }
+.plane-band[data-plane="storage"] .plane-tag rect { fill: var(--tone-rust-bg)  !important; stroke: var(--tone-rust-line)  !important; }
+
+.plane-band[data-plane="app"]     .plane-tag text { fill: var(--tone-sepia) !important; }
+.plane-band[data-plane="op"]      .plane-tag text { fill: var(--tone-rust)  !important; }
+.plane-band[data-plane="int"]     .plane-tag text { fill: var(--tone-moss)  !important; }
+.plane-band[data-plane="core"]    .plane-tag text { fill: var(--lava)       !important; }
+.plane-band[data-plane="storage"] .plane-tag text { fill: var(--tone-rust)  !important; }
+
+/* 4. Project container — the dark rgba(58,26,20,0.5) wash was the main
+      reason text inside the branch boxes was unreadable. Replace it
+      with a soft warm tint that lets the inner branch boxes pop.       */
+g[data-id="project"] > rect.bg {
+  fill: var(--lava-soft) !important;
+  stroke: var(--lava) !important;
+  stroke-opacity: 0.45;
+}
+g[data-id="project"] > text { fill: var(--lava) !important; }
+
+/* 5. Branch boxes — firmer stroke so each box reads clearly against the
+      soft project wash. (No !important so the .selected highlight, which
+      bumps to 2.5 with !important, still wins on click.)                 */
+g[data-id="main-branch"] > rect.bg,
+g[data-id="dev-branch"]  > rect.bg,
+g[data-id="replica"]     > rect.bg,
+g[data-id="pit"]         > rect.bg {
+  stroke-width: 1.75;
+}
+
+/* 6. Page server (storage plate) — warm rust tint to match the storage
+      plane wrapper above it.                                            */
+g[data-id="page-server"] > rect.bg {
+  fill: var(--tone-rust-bg) !important;
+  stroke: var(--tone-rust) !important;
+  stroke-opacity: 0.55;
+}
+g[data-id="page-server"] text[fill="#7ab3ff"],
+g[data-id="page-server"] text[fill="#4a9eff"] {
+  fill: var(--tone-rust) !important;
+}
+
+/* 7. Connector lines — strengthen the dim gray connectors so the wiring
+      between planes stays visible on cream paper.                       */
+.connector[stroke="#4a5878"] { stroke: var(--ink-mute) !important; opacity: 0.65; }
+
+/* 8. Storage plane band tag colour — original used #7ab3ff (light blue).
+      Override the inline text fill so the STORAGE eyebrow uses the warm
+      rust tone in line with the plane band fill.                        */
+svg [fill="#7ab3ff"]  { fill: var(--tone-rust) !important; }
+
+/* 9. Panel chrome — head / status pills sit on paper; rebalance them. */
+.panel { background: var(--paper-card); border-color: var(--rule-faint); }
+.panel-head { background: var(--paper-deep); border-bottom-color: var(--rule-faint); }
+.panel-title { color: var(--lava); font-family: var(--font-mono); }
+.panel-meta { color: var(--ink-mute); font-family: var(--font-mono); }
+
+/* 10. Toolbar / legend — keep them readable on paper. */
+.toolbar { background: var(--paper-card); border-color: var(--rule-faint); }
+.tb-label { color: var(--ink-mute); font-family: var(--font-mono); }
+.tb-btn   {
+  background: var(--paper);
+  border: 1px solid var(--rule-faint);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.tb-btn:hover { border-color: var(--lava); color: var(--ink); }
+.tb-btn.active { background: var(--lava); color: var(--paper); border-color: var(--lava); }
+.tb-btn.active.topic-1 { background: var(--tone-moss);  border-color: var(--tone-moss); }
+.tb-btn.active.topic-2 { background: var(--tone-rust);  border-color: var(--tone-rust); }
+.tb-btn.active.topic-3 { background: var(--tone-sepia); border-color: var(--tone-sepia); }
+.tb-divider { background: var(--rule-faint); }
+
+.legend { background: var(--paper-card); border-color: var(--rule-faint); color: var(--ink-mute); font-family: var(--font-mono); }
+/* legend swatches keep their inline colors — they're for orientation,
+   intentionally bright */
+
+/* 11. Info panel chrome on paper. */
+.info { background: var(--paper-card); border-color: var(--rule-faint); }
+.info-head { background: var(--paper-deep); border-bottom-color: var(--rule-faint); }
+.info-eyebrow { color: var(--ink-mute); font-family: var(--font-mono); }
+.info-eyebrow .topic-pill.t1 { background: var(--tone-moss-bg);  color: var(--tone-moss); }
+.info-eyebrow .topic-pill.t2 { background: var(--tone-rust-bg);  color: var(--tone-rust); }
+.info-eyebrow .topic-pill.t3 { background: var(--tone-sepia-bg); color: var(--tone-sepia); }
+.info-eyebrow .as-only       { background: var(--lava-soft);     color: var(--lava); }
+.info-name { color: var(--ink); font-family: var(--font-display); font-style: italic; }
+.info-tag  { color: var(--lava); font-family: var(--font-mono); }
+
+.info-section h4 { color: var(--tone-moss); font-family: var(--font-mono); }
+.info-section p  { color: var(--ink-soft); }
+.info-section li { color: var(--ink-soft); }
+.info-section li::before { color: var(--lava); content: '→'; font-family: var(--font-mono); }
+.info-section code {
+  background: var(--paper-deep);
+  border-color: var(--rule-faint);
+  color: var(--lava-deep);
+  font-family: var(--font-mono);
+}
+
+.connect-chip {
+  background: var(--paper);
+  border-color: var(--rule-faint);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.connect-chip:hover { border-color: var(--lava); color: var(--lava); }
+
+.placeholder { color: var(--ink-mute); }
+.placeholder-text { font-family: var(--font-mono); }
+
+/* 12. Tour bar — pin to the warm theme. */
+.tour-bar { background: var(--lava-soft); border-top-color: var(--rule-faint); }
+.tour-step { color: var(--lava); font-family: var(--font-mono); }
+.tour-msg  { color: var(--ink); font-family: var(--font-display); font-style: italic; }
+.tour-btn  { background: var(--lava); border-color: var(--lava); color: var(--paper); font-family: var(--font-mono); }
+.tour-btn.alt { background: transparent; color: var(--lava); }
+
 </style>
 </head>
 <body>

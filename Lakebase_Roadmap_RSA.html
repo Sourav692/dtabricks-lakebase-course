@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lakebase Mastery — Complete Databricks Tutorial</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@300;400;500;600&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #05080f;
@@ -417,6 +419,345 @@ main { max-width: 1140px; margin: 0 auto; padding: 48px 48px 100px; }
   .mod-header { grid-template-columns: 1fr auto; }
   .mod-num-col { display: none; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   EDITORIAL OVERRIDE — Databricks editorial-technical paper theme
+   Loaded after the dark-mode rules above; cascade re-skins the page.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* paper palette */
+  --paper:       #F4F1EA;
+  --paper-deep:  #ECE6D9;
+  --paper-card:  #FBF9F4;
+  --ink:         #0E1F26;
+  --ink-soft:    #3A4A52;
+  --ink-mute:    #6A7880;
+  --lava:        #FF3621;
+  --lava-deep:   #C72D1A;
+  --lava-soft:   rgba(255, 54, 33, 0.08);
+  --tone-rust:   #B0532E;
+  --tone-rust-bg:    rgba(176, 83, 46, 0.08);
+  --tone-rust-line:  rgba(176, 83, 46, 0.30);
+  --tone-moss:   #4A6F3F;
+  --tone-moss-bg:    rgba(74, 111, 63, 0.09);
+  --tone-moss-line:  rgba(74, 111, 63, 0.28);
+  --tone-ochre:  #A37B1F;
+  --tone-ochre-bg:   rgba(163, 123, 31, 0.10);
+  --tone-ochre-line: rgba(163, 123, 31, 0.30);
+  --tone-sepia:  #7A5F3A;
+  --tone-sepia-bg:   rgba(122, 95, 58, 0.09);
+  --tone-sepia-line: rgba(122, 95, 58, 0.28);
+  --tone-clay:   #8E3A28;
+  --tone-clay-bg:    rgba(142, 58, 40, 0.07);
+  --tone-clay-line:  rgba(142, 58, 40, 0.25);
+  --rule:        rgba(14, 31, 38, 0.18);
+  --rule-faint:  rgba(14, 31, 38, 0.10);
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:    "Instrument Sans", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* re-map the dark-mode tokens used everywhere in the inline CSS */
+  --bg:            var(--paper);
+  --surface:       var(--paper-card);
+  --surface2:      var(--paper);
+  --surface3:      var(--paper-deep);
+  --border:        var(--rule-faint);
+  --border2:       var(--rule);
+  --accent-orange: var(--lava);
+  --accent-teal:   var(--tone-moss);
+  --accent-blue:   var(--tone-rust);
+  --accent-purple: var(--tone-sepia);
+  --accent-yellow: var(--tone-ochre);
+  --text:          var(--ink);
+  --text-dim:      var(--ink-soft);
+  --text-muted:    var(--ink-mute);
+  --green:         var(--tone-moss);
+  --amber:         var(--tone-ochre);
+  --red:           var(--lava-deep);
+  --orange:        var(--tone-ochre);
+  --l0:            var(--tone-moss);
+  --l1:            var(--tone-rust);
+  --l2:            var(--tone-ochre);
+  --l3:            var(--lava);
+  --l4:            var(--lava-deep);
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background-image:
+    radial-gradient(1100px 550px at 92% -8%,  rgba(255, 54, 33, 0.05), transparent 60%),
+    radial-gradient(900px 500px  at -8% 108%, rgba(199, 167, 122, 0.20), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* ── Header / hero band ── */
+header {
+  border-bottom: 1px solid var(--rule-faint);
+  background: transparent;
+}
+header::before {
+  background:
+    radial-gradient(800px 300px at 100% 0%, var(--lava-soft), transparent 60%),
+    radial-gradient(600px 240px at 0% 100%, rgba(199, 167, 122, 0.18), transparent 60%);
+}
+
+.eyebrow-tag {
+  font-family: var(--font-mono);
+  color: var(--lava);
+  border-color: rgba(255, 54, 33, 0.30);
+  background: var(--lava-soft);
+}
+.eyebrow-line { background: linear-gradient(to right, rgba(255,54,33,0.4), transparent); }
+
+h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 420;
+  font-weight: 420;
+  color: var(--ink);
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+h1 em {
+  font-style: italic;
+  color: var(--lava);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "wght" 400;
+}
+
+.header-sub {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+  color: var(--ink-soft);
+  font-size: 17px;
+}
+
+.meta-row {
+  border: 1px solid var(--rule-faint);
+  background: var(--paper-card);
+}
+.meta-item { border-right: 1px solid var(--rule-faint); }
+.meta-val {
+  font-family: var(--font-mono);
+  color: var(--lava);
+  font-weight: 500;
+}
+.meta-lbl {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+}
+
+/* ── Coverage banner ── */
+.coverage-bar {
+  background: var(--paper-card);
+  border-bottom: 1px solid var(--rule-faint);
+}
+.coverage-label {
+  font-family: var(--font-mono);
+  color: var(--lava);
+}
+.ctag {
+  font-family: var(--font-mono);
+  border-radius: 3px;
+}
+.ctag-new {
+  background: var(--lava-soft);
+  color: var(--lava-deep);
+  border-color: rgba(255,54,33,0.28);
+}
+.ctag-updated {
+  background: var(--tone-moss-bg);
+  color: var(--tone-moss);
+  border-color: var(--tone-moss-line);
+}
+
+/* ── Legend ── */
+.legend-strip {
+  border-bottom: 1px solid var(--rule-faint);
+  background: var(--paper);
+}
+.leg { color: var(--ink-soft); font-family: var(--font-mono); font-size: 11px; }
+.leg-title {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+  letter-spacing: 0.14em;
+}
+.leg-sep { background: var(--rule-faint); }
+
+/* ── Section banner ── */
+.section-num {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+}
+.section-line { background: var(--rule-faint); }
+
+/* ── Module shell ── */
+.module {
+  border: 1px solid var(--rule-faint);
+  background: var(--paper-card);
+  box-shadow: 0 1px 0 rgba(14, 31, 38, 0.025);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.mod-header {
+  background: var(--paper-card);
+  border: none;
+  border-radius: 0;
+}
+.mod-header:hover { border-color: transparent; background: var(--paper); }
+.mod-num-col {
+  border-right: 1px solid var(--rule-faint);
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+}
+.mod-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36, "SOFT" 30, "wght" 480;
+  font-weight: 480;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+}
+.mod-subtitle {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+.mod-level {
+  font-family: var(--font-mono);
+  border-radius: 3px;
+}
+.lv0 { color: var(--tone-moss);  background: var(--tone-moss-bg);  border-color: var(--tone-moss-line); }
+.lv1 { color: var(--tone-rust);  background: var(--tone-rust-bg);  border-color: var(--tone-rust-line); }
+.lv2 { color: var(--tone-ochre); background: var(--tone-ochre-bg); border-color: var(--tone-ochre-line); }
+.lv3 { color: var(--lava);       background: var(--lava-soft);     border-color: rgba(255,54,33,0.28); }
+.lv4 { color: var(--lava-deep);  background: var(--tone-clay-bg);  border-color: var(--tone-clay-line); }
+
+.mod-toggle-col { border-left: 1px solid var(--rule-faint); }
+.toggle-btn {
+  background: var(--paper);
+  border: 1px solid var(--rule-faint);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+}
+.mod-header:hover .toggle-btn {
+  background: var(--lava-soft);
+  border-color: var(--lava);
+  color: var(--lava);
+}
+
+.mod-body {
+  border: 1px solid var(--rule-faint);
+  border-top: none;
+  background: var(--paper-card);
+}
+
+/* ── Topic rows ── */
+.topic {
+  border-bottom: 1px solid var(--rule-faint);
+}
+.topic:hover { background: var(--paper); }
+.t-num {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+}
+.t-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 18, "wght" 540;
+  font-weight: 540;
+  color: var(--ink);
+  font-size: 15px;
+}
+.tag {
+  font-family: var(--font-mono);
+  border-radius: 3px;
+}
+.tag-T { color: var(--tone-moss);  background: var(--tone-moss-bg);  border-color: var(--tone-moss-line); }
+.tag-H { color: var(--tone-sepia); background: var(--tone-sepia-bg); border-color: var(--tone-sepia-line); }
+.tag-N { color: var(--lava);       background: var(--lava-soft);     border-color: rgba(255,54,33,0.28); }
+.tag-C { color: var(--tone-ochre); background: var(--tone-ochre-bg); border-color: var(--tone-ochre-line); }
+
+.t-desc {
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+  font-size: 14px;
+}
+.t-pt { color: var(--ink-soft); font-size: 13.5px; }
+.t-pt::before {
+  content: "→";
+  color: var(--lava);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* ── Code block ── */
+.code-block {
+  background: var(--paper-deep);
+  border: 1px solid var(--rule-faint);
+  border-left: 3px solid var(--lava);
+  border-radius: 4px;
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+.code-block .kw { color: var(--tone-sepia); font-weight: 500; }
+.code-block .fn { color: var(--tone-rust); }
+.code-block .st { color: var(--tone-moss); }
+.code-block .cm { color: var(--ink-mute); font-style: italic; }
+.code-block .nm { color: var(--lava); }
+.code-block .nu { color: var(--lava-deep); }
+
+/* ── Note box ── */
+.note-box {
+  background: var(--tone-ochre-bg);
+  border: 1px solid var(--tone-ochre-line);
+  border-left: 3px solid var(--tone-ochre);
+  color: var(--ink);
+  border-radius: 4px;
+  font-size: 12.5px;
+}
+
+/* ── Module outcome strip ── */
+.mod-outcome {
+  border-top: 1px solid var(--rule-faint);
+  background: var(--tone-moss-bg);
+}
+.outcome-text {
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 14, "wght" 400;
+  font-size: 13.5px;
+}
+.outcome-text strong {
+  color: var(--tone-moss);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ── Inline code (within topic copy) ── */
+.t-pt code, .t-desc code, p code {
+  font-family: var(--font-mono);
+  background: var(--paper-deep);
+  border: 1px solid var(--rule-faint);
+  color: var(--ink);
+  padding: 0.12em 0.4em;
+  border-radius: 3px;
+  font-size: 0.88em;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+
+/* ── Selection ── */
+::selection { background: var(--lava); color: var(--paper); }
 </style>
 </head>
 <body>
